@@ -135,9 +135,7 @@ func generateMatchedRequest(requestId string) model.MatchedRequest {
 	dropoffPoint := model.NewPoint(requestId, dropoffCoord, dropoffTime, model.DropoffPoint)
 
 	// Create a new matched request and add the points
-	matchedRequest := model.NewMatchedRequestWithRequestId(requestId)
-	matchedRequest.AddPickupPoint(pickupPoint)
-	matchedRequest.AddDropoffPoint(dropoffPoint)
+	matchedRequest := model.NewMatchedRequest(requestId, pickupPoint, dropoffPoint)
 
 	return *matchedRequest
 }

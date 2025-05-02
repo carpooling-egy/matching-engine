@@ -27,9 +27,9 @@ func (mapper *JsonMapper) Marshal(result *model.MatchingResult) ([]byte, error) 
 
 func convertMatchedRequest(req model.MatchedRequest) dto.MatchedRequestDTO {
 	return dto.MatchedRequestDTO{
-		RequestID:     req.RequestID(),
-		PickupPoints:  convertPoints(req.PickupPoints()),
-		DropoffPoints: convertPoints(req.DropoffPoints()),
+		RequestID:    req.RequestID(),
+		PickupPoint:  convertPoint(req.PickupPoint()),
+		DropoffPoint: convertPoint(req.DropoffPoint()),
 	}
 }
 
