@@ -2,6 +2,7 @@ package natsjetstream
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -88,6 +89,9 @@ func (p *NATSPublisher) PublishMatchingResults(results []*model.MatchingResult) 
 		return nil
 	}
 
+	var failed []*model.MatchingResult
+	successCount := 0
+
 	for i, result := range results {
 		logCtx.Debug().
 			Str("offerId", result.OfferID()).
@@ -102,28 +106,47 @@ func (p *NATSPublisher) PublishMatchingResults(results []*model.MatchingResult) 
 				Str("offerId", result.OfferID()).
 				Int("index", i).
 				Msg("Failed to marshal result")
-			return fmt.Errorf("failed to marshal result: %w", err)
+			failed = append(failed, result)
+			continue
 		}
 
 		_, err = p.js.Publish(ctx, p.config.Subject, data)
 		if err != nil {
+			if errors.Is(err, context.DeadlineExceeded) {
+				logCtx.Error().
+					Err(err).
+					Int("published", successCount).
+					Int("remaining", len(results)-i).
+					Msg("Context deadline exceeded while publishing")
+				return fmt.Errorf("publishing timed out after %d results: %w", successCount, err)
+			}
+
 			logCtx.Error().
 				Err(err).
 				Str("offerId", result.OfferID()).
 				Int("index", i).
-				Int("published", i).
-				Int("remaining", len(results)-i).
-				Msg("Failed to publish result; aborting batch")
-			return fmt.Errorf("failed to publish result: %w", err)
+				Msg("Failed to publish result")
+			failed = append(failed, result)
+			continue
 		}
 
 		logCtx.Debug().
 			Str("offerId", result.OfferID()).
 			Int("dataSize", len(data)).
 			Msg("Successfully published result")
+
+		successCount++
 	}
 
-	logCtx.Info().Int("count", len(results)).Msg("Successfully published all results")
+	if len(failed) > 0 {
+		logCtx.Error().
+			Int("failedCount", len(failed)).
+			Int("successCount", successCount).
+			Msg("Some results failed to publish")
+		return fmt.Errorf("published %d, failed %d", successCount, len(failed))
+	}
+
+	logCtx.Info().Int("count", successCount).Msg("Successfully published all results")
 	return nil
 }
 
