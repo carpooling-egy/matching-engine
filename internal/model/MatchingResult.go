@@ -4,9 +4,9 @@ import "github.com/google/uuid"
 
 // MatchingResult represents the result of a matching operation
 type MatchingResult struct {
-	OfferID                 uuid.UUID
-	AssignedMatchedRequests []MatchedRequest
-	NewPath                 []Point
+	offerID                 uuid.UUID
+	assignedMatchedRequests []MatchedRequest
+	newPath                 []Point
 }
 
 // NewMatchingResult creates a new MatchingResult
@@ -18,8 +18,8 @@ func NewMatchingResult(offerID uuid.UUID, assignedMatchedRequests []MatchedReque
 		newPath = make([]Point, 0)
 	}
 	return &MatchingResult{
-		OfferID:                 offerID,
-		AssignedMatchedRequests: assignedMatchedRequests,
-		NewPath:                 newPath,
+		offerID:                 offerID,
+		assignedMatchedRequests: assignedMatchedRequests,
+		newPath:                 newPath,
 	}
 }

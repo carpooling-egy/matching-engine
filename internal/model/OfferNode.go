@@ -2,23 +2,23 @@ package model
 
 // OfferNode represents a node in the offer graph
 type OfferNode struct {
-	Offer                        *Offer
-	NewlyAssignedMatchedRequests []MatchedRequest
-	Edges                        []Edge
-	Matched                      bool
+	offer                        *Offer
+	newlyAssignedMatchedRequests []MatchedRequest
+	edges                        []Edge
+	isMatched                    bool
 }
 
 // NewOfferNode creates a new OfferNode
 func NewOfferNode(offer *Offer) *OfferNode {
 	return &OfferNode{
-		Offer:                        offer,
-		NewlyAssignedMatchedRequests: make([]MatchedRequest, 0),
-		Edges:                        make([]Edge, 0),
-		Matched:                      false,
+		offer:                        offer,
+		newlyAssignedMatchedRequests: make([]MatchedRequest, 0),
+		edges:                        make([]Edge, 0),
+		isMatched:                    false,
 	}
 }
 
 // GetAllRequests returns all matched requests, both existing and newly assigned
 func (node *OfferNode) GetAllRequests() []MatchedRequest {
-	return append(node.Offer.MatchedRequests, node.NewlyAssignedMatchedRequests...)
+	return append(node.offer.matchedRequests, node.newlyAssignedMatchedRequests...)
 }
