@@ -14,6 +14,11 @@ func (g *Graph) GetOfferNodes() []*OfferNode {
 	return g.offerNodes
 }
 
+// SetOfferNodes sets the offer nodes
+func (g *Graph) SetOfferNodes(offerNodes []*OfferNode) {
+	g.offerNodes = offerNodes
+}
+
 func (g *Graph) AddOfferNode(offerNode *OfferNode) {
 	g.offerNodes = append(g.offerNodes, offerNode)
 }

@@ -23,3 +23,33 @@ func NewMatchingResult(offerID uuid.UUID, assignedMatchedRequests []MatchedReque
 		newPath:                 newPath,
 	}
 }
+
+// GetOfferID returns the offer ID
+func (mr *MatchingResult) GetOfferID() uuid.UUID {
+	return mr.offerID
+}
+
+// SetOfferID sets the offer ID
+func (mr *MatchingResult) SetOfferID(offerID uuid.UUID) {
+	mr.offerID = offerID
+}
+
+// GetAssignedMatchedRequests returns the assigned matched requests
+func (mr *MatchingResult) GetAssignedMatchedRequests() []MatchedRequest {
+	return mr.assignedMatchedRequests
+}
+
+// SetAssignedMatchedRequests sets the assigned matched requests
+func (mr *MatchingResult) SetAssignedMatchedRequests(requests []MatchedRequest) {
+	mr.assignedMatchedRequests = requests
+}
+
+// GetNewPath returns the new path
+func (mr *MatchingResult) GetNewPath() []Point {
+	return mr.newPath
+}
+
+// SetNewPath sets the new path
+func (mr *MatchingResult) SetNewPath(path []Point) {
+	mr.newPath = path
+}

@@ -25,8 +25,24 @@ func (c *Coordinate) Lat() float64 {
 	return c.lat
 }
 
+func (c *Coordinate) SetLat(lat float64) error {
+	if err := validateLatitude(lat); err != nil {
+		return err
+	}
+	c.lat = lat
+	return nil
+}
+
 func (c *Coordinate) Lng() float64 {
 	return c.lng
+}
+
+func (c *Coordinate) SetLng(lng float64) error {
+	if err := validateLongitude(lng); err != nil {
+		return err
+	}
+	c.lng = lng
+	return nil
 }
 
 func validateLatitude(lat float64) error {

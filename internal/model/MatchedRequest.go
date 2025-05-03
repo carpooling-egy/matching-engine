@@ -19,3 +19,43 @@ func NewMatchedRequest(offerID, requestID uuid.UUID, pickup, dropoff *Point) *Ma
 		dropoff:   dropoff,
 	}
 }
+
+// GetOfferID returns the offer ID
+func (mr *MatchedRequest) GetOfferID() uuid.UUID {
+	return mr.offerID
+}
+
+// SetOfferID sets the offer ID
+func (mr *MatchedRequest) SetOfferID(offerID uuid.UUID) {
+	mr.offerID = offerID
+}
+
+// GetRequestID returns the request ID
+func (mr *MatchedRequest) GetRequestID() uuid.UUID {
+	return mr.requestID
+}
+
+// SetRequestID sets the request ID
+func (mr *MatchedRequest) SetRequestID(requestID uuid.UUID) {
+	mr.requestID = requestID
+}
+
+// GetPickup returns the pickup point
+func (mr *MatchedRequest) GetPickup() *Point {
+	return mr.pickup
+}
+
+// SetPickup sets the pickup point
+func (mr *MatchedRequest) SetPickup(pickup *Point) {
+	mr.pickup = pickup
+}
+
+// GetDropoff returns the dropoff point
+func (mr *MatchedRequest) GetDropoff() *Point {
+	return mr.dropoff
+}
+
+// SetDropoff sets the dropoff point
+func (mr *MatchedRequest) SetDropoff(dropoff *Point) {
+	mr.dropoff = dropoff
+}
