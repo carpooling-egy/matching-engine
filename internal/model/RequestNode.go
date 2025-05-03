@@ -11,3 +11,13 @@ func NewRequestNode(request *Request) *RequestNode {
 		request: request,
 	}
 }
+
+// GetRequest returns the request
+func (rn *RequestNode) GetRequest() *Request {
+	return rn.request
+}
+
+// SetRequest sets the request
+func (rn *RequestNode) SetRequest(request *Request) {
+	rn.request = request
+}
