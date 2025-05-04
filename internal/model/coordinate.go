@@ -1,6 +1,9 @@
 package model
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type Coordinate struct {
 	lat, lng float64
@@ -38,4 +41,8 @@ func validateLongitude(lng float64) error {
 		return errors.New("longitude must be between -180 and 180 degrees")
 	}
 	return nil
+}
+
+func (c *Coordinate) String() string {
+	return fmt.Sprintf("Coordinate{lat: %.6f, lng: %.6f}", c.lat, c.lng)
 }

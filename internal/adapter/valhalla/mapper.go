@@ -2,8 +2,8 @@ package valhalla
 
 import (
 	re "matching-engine/internal/adapter/routing-engine"
-	"matching-engine/internal/adapter/routing-engine/valhalla/client/pb"
-	"matching-engine/internal/adapter/routing-engine/valhalla/mappers"
+	"matching-engine/internal/adapter/valhalla/client/pb"
+	"matching-engine/internal/adapter/valhalla/mappers"
 	"matching-engine/internal/model"
 	"time"
 )

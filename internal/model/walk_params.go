@@ -1,6 +1,9 @@
 package model
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type WalkParams struct {
 	origin, destination *Coordinate
@@ -27,4 +30,8 @@ func (p *WalkParams) Origin() *Coordinate {
 
 func (p *WalkParams) Destination() *Coordinate {
 	return p.destination
+}
+
+func (p *WalkParams) String() string {
+	return fmt.Sprintf("WalkParams{origin=%s, destination=%s}", p.origin, p.destination)
 }

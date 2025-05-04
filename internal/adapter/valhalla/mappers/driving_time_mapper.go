@@ -1,9 +1,10 @@
 package mappers
 
 import (
+	"fmt"
 	re "matching-engine/internal/adapter/routing-engine"
-	"matching-engine/internal/adapter/routing-engine/valhalla/client/pb"
-	"matching-engine/internal/adapter/routing-engine/valhalla/helpers"
+	"matching-engine/internal/adapter/valhalla/client/pb"
+	"matching-engine/internal/adapter/valhalla/common"
 	"matching-engine/internal/model"
 	"time"
 )
@@ -17,29 +18,34 @@ var _ re.OperationMapper[
 	*pb.Api,
 ] = DrivingTimeMapper{}
 
-func (d DrivingTimeMapper) ToTransport(params *model.RouteParams) (*pb.Api, error) {
+func (DrivingTimeMapper) ToTransport(params *model.RouteParams) (*pb.Api, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+
 	wps := params.Waypoints()
 	locations := make([]*pb.Location, len(wps))
 	for i, wp := range wps {
-		locations[i] = helpers.CreateLocation(wp.Lat(), wp.Lng(), helpers.DefaultLocationType)
+		locations[i] = common.CreateLocation(wp.Lat(), wp.Lng())
 	}
 
 	return &pb.Api{
 		Options: &pb.Options{
-			Action: pb.Options_route,
-			Units:  helpers.DefaultUnit,
-			Format: helpers.DefaultFormat,
+			Action:      pb.Options_route,
+			Units:       common.DefaultUnit,
+			Format:      common.DefaultFormat,
+			CostingType: pb.Costing_auto_,
 			Costings: map[int32]*pb.Costing{
-				int32(pb.Costing_auto_): helpers.DefaultAutoCosting,
+				int32(pb.Costing_auto_): common.DefaultAutoCosting,
 			},
 			HasShapeFormat: &pb.Options_ShapeFormat{
-				ShapeFormat: helpers.DefaultShapeFormat,
+				ShapeFormat: common.DefaultShapeFormat,
 			},
 			Locations:    locations,
 			DateTimeType: pb.Options_depart_at,
 			HasDateTime: &pb.Options_DateTime{
 				// TODO check how valhalla handles timezones
-				DateTime: params.DepartureTime().String(),
+				DateTime: params.DepartureTime().Format("2006-01-02T15:04"),
 			},
 			PbfFieldSelector: &pb.PbfFieldSelector{
 				Directions: true,
@@ -48,10 +54,14 @@ func (d DrivingTimeMapper) ToTransport(params *model.RouteParams) (*pb.Api, erro
 	}, nil
 }
 
-func (d DrivingTimeMapper) FromTransport(api *pb.Api) (time.Duration, error) {
+func (DrivingTimeMapper) FromTransport(response *pb.Api) (time.Duration, error) {
+	if response == nil {
+		return 0, fmt.Errorf("response cannot be nil")
+	}
+
 	var timeInSeconds float64 = 0
 
-	for _, leg := range api.GetDirections().GetRoutes()[0].GetLegs() {
+	for _, leg := range response.GetDirections().GetRoutes()[0].GetLegs() {
 		timeInSeconds += leg.GetSummary().Time
 	}
 

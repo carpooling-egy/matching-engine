@@ -76,9 +76,9 @@ type Matrix struct {
 	Times           []float32              `protobuf:"fixed32,3,rep,packed,name=times,proto3" json:"times,omitempty"`
 	FromIndices     []uint32               `protobuf:"varint,4,rep,packed,name=from_indices,json=fromIndices,proto3" json:"from_indices,omitempty"`
 	ToIndices       []uint32               `protobuf:"varint,5,rep,packed,name=to_indices,json=toIndices,proto3" json:"to_indices,omitempty"`
-	DateTimes       []string               `protobuf:"bytes,6,rep,name=date_times,json=dateTimes,proto3" json:"date_times,omitempty"`
-	Algorithm       Matrix_Algorithm       `protobuf:"varint,7,opt,name=algorithm,proto3,enum=valhalla.Matrix_Algorithm" json:"algorithm,omitempty"`
-	Shapes          []string               `protobuf:"bytes,8,rep,name=shapes,proto3" json:"shapes,omitempty"`
+	DateTimes []string         `protobuf:"bytes,6,rep,name=date_times,json=dateTimes,proto3" json:"date_times,omitempty"`
+	Algorithm Matrix_Algorithm `protobuf:"varint,7,opt,name=algorithm,proto3,enum=valhalla.Matrix_Algorithm" json:"algorithm,omitempty"`
+	Shapes    []string         `protobuf:"bytes,8,rep,name=shapes,proto3" json:"shapes,omitempty"`
 	TimeZoneOffsets []string               `protobuf:"bytes,9,rep,name=time_zone_offsets,json=timeZoneOffsets,proto3" json:"time_zone_offsets,omitempty"`
 	TimeZoneNames   []string               `protobuf:"bytes,10,rep,name=time_zone_names,json=timeZoneNames,proto3" json:"time_zone_names,omitempty"`
 	SecondPass      []bool                 `protobuf:"varint,11,rep,packed,name=second_pass,json=secondPass,proto3" json:"second_pass,omitempty"`

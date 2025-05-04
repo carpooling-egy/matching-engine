@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -46,4 +47,10 @@ func (r *Route) Distance() *Distance {
 
 func (r *Route) Time() time.Duration {
 	return r.time
+}
+
+func (r *Route) String() string {
+	return fmt.Sprintf("Route{polyline: %s, distance: %s, time: %s}",
+		r.polyline, r.distance, r.time,
+	)
 }

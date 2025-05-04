@@ -1009,19 +1009,19 @@ func (x *TripLeg_Restriction) GetType() uint32 {
 
 // represents a single date/time range from https://wiki.openstreetmap.org/wiki/Key:opening_hours
 type TripLeg_TimeDomain struct {
-	state         protoimpl.MessageState        `protogen:"open.v1"`
-	DayDowType    TripLeg_TimeDomain_DayDowType `protobuf:"varint,1,opt,name=day_dow_type,json=dayDowType,proto3,enum=valhalla.TripLeg_TimeDomain_DayDowType" json:"day_dow_type,omitempty"` // `begin_day_dow` and `end_day_dow` type
-	DowMask       uint32                        `protobuf:"varint,2,opt,name=dow_mask,json=dowMask,proto3" json:"dow_mask,omitempty"`                                                        // day of week mask, e.g. 0b0111110 for Mo-Fr as week starts from Su
-	BeginHrs      uint32                        `protobuf:"varint,3,opt,name=begin_hrs,json=beginHrs,proto3" json:"begin_hrs,omitempty"`                                                     // begin hours, 0 if not set
-	BeginMins     uint32                        `protobuf:"varint,4,opt,name=begin_mins,json=beginMins,proto3" json:"begin_mins,omitempty"`                                                  // begin minutes, 0 if not set
-	BeginMonth    uint32                        `protobuf:"varint,5,opt,name=begin_month,json=beginMonth,proto3" json:"begin_month,omitempty"`                                               // begin month, from 1 (January) to 12 (December), 0 if not set
-	BeginDayDow   uint32                        `protobuf:"varint,6,opt,name=begin_day_dow,json=beginDayDow,proto3" json:"begin_day_dow,omitempty"`                                          // begin day of month or nth dow, i.e. 1st Sunday
-	BeginWeek     uint32                        `protobuf:"varint,7,opt,name=begin_week,json=beginWeek,proto3" json:"begin_week,omitempty"`                                                  // which week does this start, i.e. 1st week in Oct
-	EndHrs        uint32                        `protobuf:"varint,8,opt,name=end_hrs,json=endHrs,proto3" json:"end_hrs,omitempty"`                                                           // end hours, 0 if not set
-	EndMins       uint32                        `protobuf:"varint,9,opt,name=end_mins,json=endMins,proto3" json:"end_mins,omitempty"`                                                        // end minutes, 0 if not set
-	EndMonth      uint32                        `protobuf:"varint,10,opt,name=end_month,json=endMonth,proto3" json:"end_month,omitempty"`                                                    // end month, from 1 (January) to 12 (December), 0 if not set
-	EndDayDow     uint32                        `protobuf:"varint,11,opt,name=end_day_dow,json=endDayDow,proto3" json:"end_day_dow,omitempty"`                                               // end day of month or nth dow, i.e. last Sunday
-	EndWeek       uint32                        `protobuf:"varint,12,opt,name=end_week,json=endWeek,proto3" json:"end_week,omitempty"`                                                       // which week does this end, i.e. last week in Oct
+	state       protoimpl.MessageState        `protogen:"open.v1"`
+	DayDowType  TripLeg_TimeDomain_DayDowType `protobuf:"varint,1,opt,name=day_dow_type,json=dayDowType,proto3,enum=valhalla.TripLeg_TimeDomain_DayDowType" json:"day_dow_type,omitempty"` // `begin_day_dow` and `end_day_dow` type
+	DowMask     uint32                        `protobuf:"varint,2,opt,name=dow_mask,json=dowMask,proto3" json:"dow_mask,omitempty"`                                                        // day of week mask, e.g. 0b0111110 for Mo-Fr as week starts from Su
+	BeginHrs    uint32                        `protobuf:"varint,3,opt,name=begin_hrs,json=beginHrs,proto3" json:"begin_hrs,omitempty"`                                                     // begin hours, 0 if not set
+	BeginMins   uint32                        `protobuf:"varint,4,opt,name=begin_mins,json=beginMins,proto3" json:"begin_mins,omitempty"`                                                  // begin minutes, 0 if not set
+	BeginMonth  uint32                        `protobuf:"varint,5,opt,name=begin_month,json=beginMonth,proto3" json:"begin_month,omitempty"`                                               // begin month, from 1 (January) to 12 (December), 0 if not set
+	BeginDayDow uint32                        `protobuf:"varint,6,opt,name=begin_day_dow,json=beginDayDow,proto3" json:"begin_day_dow,omitempty"`                                          // begin day of month or nth dow, i.e. 1st Sunday
+	BeginWeek   uint32                        `protobuf:"varint,7,opt,name=begin_week,json=beginWeek,proto3" json:"begin_week,omitempty"`                                                  // which week does this start, i.e. 1st week in Oct
+	EndHrs      uint32                        `protobuf:"varint,8,opt,name=end_hrs,json=endHrs,proto3" json:"end_hrs,omitempty"`                                                           // end hours, 0 if not set
+	EndMins     uint32                        `protobuf:"varint,9,opt,name=end_mins,json=endMins,proto3" json:"end_mins,omitempty"`                                                        // end minutes, 0 if not set
+	EndMonth    uint32                        `protobuf:"varint,10,opt,name=end_month,json=endMonth,proto3" json:"end_month,omitempty"`                                                    // end month, from 1 (January) to 12 (December), 0 if not set
+	EndDayDow   uint32                        `protobuf:"varint,11,opt,name=end_day_dow,json=endDayDow,proto3" json:"end_day_dow,omitempty"`                                               // end day of month or nth dow, i.e. last Sunday
+	EndWeek       uint32                        `protobuf:"varint,12,opt,name=end_week,json=endWeek,proto3" json:"end_week,omitempty"`                                                     // which week does this end, i.e. last week in Oct
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1142,8 +1142,8 @@ func (x *TripLeg_TimeDomain) GetEndWeek() uint32 {
 
 type TripLeg_ConditionalSpeedLimit struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SpeedLimit    uint32                 `protobuf:"varint,1,opt,name=speed_limit,json=speedLimit,proto3" json:"speed_limit,omitempty"`
-	Condition     *TripLeg_TimeDomain    `protobuf:"bytes,2,opt,name=condition,proto3" json:"condition,omitempty"`
+	SpeedLimit    uint32              `protobuf:"varint,1,opt,name=speed_limit,json=speedLimit,proto3" json:"speed_limit,omitempty"`
+	Condition     *TripLeg_TimeDomain `protobuf:"bytes,2,opt,name=condition,proto3" json:"condition,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1193,55 +1193,55 @@ func (x *TripLeg_ConditionalSpeedLimit) GetCondition() *TripLeg_TimeDomain {
 }
 
 type TripLeg_Edge struct {
-	state                protoimpl.MessageState      `protogen:"open.v1"`
-	Name                 []*StreetName               `protobuf:"bytes,1,rep,name=name,proto3" json:"name,omitempty"`                           // street names
-	LengthKm             float32                     `protobuf:"fixed32,2,opt,name=length_km,json=lengthKm,proto3" json:"length_km,omitempty"` // km
-	Speed                float32                     `protobuf:"fixed32,3,opt,name=speed,proto3" json:"speed,omitempty"`                       // km/h
-	RoadClass            RoadClass                   `protobuf:"varint,4,opt,name=road_class,json=roadClass,proto3,enum=valhalla.RoadClass" json:"road_class,omitempty"`
-	BeginHeading         uint32                      `protobuf:"varint,5,opt,name=begin_heading,json=beginHeading,proto3" json:"begin_heading,omitempty"`            // 0-359
-	EndHeading           uint32                      `protobuf:"varint,6,opt,name=end_heading,json=endHeading,proto3" json:"end_heading,omitempty"`                  // 0-359
-	BeginShapeIndex      uint32                      `protobuf:"varint,7,opt,name=begin_shape_index,json=beginShapeIndex,proto3" json:"begin_shape_index,omitempty"` // inclusive
-	EndShapeIndex        uint32                      `protobuf:"varint,8,opt,name=end_shape_index,json=endShapeIndex,proto3" json:"end_shape_index,omitempty"`       // inclusive
-	Traversability       TripLeg_Traversability      `protobuf:"varint,9,opt,name=traversability,proto3,enum=valhalla.TripLeg_Traversability" json:"traversability,omitempty"`
-	Use                  TripLeg_Use                 `protobuf:"varint,10,opt,name=use,proto3,enum=valhalla.TripLeg_Use" json:"use,omitempty"`
-	Toll                 bool                        `protobuf:"varint,11,opt,name=toll,proto3" json:"toll,omitempty"`
+	state               protoimpl.MessageState      `protogen:"open.v1"`
+	Name                []*StreetName               `protobuf:"bytes,1,rep,name=name,proto3" json:"name,omitempty"`                           // street names
+	LengthKm            float32                     `protobuf:"fixed32,2,opt,name=length_km,json=lengthKm,proto3" json:"length_km,omitempty"` // km
+	Speed               float32                     `protobuf:"fixed32,3,opt,name=speed,proto3" json:"speed,omitempty"`                       // km/h
+	RoadClass           RoadClass                   `protobuf:"varint,4,opt,name=road_class,json=roadClass,proto3,enum=valhalla.RoadClass" json:"road_class,omitempty"`
+	BeginHeading        uint32                      `protobuf:"varint,5,opt,name=begin_heading,json=beginHeading,proto3" json:"begin_heading,omitempty"`            // 0-359
+	EndHeading          uint32                      `protobuf:"varint,6,opt,name=end_heading,json=endHeading,proto3" json:"end_heading,omitempty"`                  // 0-359
+	BeginShapeIndex     uint32                      `protobuf:"varint,7,opt,name=begin_shape_index,json=beginShapeIndex,proto3" json:"begin_shape_index,omitempty"` // inclusive
+	EndShapeIndex       uint32                      `protobuf:"varint,8,opt,name=end_shape_index,json=endShapeIndex,proto3" json:"end_shape_index,omitempty"`       // inclusive
+	Traversability      TripLeg_Traversability      `protobuf:"varint,9,opt,name=traversability,proto3,enum=valhalla.TripLeg_Traversability" json:"traversability,omitempty"`
+	Use                 TripLeg_Use                 `protobuf:"varint,10,opt,name=use,proto3,enum=valhalla.TripLeg_Use" json:"use,omitempty"`
+	Toll                bool                        `protobuf:"varint,11,opt,name=toll,proto3" json:"toll,omitempty"`
 	Unpaved              bool                        `protobuf:"varint,12,opt,name=unpaved,proto3" json:"unpaved,omitempty"`
 	Tunnel               bool                        `protobuf:"varint,13,opt,name=tunnel,proto3" json:"tunnel,omitempty"`
 	Bridge               bool                        `protobuf:"varint,14,opt,name=bridge,proto3" json:"bridge,omitempty"`
 	Roundabout           bool                        `protobuf:"varint,15,opt,name=roundabout,proto3" json:"roundabout,omitempty"`
 	InternalIntersection bool                        `protobuf:"varint,16,opt,name=internal_intersection,json=internalIntersection,proto3" json:"internal_intersection,omitempty"`
 	DriveOnLeft          bool                        `protobuf:"varint,17,opt,name=drive_on_left,json=driveOnLeft,proto3" json:"drive_on_left,omitempty"` // [default = false]
-	Surface              TripLeg_Surface             `protobuf:"varint,18,opt,name=surface,proto3,enum=valhalla.TripLeg_Surface" json:"surface,omitempty"`
-	Sign                 *TripSign                   `protobuf:"bytes,19,opt,name=sign,proto3" json:"sign,omitempty"`
-	TravelMode           TravelMode                  `protobuf:"varint,20,opt,name=travel_mode,json=travelMode,proto3,enum=valhalla.TravelMode" json:"travel_mode,omitempty"`
-	VehicleType          VehicleType                 `protobuf:"varint,21,opt,name=vehicle_type,json=vehicleType,proto3,enum=valhalla.VehicleType" json:"vehicle_type,omitempty"`
-	PedestrianType       PedestrianType              `protobuf:"varint,22,opt,name=pedestrian_type,json=pedestrianType,proto3,enum=valhalla.PedestrianType" json:"pedestrian_type,omitempty"`
-	BicycleType          BicycleType                 `protobuf:"varint,23,opt,name=bicycle_type,json=bicycleType,proto3,enum=valhalla.BicycleType" json:"bicycle_type,omitempty"`
-	TransitType          TransitType                 `protobuf:"varint,24,opt,name=transit_type,json=transitType,proto3,enum=valhalla.TransitType" json:"transit_type,omitempty"`
-	TransitRouteInfo     *TransitRouteInfo           `protobuf:"bytes,25,opt,name=transit_route_info,json=transitRouteInfo,proto3" json:"transit_route_info,omitempty"`
-	Id                   uint64                      `protobuf:"varint,26,opt,name=id,proto3" json:"id,omitempty"`
+	Surface             TripLeg_Surface             `protobuf:"varint,18,opt,name=surface,proto3,enum=valhalla.TripLeg_Surface" json:"surface,omitempty"`
+	Sign                *TripSign                   `protobuf:"bytes,19,opt,name=sign,proto3" json:"sign,omitempty"`
+	TravelMode          TravelMode                  `protobuf:"varint,20,opt,name=travel_mode,json=travelMode,proto3,enum=valhalla.TravelMode" json:"travel_mode,omitempty"`
+	VehicleType         VehicleType                 `protobuf:"varint,21,opt,name=vehicle_type,json=vehicleType,proto3,enum=valhalla.VehicleType" json:"vehicle_type,omitempty"`
+	PedestrianType      PedestrianType              `protobuf:"varint,22,opt,name=pedestrian_type,json=pedestrianType,proto3,enum=valhalla.PedestrianType" json:"pedestrian_type,omitempty"`
+	BicycleType         BicycleType                 `protobuf:"varint,23,opt,name=bicycle_type,json=bicycleType,proto3,enum=valhalla.BicycleType" json:"bicycle_type,omitempty"`
+	TransitType         TransitType                 `protobuf:"varint,24,opt,name=transit_type,json=transitType,proto3,enum=valhalla.TransitType" json:"transit_type,omitempty"`
+	TransitRouteInfo    *TransitRouteInfo           `protobuf:"bytes,25,opt,name=transit_route_info,json=transitRouteInfo,proto3" json:"transit_route_info,omitempty"`
+	Id                  uint64                      `protobuf:"varint,26,opt,name=id,proto3" json:"id,omitempty"`
 	WayId                uint64                      `protobuf:"varint,27,opt,name=way_id,json=wayId,proto3" json:"way_id,omitempty"`
 	WeightedGrade        float32                     `protobuf:"fixed32,28,opt,name=weighted_grade,json=weightedGrade,proto3" json:"weighted_grade,omitempty"`
 	MaxUpwardGrade       int32                       `protobuf:"varint,29,opt,name=max_upward_grade,json=maxUpwardGrade,proto3" json:"max_upward_grade,omitempty"`       // set to 32768 if no elevation data
 	MaxDownwardGrade     int32                       `protobuf:"varint,30,opt,name=max_downward_grade,json=maxDownwardGrade,proto3" json:"max_downward_grade,omitempty"` // set to 32768 if no elevation data
-	LaneCount            uint32                      `protobuf:"varint,31,opt,name=lane_count,json=laneCount,proto3" json:"lane_count,omitempty"`
-	CycleLane            TripLeg_CycleLane           `protobuf:"varint,32,opt,name=cycle_lane,json=cycleLane,proto3,enum=valhalla.TripLeg_CycleLane" json:"cycle_lane,omitempty"`
-	BicycleNetwork       bool                        `protobuf:"varint,33,opt,name=bicycle_network,json=bicycleNetwork,proto3" json:"bicycle_network,omitempty"` // true if the edge is part of a bike network
-	Sidewalk             TripLeg_Sidewalk            `protobuf:"varint,34,opt,name=sidewalk,proto3,enum=valhalla.TripLeg_Sidewalk" json:"sidewalk,omitempty"`
-	Density              uint32                      `protobuf:"varint,35,opt,name=density,proto3" json:"density,omitempty"`
+	LaneCount           uint32                      `protobuf:"varint,31,opt,name=lane_count,json=laneCount,proto3" json:"lane_count,omitempty"`
+	CycleLane           TripLeg_CycleLane           `protobuf:"varint,32,opt,name=cycle_lane,json=cycleLane,proto3,enum=valhalla.TripLeg_CycleLane" json:"cycle_lane,omitempty"`
+	BicycleNetwork      bool                        `protobuf:"varint,33,opt,name=bicycle_network,json=bicycleNetwork,proto3" json:"bicycle_network,omitempty"` // true if the edge is part of a bike network
+	Sidewalk            TripLeg_Sidewalk            `protobuf:"varint,34,opt,name=sidewalk,proto3,enum=valhalla.TripLeg_Sidewalk" json:"sidewalk,omitempty"`
+	Density             uint32                      `protobuf:"varint,35,opt,name=density,proto3" json:"density,omitempty"`
 	SpeedLimit           uint32                      `protobuf:"varint,36,opt,name=speed_limit,json=speedLimit,proto3" json:"speed_limit,omitempty"`  // 0 if unavailable, 255 if unlimited
 	TruckSpeed           float32                     `protobuf:"fixed32,37,opt,name=truck_speed,json=truckSpeed,proto3" json:"truck_speed,omitempty"` // km/h, 0 if unavailable
-	TruckRoute           bool                        `protobuf:"varint,38,opt,name=truck_route,json=truckRoute,proto3" json:"truck_route,omitempty"`
-	LaneConnectivity     []*TripLeg_LaneConnectivity `protobuf:"bytes,39,rep,name=lane_connectivity,json=laneConnectivity,proto3" json:"lane_connectivity,omitempty"`
-	MeanElevation        int32                       `protobuf:"varint,40,opt,name=mean_elevation,json=meanElevation,proto3" json:"mean_elevation,omitempty"` // set to 32768 if no elevation data
-	TrafficSegment       []*TripLeg_TrafficSegment   `protobuf:"bytes,41,rep,name=traffic_segment,json=trafficSegment,proto3" json:"traffic_segment,omitempty"`
-	TurnLanes            []*TurnLane                 `protobuf:"bytes,42,rep,name=turn_lanes,json=turnLanes,proto3" json:"turn_lanes,omitempty"`
-	HasTimeRestrictions  bool                        `protobuf:"varint,43,opt,name=has_time_restrictions,json=hasTimeRestrictions,proto3" json:"has_time_restrictions,omitempty"`
+	TruckRoute          bool                        `protobuf:"varint,38,opt,name=truck_route,json=truckRoute,proto3" json:"truck_route,omitempty"`
+	LaneConnectivity    []*TripLeg_LaneConnectivity `protobuf:"bytes,39,rep,name=lane_connectivity,json=laneConnectivity,proto3" json:"lane_connectivity,omitempty"`
+	MeanElevation       int32                       `protobuf:"varint,40,opt,name=mean_elevation,json=meanElevation,proto3" json:"mean_elevation,omitempty"` // set to 32768 if no elevation data
+	TrafficSegment      []*TripLeg_TrafficSegment   `protobuf:"bytes,41,rep,name=traffic_segment,json=trafficSegment,proto3" json:"traffic_segment,omitempty"`
+	TurnLanes           []*TurnLane                 `protobuf:"bytes,42,rep,name=turn_lanes,json=turnLanes,proto3" json:"turn_lanes,omitempty"`
+	HasTimeRestrictions bool                        `protobuf:"varint,43,opt,name=has_time_restrictions,json=hasTimeRestrictions,proto3" json:"has_time_restrictions,omitempty"`
 	DefaultSpeed         float32                     `protobuf:"fixed32,44,opt,name=default_speed,json=defaultSpeed,proto3" json:"default_speed,omitempty"` // km/h
-	Restriction          *TripLeg_Restriction        `protobuf:"bytes,45,opt,name=restriction,proto3" json:"restriction,omitempty"`
-	DestinationOnly      bool                        `protobuf:"varint,46,opt,name=destination_only,json=destinationOnly,proto3" json:"destination_only,omitempty"`
-	IsUrban              bool                        `protobuf:"varint,47,opt,name=is_urban,json=isUrban,proto3" json:"is_urban,omitempty"` // uses edge density to decide if edge is in an urban area
-	TaggedValue          []*TaggedValue              `protobuf:"bytes,48,rep,name=tagged_value,json=taggedValue,proto3" json:"tagged_value,omitempty"`
+	Restriction         *TripLeg_Restriction        `protobuf:"bytes,45,opt,name=restriction,proto3" json:"restriction,omitempty"`
+	DestinationOnly     bool                        `protobuf:"varint,46,opt,name=destination_only,json=destinationOnly,proto3" json:"destination_only,omitempty"`
+	IsUrban             bool                        `protobuf:"varint,47,opt,name=is_urban,json=isUrban,proto3" json:"is_urban,omitempty"` // uses edge density to decide if edge is in an urban area
+	TaggedValue         []*TaggedValue              `protobuf:"bytes,48,rep,name=tagged_value,json=taggedValue,proto3" json:"tagged_value,omitempty"`
 	// for the part of the edge that is used in the path we must know where
 	// it starts and ends along the length of the edge as a percentage
 	SourceAlongEdge           float32                          `protobuf:"fixed32,49,opt,name=source_along_edge,json=sourceAlongEdge,proto3" json:"source_along_edge,omitempty"`

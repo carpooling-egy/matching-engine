@@ -2,6 +2,8 @@ package model
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 )
 
 type LineString []Coordinate
@@ -15,6 +17,14 @@ func (ls LineString) IsClosed() bool {
 
 	first, last := ls[0], ls[len(ls)-1]
 	return first.Lat() == last.Lat() && first.Lng() == last.Lng()
+}
+
+func (ls LineString) String() string {
+	coords := make([]string, len(ls))
+	for i, pt := range ls {
+		coords[i] = pt.String()
+	}
+	return fmt.Sprintf("LineString[%s]", strings.Join(coords, ", "))
 }
 
 type Contour struct {
@@ -44,6 +54,10 @@ func (c *Contour) Unit() string {
 	return c.unit
 }
 
+func (c *Contour) String() string {
+	return fmt.Sprintf("%.2f %s", c.value, c.unit)
+}
+
 type Isochrone struct {
 	contour *Contour
 	ring    *LineString
@@ -71,4 +85,9 @@ func (i *Isochrone) Contour() *Contour {
 
 func (i *Isochrone) Geometry() *LineString {
 	return i.ring
+}
+
+func (i *Isochrone) String() string {
+	return fmt.Sprintf("Isochrone{contour: %s, ring: %s}",
+		i.contour.String(), i.ring.String())
 }

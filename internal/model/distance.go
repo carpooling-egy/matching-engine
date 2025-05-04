@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 )
 
 type DistanceUnit int
@@ -11,16 +12,16 @@ const (
 	Mile
 )
 
-func (d DistanceUnit) IsValid() bool {
-	switch d {
+func (du DistanceUnit) IsValid() bool {
+	switch du {
 	case Kilometer, Mile:
 		return true
 	}
 	return false
 }
 
-func (d DistanceUnit) String() string {
-	switch d {
+func (du DistanceUnit) String() string {
+	switch du {
 	case Kilometer:
 		return "Kilometer"
 	case Mile:
@@ -53,4 +54,8 @@ func (d *Distance) Value() float32 {
 
 func (d *Distance) Unit() DistanceUnit {
 	return d.unit
+}
+
+func (d *Distance) String() string {
+	return fmt.Sprintf("%.2f %s", d.value, d.unit)
 }

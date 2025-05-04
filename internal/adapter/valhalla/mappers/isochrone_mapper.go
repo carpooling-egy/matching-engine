@@ -3,8 +3,8 @@ package mappers
 import (
 	"fmt"
 	re "matching-engine/internal/adapter/routing-engine"
-	"matching-engine/internal/adapter/routing-engine/valhalla/client/pb"
-	"matching-engine/internal/adapter/routing-engine/valhalla/helpers"
+	"matching-engine/internal/adapter/valhalla/client/pb"
+	"matching-engine/internal/adapter/valhalla/common"
 	"matching-engine/internal/model"
 )
 
@@ -18,11 +18,11 @@ var _ re.OperationMapper[
 ] = IsochroneMapper{}
 
 func (IsochroneMapper) ToTransport(params *model.IsochroneParams) (*pb.Api, error) {
-	origin := helpers.CreateLocation(
-		params.Origin().Lat(),
-		params.Origin().Lng(),
-		helpers.DefaultLocationType,
-	)
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+
+	origin := common.CreateLocation(params.Origin().Lat(), params.Origin().Lng())
 
 	var (
 		costingType pb.Costing_Type
@@ -31,10 +31,10 @@ func (IsochroneMapper) ToTransport(params *model.IsochroneParams) (*pb.Api, erro
 
 	if params.Profile() == model.Pedestrian {
 		costingType = pb.Costing_pedestrian
-		costing = helpers.DefaultPedestrianCosting
+		costing = common.DefaultPedestrianCosting
 	} else { // assume auto
 		costingType = pb.Costing_auto_
-		costing = helpers.DefaultAutoCosting
+		costing = common.DefaultAutoCosting
 	}
 
 	return &pb.Api{
@@ -42,10 +42,10 @@ func (IsochroneMapper) ToTransport(params *model.IsochroneParams) (*pb.Api, erro
 			Action:      pb.Options_isochrone,
 			Format:      pb.Options_pbf,
 			CostingType: costingType,
-			Locations:   []*pb.Location{origin},
 			Costings: map[int32]*pb.Costing{
 				int32(pb.Costing_pedestrian): costing,
 			},
+			Locations: []*pb.Location{origin},
 			Contours: []*pb.Contour{
 				{
 					HasDistance: &pb.Contour_Distance{
@@ -61,6 +61,10 @@ func (IsochroneMapper) ToTransport(params *model.IsochroneParams) (*pb.Api, erro
 }
 
 func (IsochroneMapper) FromTransport(response *pb.Api) (*model.Isochrone, error) {
+	if response == nil {
+		return nil, fmt.Errorf("response cannot be nil")
+	}
+
 	isochrone := response.GetIsochrone()
 	if isochrone == nil {
 		return nil, fmt.Errorf("no isochrone data found")
@@ -93,22 +97,24 @@ func (IsochroneMapper) FromTransport(response *pb.Api) (*model.Isochrone, error)
 	geometry := rawContour.GetGeometries()[0]
 	rawCoords := geometry.GetCoords()
 
+	fmt.Println(rawCoords)
+
 	if len(rawCoords) == 0 || len(rawCoords)%2 != 0 {
 		return nil, fmt.Errorf("invalid isochrone coordinates")
 	}
 
 	// Valhalla packs each coordinate as an integer = degrees * coordScale.
-	// coordScale = 1e5 gives sub‐meter precision (0.00001° ≈ 1 m).
-	const coordScale = 1e5
+	// coordScale = 1e6 gives sub‐meter precision (0.000001° ≈ 1 m).
+	const coordScale = 1e6
 
 	var ring model.LineString
 	ring = make(model.LineString, 0, len(rawCoords)/2)
 
-	// Decode coords: [lat1, lon1, lat2, lon2, …] as integer 1e5‐degree units
+	// Decode coords: [lon1, lat1, lon2, lat2, …] as integer 1e5‐degree units
 	for k := 0; k < len(rawCoords); k += 2 {
-		// coords[k] is lat * coordScale, coords[k+1] is lon * coordScale
-		lat := float64(rawCoords[k]) / coordScale
-		lng := float64(rawCoords[k+1]) / coordScale
+		// coords[k] is lng * coordScale, coords[k+1] is lat * coordScale
+		lng := float64(rawCoords[k]) / coordScale
+		lat := float64(rawCoords[k+1]) / coordScale
 
 		coord, err := model.NewCoordinate(lat, lng)
 		if err != nil {

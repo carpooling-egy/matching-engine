@@ -1,6 +1,9 @@
 package model
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type IsochroneParams struct {
 	origin   *Coordinate
@@ -42,4 +45,11 @@ func (ip *IsochroneParams) Distance() *Distance {
 
 func (ip *IsochroneParams) Profile() Profile {
 	return ip.profile
+}
+
+func (ip *IsochroneParams) String() string {
+	return fmt.Sprintf(
+		"IsochroneParams{origin: %s, distance: %s, profile: %s}",
+		ip.origin.String(), ip.distance.String(), ip.profile.String(),
+	)
 }

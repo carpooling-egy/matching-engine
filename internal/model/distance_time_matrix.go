@@ -3,6 +3,8 @@ package model
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"text/tabwriter"
 	"time"
 )
 
@@ -82,4 +84,31 @@ func validateTimeMatrixElements(times [][]time.Duration) error {
 		}
 	}
 	return nil
+}
+
+func (dtm *DistanceTimeMatrix) String() string {
+	var builder strings.Builder
+	tw := tabwriter.NewWriter(&builder, 0, 0, 2, ' ', 0)
+
+	_, _ = fmt.Fprint(tw, "\t")
+	for col := range dtm.distances[0] {
+		_, _ = fmt.Fprintf(tw, "To %d\t", col)
+	}
+	_, _ = fmt.Fprintln(tw)
+
+	for rowIndex, row := range dtm.distances {
+		_, _ = fmt.Fprintf(tw, "From %d\t", rowIndex)
+		for colIndex, distance := range row {
+			duration := dtm.times[rowIndex][colIndex]
+			entry := fmt.Sprintf("%s (%s)", distance.String(), duration)
+			_, _ = fmt.Fprintf(tw, "%s\t", entry)
+		}
+		_, _ = fmt.Fprintln(tw)
+	}
+
+	if err := tw.Flush(); err != nil {
+		return fmt.Sprintf("error flushing table: %v", err)
+	}
+
+	return builder.String()
 }

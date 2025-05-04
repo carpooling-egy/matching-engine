@@ -6,7 +6,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"io"
 	re "matching-engine/internal/adapter/routing-engine"
-	"matching-engine/internal/adapter/routing-engine/valhalla/client/pb"
+	"matching-engine/internal/adapter/valhalla/client/pb"
 	"net/http"
 	"net/url"
 )
@@ -33,7 +33,7 @@ var _ re.RoutingClient[
 	*pb.Api,
 ] = (*ValhallaClient)(nil)
 
-func (vc ValhallaClient) Post(endpoint string, request *pb.Api) (*pb.Api, error) {
+func (vc *ValhallaClient) Post(endpoint string, request *pb.Api) (*pb.Api, error) {
 	data, err := vc.serializeRequest(request)
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize request: %w", err)
@@ -52,7 +52,7 @@ func (vc ValhallaClient) Post(endpoint string, request *pb.Api) (*pb.Api, error)
 	return response, nil
 }
 
-func (vc ValhallaClient) doPost(endpoint string, data []byte) ([]byte, error) {
+func (vc *ValhallaClient) doPost(endpoint string, data []byte) ([]byte, error) {
 
 	resp, err := http.Post(
 		fmt.Sprintf("%v%v?format=proto", vc.baseURL, endpoint),
@@ -77,7 +77,7 @@ func (vc ValhallaClient) doPost(endpoint string, data []byte) ([]byte, error) {
 	return body, nil
 }
 
-func (vc ValhallaClient) serializeRequest(request *pb.Api) ([]byte, error) {
+func (vc *ValhallaClient) serializeRequest(request *pb.Api) ([]byte, error) {
 	data, err := proto.Marshal(request)
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize request: %w", err)
@@ -85,7 +85,7 @@ func (vc ValhallaClient) serializeRequest(request *pb.Api) ([]byte, error) {
 	return data, nil
 }
 
-func (vc ValhallaClient) deserializeResponse(body []byte) (*pb.Api, error) {
+func (vc *ValhallaClient) deserializeResponse(body []byte) (*pb.Api, error) {
 	response := &pb.Api{}
 	if err := proto.Unmarshal(body, response); err != nil {
 		return nil, fmt.Errorf("failed to deserialize response: %w", err)

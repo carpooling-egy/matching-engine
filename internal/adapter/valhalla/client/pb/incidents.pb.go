@@ -285,18 +285,18 @@ func (x *IncidentsTile_Location) GetMetadataIndex() uint32 {
 // A single incident is described by this
 // TODO This is not yet finalized
 type IncidentsTile_Metadata struct {
-	state              protoimpl.MessageState             `protogen:"open.v1"`
-	Type               IncidentsTile_Metadata_Type        `protobuf:"varint,1,opt,name=type,proto3,enum=valhalla.IncidentsTile_Metadata_Type" json:"type,omitempty"`
-	AlertcCodes        []uint32                           `protobuf:"varint,2,rep,packed,name=alertc_codes,json=alertcCodes,proto3" json:"alertc_codes,omitempty"`
+	state        protoimpl.MessageState             `protogen:"open.v1"`
+	Type         IncidentsTile_Metadata_Type        `protobuf:"varint,1,opt,name=type,proto3,enum=valhalla.IncidentsTile_Metadata_Type" json:"type,omitempty"`
+	AlertcCodes  []uint32                           `protobuf:"varint,2,rep,packed,name=alertc_codes,json=alertcCodes,proto3" json:"alertc_codes,omitempty"`
 	Description        string                             `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	SubType            string                             `protobuf:"bytes,4,opt,name=sub_type,json=subType,proto3" json:"sub_type,omitempty"`
 	SubTypeDescription string                             `protobuf:"bytes,5,opt,name=sub_type_description,json=subTypeDescription,proto3" json:"sub_type_description,omitempty"`
 	StartTime          uint64                             `protobuf:"varint,6,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	EndTime            uint64                             `protobuf:"varint,7,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
-	Impact             IncidentsTile_Metadata_Impact      `protobuf:"varint,9,opt,name=impact,proto3,enum=valhalla.IncidentsTile_Metadata_Impact" json:"impact,omitempty"`
-	RoadClosed         bool                               `protobuf:"varint,10,opt,name=road_closed,json=roadClosed,proto3" json:"road_closed,omitempty"`
-	Congestion         *IncidentsTile_Metadata_Congestion `protobuf:"bytes,11,opt,name=congestion,proto3" json:"congestion,omitempty"`
-	LanesBlocked       []string                           `protobuf:"bytes,12,rep,name=lanes_blocked,json=lanesBlocked,proto3" json:"lanes_blocked,omitempty"`
+	EndTime      uint64                             `protobuf:"varint,7,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	Impact       IncidentsTile_Metadata_Impact      `protobuf:"varint,9,opt,name=impact,proto3,enum=valhalla.IncidentsTile_Metadata_Impact" json:"impact,omitempty"`
+	RoadClosed   bool                               `protobuf:"varint,10,opt,name=road_closed,json=roadClosed,proto3" json:"road_closed,omitempty"`
+	Congestion   *IncidentsTile_Metadata_Congestion `protobuf:"bytes,11,opt,name=congestion,proto3" json:"congestion,omitempty"`
+	LanesBlocked []string                           `protobuf:"bytes,12,rep,name=lanes_blocked,json=lanesBlocked,proto3" json:"lanes_blocked,omitempty"`
 	CreationTime       uint64                             `protobuf:"varint,13,opt,name=creation_time,json=creationTime,proto3" json:"creation_time,omitempty"`
 	LongDescription    string                             `protobuf:"bytes,14,opt,name=long_description,json=longDescription,proto3" json:"long_description,omitempty"`
 	ClearLanes         string                             `protobuf:"bytes,15,opt,name=clear_lanes,json=clearLanes,proto3" json:"clear_lanes,omitempty"`

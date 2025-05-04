@@ -2,12 +2,15 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"math"
+	"strings"
 )
 
 type Polyline struct {
-	encoded   string
-	precision int
+	encoded     string
+	precision   int
+	coordinates []Coordinate // Cached coordinates
 }
 
 type Option func(*Polyline) error
@@ -49,7 +52,20 @@ func (p *Polyline) Precision() int {
 	return p.precision
 }
 
-func (p *Polyline) Decode() ([]Coordinate, error) {
+func (p *Polyline) Coordinates() ([]Coordinate, error) {
+	if p.coordinates != nil {
+		return p.coordinates, nil
+	}
+
+	coords, err := p.decode()
+	if err != nil {
+		return nil, err
+	}
+	p.coordinates = coords
+	return p.coordinates, nil
+}
+
+func (p *Polyline) decode() ([]Coordinate, error) {
 	factor := math.Pow10(p.precision)
 	var coordinates []Coordinate
 	index := 0
@@ -99,4 +115,56 @@ func (p *Polyline) decodeDelta(index *int) (int, error) {
 		return ^(result >> 1), nil
 	}
 	return result >> 1, nil
+}
+
+func (p *Polyline) String() string {
+	// Truncate encoded string if too long
+	encoded := p.encoded
+	if len(encoded) > 20 {
+		encoded = encoded[:17] + "..."
+	}
+
+	// Always decode coordinates
+	coords, err := p.Coordinates()
+	if err != nil {
+		return fmt.Sprintf("Polyline{encoded: %q, precision: %d, coords: error(%s)}", encoded, p.precision, err)
+	}
+
+	// Format coordinates (limit to 3 for brevity if many)
+	coordsInfo := fmt.Sprintf("%d points", len(coords))
+	if len(coords) > 0 {
+		coordsInfo += ": ["
+		maxDisplay := 3
+		for i, coord := range coords {
+			if i >= maxDisplay {
+				coordsInfo += fmt.Sprintf(", ...+%d more", len(coords)-maxDisplay)
+				break
+			}
+			if i > 0 {
+				coordsInfo += ", "
+			}
+			coordsInfo += coord.String()
+		}
+		coordsInfo += "]"
+	} else {
+		coordsInfo += ": []"
+	}
+
+	return fmt.Sprintf("Polyline{encoded: %q, precision: %d, coords: %s}", encoded, p.precision, coordsInfo)
+}
+
+func (p *Polyline) ToWKT() (string, error) {
+	coords, err := p.Coordinates()
+	if err != nil {
+		return "", err
+	}
+	if len(coords) < 2 {
+		return "", errors.New("LINESTRING requires at least 2 points")
+	}
+
+	var parts []string
+	for _, coord := range coords {
+		parts = append(parts, fmt.Sprintf("%f %f", coord.Lng, coord.Lat))
+	}
+	return "LINESTRING(" + strings.Join(parts, ",") + ")", nil
 }

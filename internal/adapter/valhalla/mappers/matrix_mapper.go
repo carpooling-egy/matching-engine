@@ -3,9 +3,10 @@ package mappers
 import (
 	"fmt"
 	re "matching-engine/internal/adapter/routing-engine"
-	"matching-engine/internal/adapter/routing-engine/valhalla/client/pb"
-	"matching-engine/internal/adapter/routing-engine/valhalla/helpers"
+	"matching-engine/internal/adapter/valhalla/client/pb"
+	"matching-engine/internal/adapter/valhalla/common"
 	"matching-engine/internal/model"
+	"math"
 	"time"
 )
 
@@ -19,9 +20,26 @@ var _ re.OperationMapper[
 ] = MatrixMapper{}
 
 func (MatrixMapper) ToTransport(params *model.DistanceTimeMatrixParams) (*pb.Api, error) {
+	if params == nil {
+		return nil, fmt.Errorf("params cannot be nil")
+	}
+
 	points := make([]*pb.Location, len(params.Points()))
 	for i, point := range params.Points() {
-		points[i] = helpers.CreateLocation(point.Lat(), point.Lng(), helpers.DefaultLocationType)
+		points[i] = common.CreateLocation(point.Lat(), point.Lng())
+	}
+
+	var (
+		costingType pb.Costing_Type
+		costing     *pb.Costing
+	)
+
+	if params.Profile() == model.Pedestrian {
+		costingType = pb.Costing_pedestrian
+		costing = common.DefaultPedestrianCosting
+	} else { // assume auto
+		costingType = pb.Costing_auto_
+		costing = common.DefaultAutoCosting
 	}
 
 	return &pb.Api{
@@ -29,11 +47,11 @@ func (MatrixMapper) ToTransport(params *model.DistanceTimeMatrixParams) (*pb.Api
 			Action:      pb.Options_sources_to_targets,
 			Sources:     points,
 			Targets:     points,
-			Units:       helpers.DefaultUnit,
-			Format:      helpers.DefaultFormat,
-			CostingType: pb.Costing_auto_,
+			Units:       common.DefaultUnit,
+			Format:      common.DefaultFormat,
+			CostingType: costingType,
 			Costings: map[int32]*pb.Costing{
-				int32(pb.Costing_auto_): helpers.DefaultAutoCosting,
+				int32(pb.Costing_auto_): costing,
 			},
 			DateTimeType: pb.Options_depart_at,
 			HasDateTime: &pb.Options_DateTime{
@@ -47,8 +65,12 @@ func (MatrixMapper) ToTransport(params *model.DistanceTimeMatrixParams) (*pb.Api
 	}, nil
 }
 
-func (MatrixMapper) FromTransport(api *pb.Api) (*model.DistanceTimeMatrix, error) {
-	matrix := api.GetMatrix()
+func (MatrixMapper) FromTransport(response *pb.Api) (*model.DistanceTimeMatrix, error) {
+	if response == nil {
+		return nil, fmt.Errorf("response cannot be nil")
+	}
+
+	matrix := response.GetMatrix()
 	if matrix == nil {
 		return nil, fmt.Errorf("matrix is nil")
 	}
@@ -56,16 +78,13 @@ func (MatrixMapper) FromTransport(api *pb.Api) (*model.DistanceTimeMatrix, error
 	flattenedDistanceMatrix := matrix.GetDistances()
 	flattenedTimeMatrix := matrix.GetTimes()
 
-	length := len(api.GetOptions().GetSources()) // Assumes square matrix (sources == targets)
-
-	if len(flattenedDistanceMatrix) != length*length || len(flattenedTimeMatrix) != length*length {
-		return nil, fmt.Errorf("flattened matrix size mismatch")
-	}
+	// Assumes square matrix (sources == targets)
+	length := int(math.Sqrt(float64(len(flattenedDistanceMatrix))))
 
 	distanceMatrix := make([][]model.Distance, length)
 	timeMatrix := make([][]time.Duration, length)
 
-	distanceUnit, err := helpers.ToDomainDistanceUnit(helpers.DefaultUnit)
+	distanceUnit, err := common.ToDomainDistanceUnit(common.DefaultUnit)
 	if err != nil {
 		return nil, err
 	}

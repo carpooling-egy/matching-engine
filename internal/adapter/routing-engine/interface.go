@@ -27,9 +27,7 @@ type RoutingEngine interface {
 		routeParams *model.RouteParams,
 	) (time.Duration, error)
 
-	/* Unsure about the ones below */
-
-	// ComputeWalkingDistance get the distance of a route between two points while walking
+	// ComputeWalkingTime get the distance of a route between two points while walking
 	ComputeWalkingTime(
 		ctx context.Context,
 		walkParams *model.WalkParams,

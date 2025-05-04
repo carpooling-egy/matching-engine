@@ -44,8 +44,8 @@ type Status struct {
 	// Types that are valid to be assigned to HasBbox:
 	//
 	//	*Status_Bbox
-	HasBbox             isStatus_HasBbox `protobuf_oneof:"has_bbox"`
-	Version             string           `protobuf:"bytes,6,opt,name=version,proto3" json:"version,omitempty"`
+	HasBbox isStatus_HasBbox `protobuf_oneof:"has_bbox"`
+	Version string           `protobuf:"bytes,6,opt,name=version,proto3" json:"version,omitempty"`
 	TilesetLastModified uint32           `protobuf:"varint,7,opt,name=tileset_last_modified,json=tilesetLastModified,proto3" json:"tileset_last_modified,omitempty"`
 	AvailableActions    []string         `protobuf:"bytes,8,rep,name=available_actions,json=availableActions,proto3" json:"available_actions,omitempty"`
 	// Types that are valid to be assigned to HasHasTransitTiles:

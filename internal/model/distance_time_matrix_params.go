@@ -2,6 +2,8 @@ package model
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 )
 
@@ -46,4 +48,17 @@ func (dtm *DistanceTimeMatrixParams) DepartureTime() time.Time {
 
 func (dtm *DistanceTimeMatrixParams) Profile() Profile {
 	return dtm.profile
+}
+
+func (dtm *DistanceTimeMatrixParams) String() string {
+	coords := make([]string, len(dtm.points))
+	for i, pt := range dtm.points {
+		coords[i] = pt.String()
+	}
+	return fmt.Sprintf(
+		"Points: [%s], Departure: %s, Profile: %s",
+		strings.Join(coords, ", "),
+		dtm.departureTime.Format(time.RFC3339),
+		dtm.profile.String(),
+	)
 }

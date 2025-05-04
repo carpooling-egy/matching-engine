@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	re "matching-engine/internal/adapter/routing-engine"
-	"matching-engine/internal/adapter/routing-engine/valhalla/client"
+	"matching-engine/internal/adapter/valhalla/client"
 	"matching-engine/internal/model"
 	"time"
 )
@@ -32,7 +32,7 @@ func NewValhalla() (*Valhalla, error) {
 
 var _ re.RoutingEngine = (*Valhalla)(nil)
 
-func (v Valhalla) PlanDrivingRoute(
+func (v *Valhalla) PlanDrivingRoute(
 	ctx context.Context,
 	routeParams *model.RouteParams,
 ) (*model.Route, error) {
@@ -51,7 +51,7 @@ func (v Valhalla) PlanDrivingRoute(
 	return route, nil
 }
 
-func (v Valhalla) ComputeDrivingDistance(
+func (v *Valhalla) ComputeDrivingDistance(
 	ctx context.Context,
 	routeParams *model.RouteParams,
 ) (*model.Distance, error) {
@@ -70,7 +70,7 @@ func (v Valhalla) ComputeDrivingDistance(
 	return distance, nil
 }
 
-func (v Valhalla) ComputeDrivingTime(
+func (v *Valhalla) ComputeDrivingTime(
 	ctx context.Context,
 	routeParams *model.RouteParams,
 ) (time.Duration, error) {
@@ -89,7 +89,7 @@ func (v Valhalla) ComputeDrivingTime(
 	return duration, nil
 }
 
-func (v Valhalla) ComputeWalkingTime(
+func (v *Valhalla) ComputeWalkingTime(
 	ctx context.Context,
 	walkParams *model.WalkParams,
 ) (time.Duration, error) {
@@ -108,7 +108,7 @@ func (v Valhalla) ComputeWalkingTime(
 	return duration, nil
 }
 
-func (v Valhalla) ComputeIsochrone(
+func (v *Valhalla) ComputeIsochrone(
 	ctx context.Context,
 	req *model.IsochroneParams,
 ) (*model.Isochrone, error) {
@@ -127,7 +127,7 @@ func (v Valhalla) ComputeIsochrone(
 	return isochrone, nil
 }
 
-func (v Valhalla) ComputeDistanceTimeMatrix(
+func (v *Valhalla) ComputeDistanceTimeMatrix(
 	ctx context.Context,
 	req *model.DistanceTimeMatrixParams,
 ) (*model.DistanceTimeMatrix, error) {

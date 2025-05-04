@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -36,4 +37,10 @@ func (p *RouteParams) Waypoints() []Coordinate {
 
 func (p *RouteParams) DepartureTime() time.Time {
 	return p.departureTime
+}
+
+func (p *RouteParams) String() string {
+	return fmt.Sprintf("RouteParams{waypoints=%v, departureTime=%s}",
+		p.waypoints, p.departureTime.Format(time.RFC3339),
+	)
 }

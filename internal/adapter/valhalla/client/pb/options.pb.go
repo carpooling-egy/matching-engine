@@ -2564,8 +2564,8 @@ type Costing_Options struct {
 	// Types that are valid to be assigned to HasElevatorPenalty:
 	//
 	//	*Costing_Options_ElevatorPenalty
-	HasElevatorPenalty             isCosting_Options_HasElevatorPenalty `protobuf_oneof:"has_elevator_penalty"`
-	FixedSpeed                     uint32                               `protobuf:"varint,80,opt,name=fixed_speed,json=fixedSpeed,proto3" json:"fixed_speed,omitempty"`
+	HasElevatorPenalty isCosting_Options_HasElevatorPenalty `protobuf_oneof:"has_elevator_penalty"`
+	FixedSpeed         uint32                               `protobuf:"varint,80,opt,name=fixed_speed,json=fixedSpeed,proto3" json:"fixed_speed,omitempty"`
 	AxleCount                      uint32                               `protobuf:"varint,81,opt,name=axle_count,json=axleCount,proto3" json:"axle_count,omitempty"`
 	UseLit                         float32                              `protobuf:"fixed32,82,opt,name=use_lit,json=useLit,proto3" json:"use_lit,omitempty"`
 	DisableHierarchyPruning        bool                                 `protobuf:"varint,83,opt,name=disable_hierarchy_pruning,json=disableHierarchyPruning,proto3" json:"disable_hierarchy_pruning,omitempty"`

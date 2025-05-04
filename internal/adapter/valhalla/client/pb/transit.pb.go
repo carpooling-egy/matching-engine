@@ -541,8 +541,8 @@ type Transit_Route struct {
 	RouteColor          *uint32                `protobuf:"varint,6,opt,name=route_color,json=routeColor" json:"route_color,omitempty"`
 	RouteDesc           *string                `protobuf:"bytes,7,opt,name=route_desc,json=routeDesc" json:"route_desc,omitempty"`
 	RouteLongName       *string                `protobuf:"bytes,8,opt,name=route_long_name,json=routeLongName" json:"route_long_name,omitempty"`
-	RouteTextColor      *uint32                `protobuf:"varint,9,opt,name=route_text_color,json=routeTextColor" json:"route_text_color,omitempty"`
-	VehicleType         *Transit_VehicleType   `protobuf:"varint,10,opt,name=vehicle_type,json=vehicleType,enum=valhalla.mjolnir.Transit_VehicleType" json:"vehicle_type,omitempty"`
+	RouteTextColor      *uint32              `protobuf:"varint,9,opt,name=route_text_color,json=routeTextColor" json:"route_text_color,omitempty"`
+	VehicleType         *Transit_VehicleType `protobuf:"varint,10,opt,name=vehicle_type,json=vehicleType,enum=valhalla.mjolnir.Transit_VehicleType" json:"vehicle_type,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
