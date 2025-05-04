@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
-	"github.com/rs/zerolog/log"
 	"matching-engine/internal/model"
 	"matching-engine/internal/repository"
+
+	"github.com/rs/zerolog/log"
 )
 
 // MatcherService handles the matching of riders to drivers

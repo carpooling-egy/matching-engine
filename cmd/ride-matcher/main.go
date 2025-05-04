@@ -2,30 +2,31 @@ package main
 
 import (
 	"context"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"matching-engine/internal/repository"
 	"matching-engine/internal/service"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
 	// Configure zerolog
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
+	// zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	// log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 
-	log.Info().Msg("Starting ride matcher service...")
+	// log.Info().Msg("Starting ride matcher service...")
 
-	// Create a context that can be cancelled
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	// // Create a context that can be cancelled
+	// ctx, cancel := context.WithCancel(context.Background())
+	// defer cancel()
 
-	// Set up signal handling for graceful shutdown
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	// // Set up signal handling for graceful shutdown
+	// sigChan := make(chan os.Signal, 1)
+	// signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	// Create a repository (using mock for now)
 	repo := repository.NewMockRepository()
@@ -47,11 +48,11 @@ func main() {
 		}
 	}
 
-	// Create a ticker that triggers at the specified interval
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
+	// // Create a ticker that triggers at the specified interval
+	// ticker := time.NewTicker(interval)
+	// defer ticker.Stop()
 
-	log.Info().Msgf("Matcher will run every %s", interval)
+	// log.Info().Msgf("Matcher will run every %s", interval)
 
 	// Run the matching algorithm immediately on startup
 	go func() {
