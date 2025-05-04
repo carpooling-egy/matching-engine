@@ -1,49 +1,30 @@
-package model
+package models
 
-import "matching-engine/internal/enums"
-
-// Preference represents user preferences for matching
+// Preference represents user preferences for rides
 type Preference struct {
-	gender enums.Gender
-	smoker bool
-	pets   bool
+	sameGender    bool
+	allowsSmoking bool
+	allowsPets    bool
 }
 
-// NewPreference creates a new Preference
-func NewPreference(gender enums.Gender, smoker, pets bool) *Preference {
+// No need to validate parameters as they will be read from database
+// This constructor should be only used from database entities
+func NewPreference(sameGender, allowsSmoking, allowsPets bool) *Preference {
 	return &Preference{
-		gender: gender,
-		smoker: smoker,
-		pets:   pets,
+		sameGender:   sameGender,
+		allowsSmoking: allowsSmoking,
+		allowsPets:   allowsPets,
 	}
 }
 
-// Gender returns the gender preference
-func (p *Preference) Gender() enums.Gender {
-	return p.gender
+func (p *Preference) SameGender() bool {
+	return p.sameGender
 }
 
-// SetGender sets the gender preference
-func (p *Preference) SetGender(gender enums.Gender) {
-	p.gender = gender
+func (p *Preference) AllowsSmoking() bool {
+	return p.allowsSmoking
 }
 
-// IsSmoker returns whether smoking is allowed
-func (p *Preference) IsSmoker() bool {
-	return p.smoker
-}
-
-// SetSmoker sets whether smoking is allowed
-func (p *Preference) SetSmoker(smoker bool) {
-	p.smoker = smoker
-}
-
-// HasPets returns whether pets are allowed
-func (p *Preference) HasPets() bool {
-	return p.pets
-}
-
-// SetPets sets whether pets are allowed
-func (p *Preference) SetPets(pets bool) {
-	p.pets = pets
+func (p *Preference) AllowsPets() bool {
+	return p.allowsPets
 }
