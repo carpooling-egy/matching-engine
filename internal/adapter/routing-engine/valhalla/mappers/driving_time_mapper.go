@@ -8,17 +8,16 @@ import (
 	"time"
 )
 
-type RouteMapper struct{}
+type DrivingTimeMapper struct{}
 
 var _ re.OperationMapper[
 	*model.RouteParams,
-	*model.Route,
+	time.Duration,
 	*pb.Api,
 	*pb.Api,
-] = RouteMapper{}
+] = DrivingTimeMapper{}
 
-func (RouteMapper) ToTransport(params *model.RouteParams) (*pb.Api, error) {
-
+func (d DrivingTimeMapper) ToTransport(params *model.RouteParams) (*pb.Api, error) {
 	wps := params.Waypoints()
 	locations := make([]*pb.Location, len(wps))
 	for i, wp := range wps {
@@ -39,7 +38,8 @@ func (RouteMapper) ToTransport(params *model.RouteParams) (*pb.Api, error) {
 			Locations:    locations,
 			DateTimeType: pb.Options_depart_at,
 			HasDateTime: &pb.Options_DateTime{
-				DateTime: params.DepartureTime().String(), // TODO check how valhalla handles timezones
+				// TODO check how valhalla handles timezones
+				DateTime: params.DepartureTime().String(),
 			},
 			PbfFieldSelector: &pb.PbfFieldSelector{
 				Directions: true,
@@ -48,41 +48,12 @@ func (RouteMapper) ToTransport(params *model.RouteParams) (*pb.Api, error) {
 	}, nil
 }
 
-func (RouteMapper) FromTransport(api *pb.Api) (*model.Route, error) {
-	polyline := api.GetDirections().
-		GetRoutes()[0].
-		GetLegs()[0].
-		GetShape()
-
-	var distance float32 = 0
+func (d DrivingTimeMapper) FromTransport(api *pb.Api) (time.Duration, error) {
 	var timeInSeconds float64 = 0
+
 	for _, leg := range api.GetDirections().GetRoutes()[0].GetLegs() {
-		distance += leg.GetSummary().Length
 		timeInSeconds += leg.GetSummary().Time
 	}
 
-	polylineObj, err := model.NewPolyline(polyline)
-	if err != nil {
-		return nil, err
-	}
-
-	unit, err := helpers.ToDomainDistanceUnit(helpers.DefaultUnit)
-	if err != nil {
-		return nil, err
-	}
-
-	distanceObj, err := model.NewDistance(distance, unit)
-	if err != nil {
-		return nil, err
-	}
-
-	route, err := model.NewRoute(
-		polylineObj, distanceObj,
-		time.Duration(timeInSeconds*float64(time.Second)),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return route, nil
+	return time.Duration(timeInSeconds * float64(time.Second)), nil
 }

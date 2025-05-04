@@ -5,20 +5,18 @@ import (
 	"matching-engine/internal/adapter/routing-engine/valhalla/client/pb"
 	"matching-engine/internal/adapter/routing-engine/valhalla/helpers"
 	"matching-engine/internal/model"
-	"time"
 )
 
-type RouteMapper struct{}
+type DrivingDistanceMapper struct{}
 
 var _ re.OperationMapper[
 	*model.RouteParams,
-	*model.Route,
+	*model.Distance,
 	*pb.Api,
 	*pb.Api,
-] = RouteMapper{}
+] = DrivingDistanceMapper{}
 
-func (RouteMapper) ToTransport(params *model.RouteParams) (*pb.Api, error) {
-
+func (d DrivingDistanceMapper) ToTransport(params *model.RouteParams) (*pb.Api, error) {
 	wps := params.Waypoints()
 	locations := make([]*pb.Location, len(wps))
 	for i, wp := range wps {
@@ -48,22 +46,10 @@ func (RouteMapper) ToTransport(params *model.RouteParams) (*pb.Api, error) {
 	}, nil
 }
 
-func (RouteMapper) FromTransport(api *pb.Api) (*model.Route, error) {
-	polyline := api.GetDirections().
-		GetRoutes()[0].
-		GetLegs()[0].
-		GetShape()
-
+func (d DrivingDistanceMapper) FromTransport(api *pb.Api) (*model.Distance, error) {
 	var distance float32 = 0
-	var timeInSeconds float64 = 0
 	for _, leg := range api.GetDirections().GetRoutes()[0].GetLegs() {
 		distance += leg.GetSummary().Length
-		timeInSeconds += leg.GetSummary().Time
-	}
-
-	polylineObj, err := model.NewPolyline(polyline)
-	if err != nil {
-		return nil, err
 	}
 
 	unit, err := helpers.ToDomainDistanceUnit(helpers.DefaultUnit)
@@ -76,13 +62,5 @@ func (RouteMapper) FromTransport(api *pb.Api) (*model.Route, error) {
 		return nil, err
 	}
 
-	route, err := model.NewRoute(
-		polylineObj, distanceObj,
-		time.Duration(timeInSeconds*float64(time.Second)),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return route, nil
+	return distanceObj, nil
 }

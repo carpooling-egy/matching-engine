@@ -3,26 +3,22 @@ package model
 import "errors"
 
 type IsochroneParams struct {
-	origin   Coordinate
-	distance Distance
+	origin   *Coordinate
+	distance *Distance
 	profile  Profile
 }
 
 func NewIsochroneParams(
-	origin Coordinate,
-	distance Distance,
+	origin *Coordinate,
+	distance *Distance,
 	profile Profile,
 ) (*IsochroneParams, error) {
-	if origin == (Coordinate{}) {
-		return nil, errors.New("origin coordinate is empty")
+	if origin == nil {
+		return nil, errors.New("origin is nil")
 	}
 
-	if distance.value < 0 {
-		return nil, errors.New("distance is negative")
-	}
-
-	if distance.unit != Meter && distance.unit != Kilometer && distance.unit != Mile {
-		return nil, errors.New("invalid distance unit")
+	if distance == nil {
+		return nil, errors.New("distance is nil")
 	}
 
 	if profile == "" {
@@ -36,23 +32,14 @@ func NewIsochroneParams(
 	}, nil
 }
 
-func (ip *IsochroneParams) Origin() (Coordinate, error) {
-	if ip == nil {
-		return Coordinate{}, errors.New("nil isochrone params reference")
-	}
-	return ip.origin, nil
+func (ip *IsochroneParams) Origin() *Coordinate {
+	return ip.origin
 }
 
-func (ip *IsochroneParams) Distance() (Distance, error) {
-	if ip == nil {
-		return Distance{}, errors.New("nil isochrone params reference")
-	}
-	return ip.distance, nil
+func (ip *IsochroneParams) Distance() *Distance {
+	return ip.distance
 }
 
-func (ip *IsochroneParams) Profile() (Profile, error) {
-	if ip == nil {
-		return "", errors.New("nil isochrone params reference")
-	}
-	return ip.profile, nil
+func (ip *IsochroneParams) Profile() Profile {
+	return ip.profile
 }

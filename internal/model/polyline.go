@@ -10,23 +10,35 @@ type Polyline struct {
 	precision int
 }
 
-func NewPolyline(encoded string, precisionOptional ...int) (*Polyline, error) {
+type Option func(*Polyline) error
+
+func WithPrecision(precision int) Option {
+	return func(p *Polyline) error {
+		if precision < 0 {
+			return errors.New("precision cannot be negative")
+		}
+		p.precision = precision
+		return nil
+	}
+}
+
+func NewPolyline(encoded string, opts ...Option) (*Polyline, error) {
 	if encoded == "" {
 		return nil, errors.New("encoded string is empty")
 	}
 
-	precision := 6
-	if len(precisionOptional) > 0 {
-		precision = precisionOptional[0]
-		if precision < 0 {
-			return nil, errors.New("precision is negative")
+	p := &Polyline{
+		encoded:   encoded,
+		precision: 6,
+	}
+
+	for _, opt := range opts {
+		if err := opt(p); err != nil {
+			return nil, err
 		}
 	}
 
-	return &Polyline{
-		encoded:   encoded,
-		precision: precision,
-	}, nil
+	return p, nil
 }
 
 func (p *Polyline) Encoded() string {
@@ -37,9 +49,9 @@ func (p *Polyline) Precision() int {
 	return p.precision
 }
 
-func (p *Polyline) Decode() ([]*Coordinate, error) {
+func (p *Polyline) Decode() ([]Coordinate, error) {
 	factor := math.Pow10(p.precision)
-	var coordinates []*Coordinate
+	var coordinates []Coordinate
 	index := 0
 	lat, lng := 0, 0
 
@@ -63,7 +75,7 @@ func (p *Polyline) Decode() ([]*Coordinate, error) {
 		if err != nil {
 			return nil, err
 		}
-		coordinates = append(coordinates, coord)
+		coordinates = append(coordinates, *coord)
 	}
 
 	return coordinates, nil

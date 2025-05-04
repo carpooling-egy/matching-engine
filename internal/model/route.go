@@ -6,18 +6,23 @@ import (
 )
 
 type Route struct {
-	polyline Polyline
-	distance Distance
+	polyline *Polyline
+	distance *Distance
 	time     time.Duration
 }
 
-func NewRoute(polyline Polyline, distance Distance, time time.Duration) (*Route, error) {
-	if polyline == (Polyline{}) {
+func NewRoute(
+	polyline *Polyline,
+	distance *Distance,
+	time time.Duration,
+) (*Route, error) {
+
+	if polyline == nil {
 		return nil, errors.New("polyline is nil")
 	}
 
-	if distance == (Distance{}) {
-		return nil, errors.New("distance cannot be negative")
+	if distance == nil {
+		return nil, errors.New("distance is nil")
 	}
 
 	if time < 0 {
@@ -31,26 +36,14 @@ func NewRoute(polyline Polyline, distance Distance, time time.Duration) (*Route,
 	}, nil
 }
 
-func (r *Route) Polyline() (Polyline, error) {
-	if r == nil {
-		return Polyline{}, errors.New("nil route reference")
-	}
-
-	return r.polyline, nil
+func (r *Route) Polyline() *Polyline {
+	return r.polyline
 }
 
-func (r *Route) Distance() (Distance, error) {
-	if r == nil {
-		return Distance{}, errors.New("nil route reference")
-	}
-
-	return r.distance, nil
+func (r *Route) Distance() *Distance {
+	return r.distance
 }
 
-func (r *Route) Time() (time.Duration, error) {
-	if r == nil {
-		return 0, errors.New("nil route reference")
-	}
-
-	return r.time, nil
+func (r *Route) Time() time.Duration {
+	return r.time
 }

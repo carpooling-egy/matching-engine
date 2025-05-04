@@ -10,25 +10,29 @@ type RoutingEngine interface {
 	// PlanDrivingRoute get a route between two points for a driver with a departure time
 	PlanDrivingRoute(
 		ctx context.Context,
-		routeParams model.RouteParams,
+		routeParams *model.RouteParams,
 	) (*model.Route, error)
-
-	// ComputeWalkingDistance get the distance of a route between two points while walking
-	ComputeWalkingDistance(
-		ctx context.Context,
-		walkParams model.WalkParams,
-	) (model.Distance, error)
 
 	// ComputeDrivingDistance get the distance of a route crossing 2/3 points
 	// while driving with a departure time
 	ComputeDrivingDistance(
 		ctx context.Context,
-		routeParams model.RouteParams,
-	) (model.Distance, error)
+		routeParams *model.RouteParams,
+	) (*model.Distance, error)
 
+	// ComputeDrivingTime get the duration of a route crossing 2/3 points
+	// while driving with a departure time
 	ComputeDrivingTime(
 		ctx context.Context,
-		routeParams model.RouteParams,
+		routeParams *model.RouteParams,
+	) (time.Duration, error)
+
+	/* Unsure about the ones below */
+
+	// ComputeWalkingDistance get the distance of a route between two points while walking
+	ComputeWalkingTime(
+		ctx context.Context,
+		walkParams *model.WalkParams,
 	) (time.Duration, error)
 
 	// ComputeIsochrone get the walkable area (isochrone) for a given point and a distance

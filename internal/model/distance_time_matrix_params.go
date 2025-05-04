@@ -6,48 +6,44 @@ import (
 )
 
 type DistanceTimeMatrixParams struct {
-	sources, targets []Coordinate
-	departureTime    time.Time
-	profile          Profile
+	points        []Coordinate
+	departureTime time.Time
+	profile       Profile
 }
 
 func NewDistanceTimeMatrixParams(
-	sources, targets []Coordinate,
-	departureTime time.Time, profile Profile,
+	points []Coordinate,
+	departureTime time.Time,
+	profile Profile,
 ) (*DistanceTimeMatrixParams, error) {
 
-	if len(sources) == 0 {
-		return nil, errors.New("sources list is empty")
-	}
-
-	if len(targets) == 0 {
-		return nil, errors.New("targets list is empty")
-	}
-
-	if len(sources) != len(targets) {
-		return nil, errors.New("sources and targets lists must have the same length")
+	if len(points) == 0 {
+		return nil, errors.New("points list is empty")
 	}
 
 	if departureTime.Before(time.Now()) {
 		return nil, errors.New("departure time is in the past")
 	}
 
-	if profile == "" {
-		return nil, errors.New("profile is empty")
+	if !profile.IsValid() {
+		return nil, errors.New("invalid profile")
 	}
 
 	return &DistanceTimeMatrixParams{
-		sources:       sources,
-		targets:       targets,
+		points:        points,
 		departureTime: departureTime,
 		profile:       profile,
 	}, nil
 }
 
-func (dtmp *DistanceTimeMatrixParams) Sources() []Coordinate {
-	return dtmp.sources
+func (dtm *DistanceTimeMatrixParams) Points() []Coordinate {
+	return dtm.points
 }
 
-func (dtmp *DistanceTimeMatrixParams) Targets() []Coordinate {
-	return dtmp.targets
+func (dtm *DistanceTimeMatrixParams) DepartureTime() time.Time {
+	return dtm.departureTime
+}
+
+func (dtm *DistanceTimeMatrixParams) Profile() Profile {
+	return dtm.profile
 }

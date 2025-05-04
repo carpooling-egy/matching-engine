@@ -5,30 +5,35 @@ import (
 	"fmt"
 	"google.golang.org/protobuf/proto"
 	"io"
+	re "matching-engine/internal/adapter/routing-engine"
 	"matching-engine/internal/adapter/routing-engine/valhalla/client/pb"
 	"net/http"
+	"net/url"
 )
 
 type ValhallaClient struct {
-	baseUrl    string
-	portNumber string
+	baseURL string
 }
 
-func NewValhallaClient(baseUrl string, portNumber string) (*ValhallaClient, error) {
-	if baseUrl == "" {
+func NewValhallaClient(baseURL string) (*ValhallaClient, error) {
+	if baseURL == "" {
 		return nil, fmt.Errorf("base URL cannot be empty")
 	}
-	if portNumber == "" {
-		return nil, fmt.Errorf("port number cannot be empty")
+
+	_, err := url.ParseRequestURI(baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid base URL: %w", err)
 	}
 
-	return &ValhallaClient{
-		baseUrl:    baseUrl,
-		portNumber: portNumber,
-	}, nil
+	return &ValhallaClient{baseURL: baseURL}, nil
 }
 
-func (vc ValhallaClient) SendPostRequest(endpoint string, request *pb.Api) (*pb.Api, error) {
+var _ re.RoutingClient[
+	*pb.Api,
+	*pb.Api,
+] = (*ValhallaClient)(nil)
+
+func (vc ValhallaClient) Post(endpoint string, request *pb.Api) (*pb.Api, error) {
 	data, err := vc.serializeRequest(request)
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize request: %w", err)
@@ -48,13 +53,9 @@ func (vc ValhallaClient) SendPostRequest(endpoint string, request *pb.Api) (*pb.
 }
 
 func (vc ValhallaClient) doPost(endpoint string, data []byte) ([]byte, error) {
+
 	resp, err := http.Post(
-		fmt.Sprintf(
-			vc.baseUrl,
-			vc.portNumber,
-			endpoint,
-			"?format=proto",
-		),
+		fmt.Sprintf("%v%v?format=proto", vc.baseURL, endpoint),
 		"application/x-protobuf",
 		bytes.NewReader(data),
 	)
