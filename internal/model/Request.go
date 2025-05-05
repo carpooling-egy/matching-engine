@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/google/uuid"
+	"matching-engine/internal/enums"
 	"time"
 )
 
@@ -121,4 +122,10 @@ func (r *Request) GetNumberOfRiders() int {
 // SetNumberOfRiders sets the number of riders
 func (r *Request) SetNumberOfRiders(count int) {
 	r.numberOfRiders = count
+}
+
+// GetRoleType returns the role type of the request.
+// This method identifies the request as a specific role type in the system.
+func (r *Request) GetRoleType() enums.RoleType {
+	return enums.Request
 }

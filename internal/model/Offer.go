@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/google/uuid"
+	"matching-engine/internal/enums"
 	"time"
 )
 
@@ -127,4 +128,9 @@ func (o *Offer) GetPath() []*Point {
 // SetPath sets the path
 func (o *Offer) SetPath(path []*Point) {
 	o.path = path
+}
+
+// GetRoleType returns the role type of the offer
+func (o *Offer) GetRoleType() enums.RoleType {
+	return enums.Offer
 }
