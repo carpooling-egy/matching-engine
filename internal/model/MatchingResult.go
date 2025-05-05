@@ -1,16 +1,14 @@
 package model
 
-import "github.com/google/uuid"
-
 // MatchingResult represents the result of a matching operation
 type MatchingResult struct {
-	offerID                 uuid.UUID
+	offerID                 string
 	assignedMatchedRequests []MatchedRequest
 	newPath                 []Point
 }
 
 // NewMatchingResult creates a new MatchingResult
-func NewMatchingResult(offerID uuid.UUID, assignedMatchedRequests []MatchedRequest, newPath []Point) *MatchingResult {
+func NewMatchingResult(offerID string, assignedMatchedRequests []MatchedRequest, newPath []Point) *MatchingResult {
 	if assignedMatchedRequests == nil {
 		assignedMatchedRequests = make([]MatchedRequest, 0)
 	}
@@ -25,12 +23,12 @@ func NewMatchingResult(offerID uuid.UUID, assignedMatchedRequests []MatchedReque
 }
 
 // GetOfferID returns the offer ID
-func (mr *MatchingResult) GetOfferID() uuid.UUID {
+func (mr *MatchingResult) GetOfferID() string {
 	return mr.offerID
 }
 
 // SetOfferID sets the offer ID
-func (mr *MatchingResult) SetOfferID(offerID uuid.UUID) {
+func (mr *MatchingResult) SetOfferID(offerID string) {
 	mr.offerID = offerID
 }
 
