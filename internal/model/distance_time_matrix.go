@@ -10,7 +10,7 @@ import (
 
 type DistanceTimeMatrix struct {
 	distances [][]Distance
-	times     [][]time.Duration
+	times     [][]time.Duration // in minutes
 }
 
 func NewDistanceTimeMatrix(
@@ -21,14 +21,6 @@ func NewDistanceTimeMatrix(
 	if err := validateMatrixDimensions(distances, times); err != nil {
 		return nil, err
 	}
-
-	if err := validateSquareMatrix(distances); err != nil {
-		return nil, err
-	}
-	if err := validateSquareMatrix(times); err != nil {
-		return nil, err
-	}
-
 	if err := validateTimeMatrixElements(times); err != nil {
 		return nil, err
 	}
@@ -45,17 +37,6 @@ func (dtm *DistanceTimeMatrix) Distances() [][]Distance {
 
 func (dtm *DistanceTimeMatrix) Times() [][]time.Duration {
 	return dtm.times
-}
-
-func validateSquareMatrix[T any](matrix [][]T) error {
-	rows := len(matrix)
-	for i := range matrix {
-		if len(matrix[i]) != rows {
-			return fmt.Errorf("matrix must be square, "+
-				"row %d has an incorrect number of columns", i)
-		}
-	}
-	return nil
 }
 
 func validateMatrixDimensions(distances [][]Distance, times [][]time.Duration) error {

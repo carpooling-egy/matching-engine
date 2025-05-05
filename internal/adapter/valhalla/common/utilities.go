@@ -2,27 +2,37 @@ package common
 
 import (
 	"fmt"
-	pb2 "matching-engine/internal/adapter/valhalla/client/pb"
+	"matching-engine/internal/adapter/valhalla/client/pb"
 	"matching-engine/internal/model"
 )
 
-func CreateLocation(lat, lng float64) *pb2.Location {
-	return &pb2.Location{
+func CreateLocation(lat, lng float64) *pb.Location {
+	return &pb.Location{
 		Type: DefaultLocationType,
-		Ll: &pb2.LatLng{
-			HasLat: &pb2.LatLng_Lat{Lat: lat},
-			HasLng: &pb2.LatLng_Lng{Lng: lng},
+		Ll: &pb.LatLng{
+			HasLat: &pb.LatLng_Lat{Lat: lat},
+			HasLng: &pb.LatLng_Lng{Lng: lng},
 		},
 	}
 }
 
-func ToDomainDistanceUnit(pbUnit pb2.Options_Units) (model.DistanceUnit, error) {
+func ToDomainDistanceUnit(pbUnit pb.Options_Units) (model.DistanceUnit, error) {
 	switch pbUnit {
-	case pb2.Options_kilometers:
+	case pb.Options_kilometers:
 		return model.Kilometer, nil
-	case pb2.Options_miles:
+	case pb.Options_miles:
 		return model.Mile, nil
 	default:
 		return 0, fmt.Errorf("unknown pb.Options_Units value: %v", pbUnit)
 	}
+}
+
+func MapProfileToCosting(profile model.Profile) (pb.Costing_Type, *pb.Costing, error) {
+	switch profile {
+	case model.Pedestrian:
+		return pb.Costing_pedestrian, DefaultPedestrianCosting, nil
+	case model.Auto:
+		return pb.Costing_auto_, DefaultAutoCosting, nil
+	}
+	return 0, nil, fmt.Errorf("unsupported profile: %s", profile)
 }

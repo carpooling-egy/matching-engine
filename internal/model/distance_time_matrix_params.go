@@ -8,19 +8,29 @@ import (
 )
 
 type DistanceTimeMatrixParams struct {
-	points        []Coordinate
+	sources       []Coordinate
+	targets       []Coordinate
 	departureTime time.Time
 	profile       Profile
 }
 
+type MatrixOption func(*DistanceTimeMatrixParams)
+
+func WithTargets(targets []Coordinate) MatrixOption {
+	return func(p *DistanceTimeMatrixParams) {
+		p.targets = targets
+	}
+}
+
 func NewDistanceTimeMatrixParams(
-	points []Coordinate,
+	sources []Coordinate,
 	departureTime time.Time,
 	profile Profile,
+	opts ...MatrixOption,
 ) (*DistanceTimeMatrixParams, error) {
 
-	if len(points) == 0 {
-		return nil, errors.New("points list is empty")
+	if len(sources) == 0 {
+		return nil, fmt.Errorf("sources cannot be empty")
 	}
 
 	if departureTime.Before(time.Now()) {
@@ -31,15 +41,30 @@ func NewDistanceTimeMatrixParams(
 		return nil, errors.New("invalid profile")
 	}
 
-	return &DistanceTimeMatrixParams{
-		points:        points,
+	dtm := &DistanceTimeMatrixParams{
+		sources:       sources,
+		targets:       sources,
 		departureTime: departureTime,
 		profile:       profile,
-	}, nil
+	}
+
+	for _, opt := range opts {
+		opt(dtm)
+	}
+
+	if len(dtm.targets) == 0 {
+		return nil, errors.New("targets cannot be empty")
+	}
+
+	return dtm, nil
 }
 
-func (dtm *DistanceTimeMatrixParams) Points() []Coordinate {
-	return dtm.points
+func (dtm *DistanceTimeMatrixParams) Sources() []Coordinate {
+	return dtm.sources
+}
+
+func (dtm *DistanceTimeMatrixParams) Targets() []Coordinate {
+	return dtm.targets
 }
 
 func (dtm *DistanceTimeMatrixParams) DepartureTime() time.Time {
@@ -51,13 +76,18 @@ func (dtm *DistanceTimeMatrixParams) Profile() Profile {
 }
 
 func (dtm *DistanceTimeMatrixParams) String() string {
-	coords := make([]string, len(dtm.points))
-	for i, pt := range dtm.points {
-		coords[i] = pt.String()
+	formatCoords := func(coords []Coordinate) string {
+		parts := make([]string, len(coords))
+		for i, pt := range coords {
+			parts[i] = pt.String()
+		}
+		return "[" + strings.Join(parts, ", ") + "]"
 	}
+
 	return fmt.Sprintf(
-		"Points: [%s], Departure: %s, Profile: %s",
-		strings.Join(coords, ", "),
+		"Sources: %s, Targets: %s, Departure: %s, Profile: %s",
+		formatCoords(dtm.sources),
+		formatCoords(dtm.targets),
 		dtm.departureTime.Format(time.RFC3339),
 		dtm.profile.String(),
 	)

@@ -24,7 +24,7 @@ func (IsochroneMapper) ToTransport(params *model.IsochroneParams) (*pb.Api, erro
 
 	origin := common.CreateLocation(params.Origin().Lat(), params.Origin().Lng())
 
-	costingType, costing, err := mapProfileToCosting(params.Profile())
+	costingType, costing, err := common.MapProfileToCosting(params.Profile())
 	if err != nil {
 		return nil, err
 	}
@@ -49,16 +49,6 @@ func (IsochroneMapper) ToTransport(params *model.IsochroneParams) (*pb.Api, erro
 			},
 		},
 	}, nil
-}
-
-func mapProfileToCosting(profile model.Profile) (pb.Costing_Type, *pb.Costing, error) {
-	switch profile {
-	case model.Pedestrian:
-		return pb.Costing_pedestrian, common.DefaultPedestrianCosting, nil
-	case model.Auto:
-		return pb.Costing_auto_, common.DefaultAutoCosting, nil
-	}
-	return 0, nil, fmt.Errorf("unsupported profile: %s", profile)
 }
 
 func mapContourToPbContour(contour *model.Contour) (*pb.Contour, error) {
