@@ -24,17 +24,14 @@ func (IsochroneMapper) ToTransport(params *model.IsochroneParams) (*pb.Api, erro
 
 	origin := common.CreateLocation(params.Origin().Lat(), params.Origin().Lng())
 
-	var (
-		costingType pb.Costing_Type
-		costing     *pb.Costing
-	)
+	costingType, costing, err := mapProfileToCosting(params.Profile())
+	if err != nil {
+		return nil, err
+	}
 
-	if params.Profile() == model.Pedestrian {
-		costingType = pb.Costing_pedestrian
-		costing = common.DefaultPedestrianCosting
-	} else { // assume auto
-		costingType = pb.Costing_auto_
-		costing = common.DefaultAutoCosting
+	contour, err := mapContourToPbContour(params.Contour())
+	if err != nil {
+		return nil, err
 	}
 
 	return &pb.Api{
@@ -46,18 +43,36 @@ func (IsochroneMapper) ToTransport(params *model.IsochroneParams) (*pb.Api, erro
 				int32(pb.Costing_pedestrian): costing,
 			},
 			Locations: []*pb.Location{origin},
-			Contours: []*pb.Contour{
-				{
-					HasDistance: &pb.Contour_Distance{
-						Distance: params.Distance().Value(),
-					},
-				},
-			},
+			Contours:  []*pb.Contour{contour},
 			HasPolygons: &pb.Options_Polygons{
 				Polygons: false,
 			},
 		},
 	}, nil
+}
+
+func mapProfileToCosting(profile model.Profile) (pb.Costing_Type, *pb.Costing, error) {
+	switch profile {
+	case model.Pedestrian:
+		return pb.Costing_pedestrian, common.DefaultPedestrianCosting, nil
+	case model.Auto:
+		return pb.Costing_auto_, common.DefaultAutoCosting, nil
+	}
+	return 0, nil, fmt.Errorf("unsupported profile: %s", profile)
+}
+
+func mapContourToPbContour(contour *model.Contour) (*pb.Contour, error) {
+	switch contour.Metric() {
+	case model.ContourMetricTimeInMinutes:
+		return &pb.Contour{
+			HasTime: &pb.Contour_Time{Time: contour.Value()},
+		}, nil
+	case model.ContourMetricDistanceInKilometers:
+		return &pb.Contour{
+			HasDistance: &pb.Contour_Distance{Distance: contour.Value()},
+		}, nil
+	}
+	return nil, fmt.Errorf("unsupported contour unit: %s", contour.Metric())
 }
 
 func (IsochroneMapper) FromTransport(response *pb.Api) (*model.Isochrone, error) {
@@ -79,8 +94,14 @@ func (IsochroneMapper) FromTransport(response *pb.Api) (*model.Isochrone, error)
 	interval := intervals[0]
 
 	value := interval.GetMetricValue()
-	unit := interval.GetMetric().String()
-	contour, err := model.NewContour(value, unit)
+	metric := interval.GetMetric().String()
+
+	contourMetric, err := model.NewContourMetric(metric)
+	if err != nil {
+		return nil, fmt.Errorf("invalid contour metric %q: %w", metric, err)
+	}
+
+	contour, err := model.NewContour(value, contourMetric)
 	if err != nil {
 		return nil, err
 	}
@@ -96,8 +117,6 @@ func (IsochroneMapper) FromTransport(response *pb.Api) (*model.Isochrone, error)
 
 	geometry := rawContour.GetGeometries()[0]
 	rawCoords := geometry.GetCoords()
-
-	fmt.Println(rawCoords)
 
 	if len(rawCoords) == 0 || len(rawCoords)%2 != 0 {
 		return nil, fmt.Errorf("invalid isochrone coordinates")

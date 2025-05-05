@@ -47,8 +47,8 @@ func TestValhalla_PlanDrivingRoute(t *testing.T) {
 			name: "valid route",
 			routeParam: must(model.NewRouteParams(
 				[]model.Coordinate{
-					*must(model.NewCoordinate(42.5078, 1.5211)),
-					*must(model.NewCoordinate(42.5057, 1.5265)),
+					*must(model.NewCoordinate(42.43, 1.42)),
+					*must(model.NewCoordinate(42.6, 1.7)),
 				},
 				time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 			)),
@@ -208,7 +208,7 @@ func TestValhalla_ComputeIsochrone(t *testing.T) {
 			name: "valid isochrone",
 			req: must(model.NewIsochroneParams(
 				must(model.NewCoordinate(42.5347, 1.5830)),
-				must(model.NewDistance(5, model.Kilometer)),
+				must(model.NewContour(30, model.ContourMetricDistanceInKilometers)),
 				model.Pedestrian,
 			)),
 			wantErr: false,
@@ -247,9 +247,26 @@ func TestValhalla_ComputeDistanceTimeMatrix(t *testing.T) {
 			name: "valid matrix",
 			req: must(model.NewDistanceTimeMatrixParams(
 				[]model.Coordinate{
+					//  Lat: 42.5078, Lon: 1.5211
+					// Lat: 42.5057, Lon: 1.5265
+					// Lat: 42.5036, Lon: 1.5148
+					// Lat: 42.5083, Lon: 1.5353
+					// Lat: 42.4636, Lon: 1.4912
+					// Lat: 42.5347, Lon: 1.5830
+					// Lat: 42.5562, Lon: 1.5339
+					// Lat: 42.5676, Lon: 1.5980
+					// Lat: 42.5669, Lon: 1.4846
+					// Lat: 42.5440, Lon: 1.5148
+					*must(model.NewCoordinate(42.5078, 1.5211)),
+					*must(model.NewCoordinate(42.5057, 1.5265)),
+					*must(model.NewCoordinate(42.5036, 1.5148)),
+					*must(model.NewCoordinate(42.5083, 1.5353)),
+					*must(model.NewCoordinate(42.4636, 1.4912)),
 					*must(model.NewCoordinate(42.5347, 1.5830)),
 					*must(model.NewCoordinate(42.5562, 1.5339)),
 					*must(model.NewCoordinate(42.5676, 1.5980)),
+					*must(model.NewCoordinate(42.5669, 1.4846)),
+					*must(model.NewCoordinate(42.5440, 1.5148)),
 				},
 				time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 				model.Auto,

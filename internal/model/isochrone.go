@@ -24,38 +24,7 @@ func (ls LineString) String() string {
 	for i, pt := range ls {
 		coords[i] = pt.String()
 	}
-	return fmt.Sprintf("LineString[%s]", strings.Join(coords, ", "))
-}
-
-type Contour struct {
-	value float32
-	// Unit describes what Value measures (e.g. "minutes" or "kilometers").
-	unit string
-}
-
-func NewContour(value float32, unit string) (*Contour, error) {
-	if value < 0 {
-		return nil, errors.New("contour value must be non-negative")
-	}
-	if unit == "" {
-		return nil, errors.New("contour unit must be non-empty")
-	}
-	return &Contour{
-		value: value,
-		unit:  unit,
-	}, nil
-}
-
-func (c *Contour) Value() float32 {
-	return c.value
-}
-
-func (c *Contour) Unit() string {
-	return c.unit
-}
-
-func (c *Contour) String() string {
-	return fmt.Sprintf("%.2f %s", c.value, c.unit)
+	return fmt.Sprintf("LineString{len=%d}[%s]", len(ls), strings.Join(coords, ", "))
 }
 
 type Isochrone struct {

@@ -6,22 +6,22 @@ import (
 )
 
 type IsochroneParams struct {
-	origin   *Coordinate
-	distance *Distance
-	profile  Profile
+	origin  *Coordinate
+	contour *Contour
+	profile Profile
 }
 
 func NewIsochroneParams(
 	origin *Coordinate,
-	distance *Distance,
+	contour *Contour,
 	profile Profile,
 ) (*IsochroneParams, error) {
 	if origin == nil {
 		return nil, errors.New("origin is nil")
 	}
 
-	if distance == nil {
-		return nil, errors.New("distance is nil")
+	if contour == nil {
+		return nil, errors.New("contour is nil")
 	}
 
 	if profile == "" {
@@ -29,9 +29,9 @@ func NewIsochroneParams(
 	}
 
 	return &IsochroneParams{
-		origin:   origin,
-		distance: distance,
-		profile:  profile,
+		origin:  origin,
+		contour: contour,
+		profile: profile,
 	}, nil
 }
 
@@ -39,8 +39,8 @@ func (ip *IsochroneParams) Origin() *Coordinate {
 	return ip.origin
 }
 
-func (ip *IsochroneParams) Distance() *Distance {
-	return ip.distance
+func (ip *IsochroneParams) Contour() *Contour {
+	return ip.contour
 }
 
 func (ip *IsochroneParams) Profile() Profile {
@@ -49,7 +49,7 @@ func (ip *IsochroneParams) Profile() Profile {
 
 func (ip *IsochroneParams) String() string {
 	return fmt.Sprintf(
-		"IsochroneParams{origin: %s, distance: %s, profile: %s}",
-		ip.origin.String(), ip.distance.String(), ip.profile.String(),
+		"IsochroneParams{origin: %s, contour: %s, profile: %s}",
+		ip.origin.String(), ip.contour.String(), ip.profile.String(),
 	)
 }
