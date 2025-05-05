@@ -1,49 +1,36 @@
 package model
 
 import (
-	"github.com/google/uuid"
 	"matching-engine/internal/enums"
 	"time"
 )
 
 // Point represents a location point with owner, time, and type information
 type Point struct {
-	ownerID    uuid.UUID
-	ownerType  enums.OwnerType
+	owner      *Role
 	coordinate Coordinate
 	time       time.Time
 	pointType  enums.PointType
 }
 
 // NewPoint creates a new Point
-func NewPoint(ownerID uuid.UUID, ownerType enums.OwnerType, coordinate Coordinate, time time.Time, pointType enums.PointType) *Point {
+func NewPoint(owner *Role, coordinate Coordinate, time time.Time, pointType enums.PointType) *Point {
 	return &Point{
-		ownerID:    ownerID,
-		ownerType:  ownerType,
+		owner:      owner,
 		coordinate: coordinate,
 		time:       time,
 		pointType:  pointType,
 	}
 }
 
-// GetOwnerID returns the owner ID
-func (p *Point) GetOwnerID() uuid.UUID {
-	return p.ownerID
+// GetOwner returns the owner of the point
+func (p *Point) GetOwner() *Role {
+	return p.owner
 }
 
-// SetOwnerID sets the owner ID
-func (p *Point) SetOwnerID(ownerID uuid.UUID) {
-	p.ownerID = ownerID
-}
-
-// GetOwnerType returns the owner type
-func (p *Point) GetOwnerType() enums.OwnerType {
-	return p.ownerType
-}
-
-// SetOwnerType sets the owner type
-func (p *Point) SetOwnerType(ownerType enums.OwnerType) {
-	p.ownerType = ownerType
+// SetOwner sets the owner of the point
+func (p *Point) SetOwner(owner *Role) {
+	p.owner = owner
 }
 
 // GetCoordinate returns the coordinate
