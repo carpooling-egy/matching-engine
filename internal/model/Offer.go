@@ -1,28 +1,27 @@
 package model
 
 import (
-	"github.com/google/uuid"
 	"matching-engine/internal/enums"
 	"time"
 )
 
 // Offer represents a service provider's offer
 type Offer struct {
-	id              uuid.UUID
-	userID          uuid.UUID
+	id              string
+	userID          string
 	source          Coordinate
 	destination     Coordinate
 	detourTime      time.Duration
 	departureTime   time.Time
-	matchedRequests []MatchedRequest
+	matchedRequests []*MatchedRequest
 	preference      Preference
 	path            []*Point
 }
 
 // NewOffer creates a new Offer
-func NewOffer(id, userID uuid.UUID, source, destination Coordinate, detourTime time.Duration, departureTime time.Time, matchedRequests []MatchedRequest, preference Preference, path []*Point) *Offer {
+func NewOffer(id, userID string, source, destination Coordinate, detourTime time.Duration, departureTime time.Time, matchedRequests []*MatchedRequest, preference Preference, path []*Point) *Offer {
 	if matchedRequests == nil {
-		matchedRequests = make([]MatchedRequest, 0)
+		matchedRequests = make([]*MatchedRequest, 0)
 	}
 	if path == nil {
 		path = make([]*Point, 0)
@@ -41,22 +40,22 @@ func NewOffer(id, userID uuid.UUID, source, destination Coordinate, detourTime t
 }
 
 // GetID returns the offer ID
-func (o *Offer) GetID() uuid.UUID {
+func (o *Offer) GetID() string {
 	return o.id
 }
 
 // SetID sets the offer ID
-func (o *Offer) SetID(id uuid.UUID) {
+func (o *Offer) SetID(id string) {
 	o.id = id
 }
 
 // GetUserID returns the user ID
-func (o *Offer) GetUserID() uuid.UUID {
+func (o *Offer) GetUserID() string {
 	return o.userID
 }
 
 // SetUserID sets the user ID
-func (o *Offer) SetUserID(userID uuid.UUID) {
+func (o *Offer) SetUserID(userID string) {
 	o.userID = userID
 }
 
@@ -101,12 +100,12 @@ func (o *Offer) SetDepartureTime(departureTime time.Time) {
 }
 
 // GetMatchedRequests returns the matched requests
-func (o *Offer) GetMatchedRequests() []MatchedRequest {
+func (o *Offer) GetMatchedRequests() []*MatchedRequest {
 	return o.matchedRequests
 }
 
 // SetMatchedRequests sets the matched requests
-func (o *Offer) SetMatchedRequests(matchedRequests []MatchedRequest) {
+func (o *Offer) SetMatchedRequests(matchedRequests []*MatchedRequest) {
 	o.matchedRequests = matchedRequests
 }
 

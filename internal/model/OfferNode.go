@@ -3,8 +3,8 @@ package model
 // OfferNode represents a node in the offer graph
 type OfferNode struct {
 	offer                        *Offer
-	newlyAssignedMatchedRequests []MatchedRequest
-	edges                        []Edge
+	newlyAssignedMatchedRequests []*MatchedRequest
+	edges                        []*Edge
 	isMatched                    bool
 }
 
@@ -12,8 +12,8 @@ type OfferNode struct {
 func NewOfferNode(offer *Offer) *OfferNode {
 	return &OfferNode{
 		offer:                        offer,
-		newlyAssignedMatchedRequests: make([]MatchedRequest, 0),
-		edges:                        make([]Edge, 0),
+		newlyAssignedMatchedRequests: make([]*MatchedRequest, 0),
+		edges:                        make([]*Edge, 0),
 		isMatched:                    false,
 	}
 }
@@ -29,22 +29,22 @@ func (node *OfferNode) SetOffer(offer *Offer) {
 }
 
 // GetNewlyAssignedMatchedRequests returns the newly assigned matched requests
-func (node *OfferNode) GetNewlyAssignedMatchedRequests() []MatchedRequest {
+func (node *OfferNode) GetNewlyAssignedMatchedRequests() []*MatchedRequest {
 	return node.newlyAssignedMatchedRequests
 }
 
 // SetNewlyAssignedMatchedRequests sets the newly assigned matched requests
-func (node *OfferNode) SetNewlyAssignedMatchedRequests(requests []MatchedRequest) {
+func (node *OfferNode) SetNewlyAssignedMatchedRequests(requests []*MatchedRequest) {
 	node.newlyAssignedMatchedRequests = requests
 }
 
 // GetEdges returns the edges
-func (node *OfferNode) GetEdges() []Edge {
+func (node *OfferNode) GetEdges() []*Edge {
 	return node.edges
 }
 
 // SetEdges sets the edges
-func (node *OfferNode) SetEdges(edges []Edge) {
+func (node *OfferNode) SetEdges(edges []*Edge) {
 	node.edges = edges
 }
 
@@ -59,6 +59,6 @@ func (node *OfferNode) SetMatched(isMatched bool) {
 }
 
 // GetAllRequests returns all matched requests, both existing and newly assigned
-func (node *OfferNode) GetAllRequests() []MatchedRequest {
+func (node *OfferNode) GetAllRequests() []*MatchedRequest {
 	return append(node.offer.matchedRequests, node.newlyAssignedMatchedRequests...)
 }

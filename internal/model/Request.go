@@ -1,15 +1,14 @@
 package model
 
 import (
-	"github.com/google/uuid"
 	"matching-engine/internal/enums"
 	"time"
 )
 
 // Request represents a user's request for a service
 type Request struct {
-	id                    uuid.UUID
-	userID                uuid.UUID
+	id                    string
+	userID                string
 	source                Coordinate
 	destination           Coordinate
 	earliestDepartureTime time.Time
@@ -20,7 +19,7 @@ type Request struct {
 }
 
 // NewRequest creates a new Request
-func NewRequest(id, userID uuid.UUID, source, destination Coordinate, earliestDepartureTime, latestArrivalTime time.Time, maxWalkingTime time.Duration, preference Preference, numberOfRiders int) *Request {
+func NewRequest(id, userID string, source, destination Coordinate, earliestDepartureTime, latestArrivalTime time.Time, maxWalkingTime time.Duration, preference Preference, numberOfRiders int) *Request {
 	return &Request{
 		id:                    id,
 		userID:                userID,
@@ -35,22 +34,22 @@ func NewRequest(id, userID uuid.UUID, source, destination Coordinate, earliestDe
 }
 
 // GetID returns the request ID
-func (r *Request) GetID() uuid.UUID {
+func (r *Request) GetID() string {
 	return r.id
 }
 
 // SetID sets the request ID
-func (r *Request) SetID(id uuid.UUID) {
+func (r *Request) SetID(id string) {
 	r.id = id
 }
 
 // GetUserID returns the user ID
-func (r *Request) GetUserID() uuid.UUID {
+func (r *Request) GetUserID() string {
 	return r.userID
 }
 
 // SetUserID sets the user ID
-func (r *Request) SetUserID(userID uuid.UUID) {
+func (r *Request) SetUserID(userID string) {
 	r.userID = userID
 }
 
