@@ -1,4 +1,4 @@
-package PathGenerator
+package path_generator
 
 import "matching-engine/internal/model"
 

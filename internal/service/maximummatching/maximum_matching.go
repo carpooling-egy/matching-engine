@@ -1,4 +1,4 @@
-package MaximumMatching
+package maximummatching
 
 import "matching-engine/internal/model"
 
