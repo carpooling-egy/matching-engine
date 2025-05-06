@@ -1,4 +1,4 @@
-package EarlyPruning
+package earlypruning
 
 import "matching-engine/internal/model"
 

@@ -3,20 +3,20 @@ package service
 import (
 	"fmt"
 	"matching-engine/internal/model"
-	"matching-engine/internal/service/EarlyPruning"
-	"matching-engine/internal/service/PathGenerator"
+	"matching-engine/internal/service/earlypruning"
+	"matching-engine/internal/service/path-generator"
 )
 
 type Matcher struct {
 	offerNodes             []*model.OfferNode
 	requestNodes           []*model.RequestNode
 	potentialOfferRequests map[*model.OfferNode][]*model.RequestNode
-	pathPlanner            PathGenerator.PathPlanner
-	candidateGenerator     EarlyPruning.CandidateGenerator
+	pathPlanner            path_generator.PathPlanner
+	candidateGenerator     earlypruning.CandidateGenerator
 }
 
 // NewMatcher creates a new Matcher instance
-func NewMatcher(planner PathGenerator.PathPlanner, generator EarlyPruning.CandidateGenerator) *Matcher {
+func NewMatcher(planner path_generator.PathPlanner, generator earlypruning.CandidateGenerator) *Matcher {
 	return &Matcher{
 		offerNodes:             make([]*model.OfferNode, 0),
 		requestNodes:           make([]*model.RequestNode, 0),
