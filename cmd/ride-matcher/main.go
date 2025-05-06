@@ -29,12 +29,12 @@ func main() {
 
 	// Create a repository (using mock for now)
 	repo := repository.NewMockRepository()
-
 	// Create the matcher service
-	matcherService := service.NewMatcherService(repo)
+	// TODO: Initialize with actual path planner and candidate generator
+	matcherService := service.NewMatcher(nil, nil)
 
 	// Define the interval for running the matching algorithm
-	// Get interval from environment variable or use default
+	// Get an interval from environment variable or use default
 	intervalStr := os.Getenv("MATCHER_INTERVAL")
 	interval := 15 * time.Minute // default interval
 	if intervalStr != "" {
@@ -55,9 +55,25 @@ func main() {
 
 	// Run the matching algorithm immediately on startup
 	go func() {
-		if err := matcherService.RunMatchingAlgorithm(ctx); err != nil {
+		log.Info().Msg("Running matching algorithm immediately on startup...")
+		// Call the matching algorithm
+		offers, err := repo.GetAvailableOffers(ctx)
+		if err != nil {
+			log.Error().Err(err).Msg("Error fetching available offers")
+			return
+		}
+		requests, err := repo.GetPendingRequests(ctx)
+		if err != nil {
+			log.Error().Err(err).Msg("Error fetching pending requests")
+			return
+		}
+		results, err := matcherService.Match(offers, requests)
+		if err != nil {
 			log.Error().Err(err).Msg("Error running matching algorithm")
 		}
+		// TODO: Publish results to the channel using method in MatchingResultSinkInterface
+		log.Info().Msgf("Matching results: %v", results)
+
 	}()
 
 	// Main loop
@@ -66,9 +82,22 @@ func main() {
 		case <-ticker.C:
 			// Run the matching algorithm at each tick
 			go func() {
-				if err := matcherService.RunMatchingAlgorithm(ctx); err != nil {
+				offers, err := repo.GetAvailableOffers(ctx)
+				if err != nil {
+					log.Error().Err(err).Msg("Error fetching available offers")
+					return
+				}
+				requests, err := repo.GetPendingRequests(ctx)
+				if err != nil {
+					log.Error().Err(err).Msg("Error fetching pending requests")
+					return
+				}
+				results, err := matcherService.Match(offers, requests)
+				if err != nil {
 					log.Error().Err(err).Msg("Error running matching algorithm")
 				}
+				// TODO: Publish results to the channel using method in MatchingResultSinkInterface
+				log.Info().Msgf("Matching results: %v", results)
 			}()
 		case sig := <-sigChan:
 			log.Info().Msgf("Received signal: %v, shutting down...", sig)

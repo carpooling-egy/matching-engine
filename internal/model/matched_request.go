@@ -1,47 +1,59 @@
 package model
 
-// MatchedRequest represents a request that has been matched with pickup and dropoff points
+// MatchedRequest represents a request that has been matched with an offer
 type MatchedRequest struct {
-	requestId    string
-	pickupPoint  Point
-	dropoffPoint Point
+	offer   *Offer
+	request *Request
+	pickup  Point
+	dropoff Point
 }
 
-// NewMatchedRequest creates a new MatchedRequest with the given request ID, pickup, and dropoff points
-func NewMatchedRequest(requestId string, pickupPoint, dropoffPoint Point) *MatchedRequest {
+// NewMatchedRequest creates a new MatchedRequest
+func NewMatchedRequest(offer *Offer, request *Request, pickup, dropoff Point) *MatchedRequest {
 	return &MatchedRequest{
-		requestId:    requestId,
-		pickupPoint:  pickupPoint,
-		dropoffPoint: dropoffPoint,
+		offer:   offer,
+		request: request,
+		pickup:  pickup,
+		dropoff: dropoff,
 	}
 }
 
-// RequestID returns the ID of this matched request
-func (m *MatchedRequest) RequestID() string {
-	return m.requestId
+// GetOffer returns the offer
+func (mr *MatchedRequest) GetOffer() *Offer {
+	return mr.offer
 }
 
-// SetRequestID sets the ID for this matched request
-func (m *MatchedRequest) SetRequestID(requestId string) {
-	m.requestId = requestId
+// SetOffer sets the offer
+func (mr *MatchedRequest) SetOffer(offer *Offer) {
+	mr.offer = offer
 }
 
-// PickupPoint PickupPoints returns the pickup points for this matched request
-func (m *MatchedRequest) PickupPoint() Point {
-	return m.pickupPoint
+// GetRequest returns the request
+func (mr *MatchedRequest) GetRequest() *Request {
+	return mr.request
 }
 
-// SetPickupPoint SetPickupPoints sets the pickup points for this matched request
-func (m *MatchedRequest) SetPickupPoint(point Point) {
-	m.pickupPoint = point
+// SetRequest sets the request
+func (mr *MatchedRequest) SetRequest(request *Request) {
+	mr.request = request
 }
 
-// DropoffPoint returns the dropoff points for this matched request
-func (m *MatchedRequest) DropoffPoint() Point {
-	return m.dropoffPoint
+// GetPickup returns the pickup point
+func (mr *MatchedRequest) GetPickup() Point {
+	return mr.pickup
 }
 
-// SetDropoffPoint sets the dropoff points for this matched request
-func (m *MatchedRequest) SetDropoffPoint(points Point) {
-	m.dropoffPoint = points
+// SetPickup sets the pickup point
+func (mr *MatchedRequest) SetPickup(pickup Point) {
+	mr.pickup = pickup
+}
+
+// GetDropoff returns the dropoff point
+func (mr *MatchedRequest) GetDropoff() Point {
+	return mr.dropoff
+}
+
+// SetDropoff sets the dropoff point
+func (mr *MatchedRequest) SetDropoff(dropoff Point) {
+	mr.dropoff = dropoff
 }

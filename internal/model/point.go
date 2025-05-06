@@ -1,61 +1,64 @@
 package model
 
-import "time"
+import (
+	"matching-engine/internal/enums"
+	"time"
+)
 
-// Point represents a location with temporal information, and associated request ID
+// Point represents a location point with owner, time, and type information
 type Point struct {
-	requestId string
-	point     *Coordinate
-	time      time.Time
-	pointType PointType
+	owner      *Role
+	coordinate Coordinate
+	time       time.Time
+	pointType  enums.PointType
 }
 
-// NewPoint creates a new Point with the given parameters
-func NewPoint(requestId string, coordinate *Coordinate, time time.Time, pointType PointType) Point {
-	return Point{
-		requestId: requestId,
-		point:     coordinate,
-		time:      time,
-		pointType: pointType,
+// NewPoint creates a new Point
+func NewPoint(owner *Role, coordinate Coordinate, time time.Time, pointType enums.PointType) *Point {
+	return &Point{
+		owner:      owner,
+		coordinate: coordinate,
+		time:       time,
+		pointType:  pointType,
 	}
 }
 
-// RequestID returns the request ID associated with this point
-func (p *Point) RequestID() string {
-	return p.requestId
+// GetOwner returns the owner of the point
+func (p *Point) GetOwner() *Role {
+	return p.owner
 }
 
-// SetRequestID sets the request ID for this point
-func (p *Point) SetRequestID(requestId string) {
-	p.requestId = requestId
+// SetOwner sets the owner of the point
+func (p *Point) SetOwner(owner *Role) {
+	p.owner = owner
 }
 
-// Coordinate returns the geographic coordinate of this point
-func (p *Point) Coordinate() *Coordinate {
-	return p.point
+// GetCoordinate returns the coordinate
+func (p *Point) GetCoordinate() Coordinate {
+	return p.coordinate
 }
 
-// SetCoordinate sets the geographic coordinate for this point
-func (p *Point) SetCoordinate(coordinate *Coordinate) {
-	p.point = coordinate
+// SetCoordinate sets the coordinate
+func (p *Point) SetCoordinate(coordinate Coordinate) {
+	p.coordinate = coordinate
 }
 
-// Time returns the time associated with this point
-func (p *Point) Time() time.Time {
+// GetTime returns the time
+func (p *Point) GetTime() time.Time {
 	return p.time
 }
 
-// SetTime sets the time for this point
-func (p *Point) SetTime(time time.Time) {
-	p.time = time
+// SetTime sets the time
+func (p *Point) SetTime(timestamp time.Time) {
+	p.time = timestamp
 }
 
-// PointType returns the type of this point
-func (p *Point) PointType() PointType {
+// GetPointType returns the point type
+func (p *Point) GetPointType() enums.PointType {
 	return p.pointType
 }
 
-// SetPointType sets the type for this point
-func (p *Point) SetPointType(pointType PointType) {
+// SetPointType sets the point type
+func (p *Point) SetPointType(pointType enums.PointType) {
 	p.pointType = pointType
 }

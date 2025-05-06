@@ -1,57 +1,53 @@
 package model
 
-// MatchingResult represents the outcome of a matching operation
+// MatchingResult represents the result of a matching operation
 type MatchingResult struct {
-	offerId                 string
+	offerID                 string
 	assignedMatchedRequests []MatchedRequest
-	path                    []Point
+	newPath                 []Point
 }
 
-// NewMatchingResult creates a new MatchingResult with the given offer ID
-func NewMatchingResult(offerId string) *MatchingResult {
+// NewMatchingResult creates a new MatchingResult
+func NewMatchingResult(offerID string, assignedMatchedRequests []MatchedRequest, newPath []Point) *MatchingResult {
+	if assignedMatchedRequests == nil {
+		assignedMatchedRequests = make([]MatchedRequest, 0)
+	}
+	if newPath == nil {
+		newPath = make([]Point, 0)
+	}
 	return &MatchingResult{
-		offerId:                 offerId,
-		assignedMatchedRequests: make([]MatchedRequest, 0),
-		path:                    make([]Point, 0),
+		offerID:                 offerID,
+		assignedMatchedRequests: assignedMatchedRequests,
+		newPath:                 newPath,
 	}
 }
 
-// OfferID returns the offer ID of the matching result
-func (m *MatchingResult) OfferID() string {
-	return m.offerId
+// GetOfferID returns the offer ID
+func (mr *MatchingResult) GetOfferID() string {
+	return mr.offerID
 }
 
-// SetOfferID sets the offer ID for the matching result
-func (m *MatchingResult) SetOfferID(offerId string) {
-	m.offerId = offerId
+// SetOfferID sets the offer ID
+func (mr *MatchingResult) SetOfferID(offerID string) {
+	mr.offerID = offerID
 }
 
-// AssignedMatchedRequests returns the matched requests
-func (m *MatchingResult) AssignedMatchedRequests() []MatchedRequest {
-	return m.assignedMatchedRequests
+// GetAssignedMatchedRequests returns the assigned matched requests
+func (mr *MatchingResult) GetAssignedMatchedRequests() []MatchedRequest {
+	return mr.assignedMatchedRequests
 }
 
-// SetAssignedMatchedRequests sets the list of assigned matched requests
-func (m *MatchingResult) SetAssignedMatchedRequests(requests []MatchedRequest) {
-	m.assignedMatchedRequests = requests
+// SetAssignedMatchedRequests sets the assigned matched requests
+func (mr *MatchingResult) SetAssignedMatchedRequests(requests []MatchedRequest) {
+	mr.assignedMatchedRequests = requests
 }
 
-// AddAssignedMatchedRequest adds a matched request to the list
-func (m *MatchingResult) AddAssignedMatchedRequest(request MatchedRequest) {
-	m.assignedMatchedRequests = append(m.assignedMatchedRequests, request)
+// GetNewPath returns the new path
+func (mr *MatchingResult) GetNewPath() []Point {
+	return mr.newPath
 }
 
-// Path returns the path of points for the matching result
-func (m *MatchingResult) Path() []Point {
-	return m.path
-}
-
-// SetPath sets the path for the matching result
-func (m *MatchingResult) SetPath(path []Point) {
-	m.path = path
-}
-
-// AddPoint adds a point to the path
-func (m *MatchingResult) AddPoint(point Point) {
-	m.path = append(m.path, point)
+// SetNewPath sets the new path
+func (mr *MatchingResult) SetNewPath(path []Point) {
+	mr.newPath = path
 }
