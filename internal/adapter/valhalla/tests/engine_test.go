@@ -169,7 +169,7 @@ func TestValhalla_ComputeIsochrone(t *testing.T) {
 			req: must(model.NewIsochroneParams(
 				must(model.NewCoordinate(42.5347, 1.5830)),
 				must(model.NewContour(30, model.ContourMetricDistanceInKilometers)),
-				model.Pedestrian,
+				model.ProfilePedestrian,
 			)),
 			wantErr: false,
 		},
@@ -214,7 +214,7 @@ func TestValhalla_ComputeDistanceTimeMatrix(t *testing.T) {
 					*must(model.NewCoordinate(42.5057, 1.5265)),
 				},
 				time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
-				model.Auto,
+				model.ProfileAuto,
 				model.WithTargets([]model.Coordinate{
 					*must(model.NewCoordinate(42.5057, 1.5265)),
 					*must(model.NewCoordinate(42.5440, 1.5148)),

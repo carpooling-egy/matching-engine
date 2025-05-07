@@ -39,7 +39,7 @@ func (MatrixMapper) ToTransport(params *model.DistanceTimeMatrixParams) (*pb.Api
 			Sources:     sources,
 			Targets:     targets,
 			Units:       common.DefaultUnit,
-			Format:      common.DefaultFormat,
+			Format:      common.DefaultResponseFormat,
 			CostingType: costingType,
 			Costings: map[int32]*pb.Costing{
 				int32(pb.Costing_auto_): costing,
@@ -47,7 +47,7 @@ func (MatrixMapper) ToTransport(params *model.DistanceTimeMatrixParams) (*pb.Api
 			DateTimeType: pb.Options_depart_at,
 			HasDateTime: &pb.Options_DateTime{
 				// TODO check how valhalla handles timezones
-				DateTime: params.DepartureTime().Format("2006-01-02T15:04"),
+				DateTime: params.DepartureTime().Format(common.DefaultTimeFormat),
 			},
 			PbfFieldSelector: &pb.PbfFieldSelector{
 				Matrix: true,
@@ -84,7 +84,7 @@ func (MatrixMapper) FromTransport(response *pb.Api) (*model.DistanceTimeMatrix, 
 	if response == nil {
 		return nil, fmt.Errorf("response cannot be nil")
 	}
-	//
+
 	matrix := response.GetMatrix()
 	if matrix == nil {
 		return nil, fmt.Errorf("matrix is nil")

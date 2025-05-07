@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type RoutingEngine interface {
+type Engine interface {
 	// PlanDrivingRoute get a route between two points for a driver with a departure time
 	PlanDrivingRoute(
 		ctx context.Context,

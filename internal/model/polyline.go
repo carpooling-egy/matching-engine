@@ -10,7 +10,7 @@ import (
 type Polyline struct {
 	encoded     string
 	precision   int
-	coordinates []Coordinate // Cached coordinates
+	coordinates LineString
 }
 
 type Option func(*Polyline) error
@@ -52,7 +52,7 @@ func (p *Polyline) Precision() int {
 	return p.precision
 }
 
-func (p *Polyline) Coordinates() ([]Coordinate, error) {
+func (p *Polyline) Coordinates() (LineString, error) {
 	if p.coordinates != nil {
 		return p.coordinates, nil
 	}
@@ -65,9 +65,9 @@ func (p *Polyline) Coordinates() ([]Coordinate, error) {
 	return p.coordinates, nil
 }
 
-func (p *Polyline) decode() ([]Coordinate, error) {
+func (p *Polyline) decode() (LineString, error) {
 	factor := math.Pow10(p.precision)
-	var coordinates []Coordinate
+	var coordinates LineString
 	index := 0
 	lat, lng := 0, 0
 

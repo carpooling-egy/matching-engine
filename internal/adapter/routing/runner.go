@@ -12,7 +12,7 @@ func RunOperation[
 	TransRes any,
 ](
 	ctx context.Context,
-	client RoutingClient[TransReq, TransRes],
+	client Client[TransReq, TransRes],
 	endpoint string,
 	params DomainReq,
 	mapper OperationMapper[DomainReq, DomainRes, TransReq, TransRes],

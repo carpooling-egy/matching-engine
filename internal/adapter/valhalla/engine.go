@@ -26,7 +26,7 @@ func NewValhalla(clientOpts ...client.Option) (*Valhalla, error) {
 	}, nil
 }
 
-var _ re.RoutingEngine = (*Valhalla)(nil)
+var _ re.Engine = (*Valhalla)(nil)
 
 func (v *Valhalla) PlanDrivingRoute(
 	ctx context.Context,

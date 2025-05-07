@@ -25,7 +25,7 @@ func (SnapToRoadMapper) ToTransport(point *model.Coordinate) (*pb.Api, error) {
 	return &pb.Api{
 		Options: &pb.Options{
 			Action: pb.Options_trace_attributes,
-			Format: common.DefaultFormat,
+			Format: common.DefaultResponseFormat,
 			Shape: []*pb.Location{
 				common.CreateLocation(point.Lat(), point.Lng()),
 				common.CreateLocation(point.Lat(), point.Lng()),

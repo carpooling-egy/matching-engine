@@ -33,7 +33,7 @@ func (WalkingTimeMapper) ToTransport(params *model.WalkParams) (*pb.Api, error) 
 		Options: &pb.Options{
 			Action:      pb.Options_route,
 			Units:       common.DefaultUnit,
-			Format:      common.DefaultFormat,
+			Format:      common.DefaultResponseFormat,
 			CostingType: pb.Costing_auto_,
 			Costings: map[int32]*pb.Costing{
 				int32(pb.Costing_auto_): common.DefaultPedestrianCosting,

@@ -1,27 +1,20 @@
 package model
 
 const (
-	Auto       Profile = "auto"
-	Pedestrian Profile = "pedestrian"
+	ProfileAuto       Profile = "auto"
+	ProfilePedestrian Profile = "pedestrian"
 )
 
 type Profile string
 
 func (p Profile) IsValid() bool {
 	switch p {
-	case Auto, Pedestrian:
+	case ProfileAuto, ProfilePedestrian:
 		return true
 	}
 	return false
 }
 
 func (p Profile) String() string {
-	switch p {
-	case Auto:
-		return "auto"
-	case Pedestrian:
-		return "pedestrian"
-	default:
-		return ""
-	}
+	return string(p)
 }

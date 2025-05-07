@@ -33,7 +33,7 @@ func (DrivingTimeMapper) ToTransport(params *model.RouteParams) (*pb.Api, error)
 		Options: &pb.Options{
 			Action:      pb.Options_route,
 			Units:       common.DefaultUnit,
-			Format:      common.DefaultFormat,
+			Format:      common.DefaultResponseFormat,
 			CostingType: pb.Costing_auto_,
 			Costings: map[int32]*pb.Costing{
 				int32(pb.Costing_auto_): common.DefaultAutoCosting,
@@ -45,7 +45,7 @@ func (DrivingTimeMapper) ToTransport(params *model.RouteParams) (*pb.Api, error)
 			DateTimeType: pb.Options_depart_at,
 			HasDateTime: &pb.Options_DateTime{
 				// TODO check how valhalla handles timezones
-				DateTime: params.DepartureTime().Format("2006-01-02T15:04"),
+				DateTime: params.DepartureTime().Format(common.DefaultTimeFormat),
 			},
 			PbfFieldSelector: &pb.PbfFieldSelector{
 				Directions: true,

@@ -88,7 +88,7 @@ func (dtm *DistanceTimeMatrixParams) String() string {
 		"Sources: %s, Targets: %s, Departure: %s, Profile: %s",
 		formatCoords(dtm.sources),
 		formatCoords(dtm.targets),
-		dtm.departureTime.Format(time.RFC3339),
+		dtm.departureTime,
 		dtm.profile.String(),
 	)
 }

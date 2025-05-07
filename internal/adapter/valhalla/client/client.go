@@ -29,6 +29,9 @@ func WithConfig(c *Config) Option {
 func NewValhallaClient(opts ...Option) (*ValhallaClient, error) {
 	cfg, err := LoadConfig()
 	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("Failed to load configuration for ValhallaClient")
 		return nil, fmt.Errorf("failed to load config: %w", err)
 	}
 
@@ -44,14 +47,18 @@ func NewValhallaClient(opts ...Option) (*ValhallaClient, error) {
 		log.Error().
 			Err(err).
 			Str("baseURL", baseURL).
-			Msg("invalid base URL format")
+			Msg("Invalid base URL format provided in configuration")
 		return nil, fmt.Errorf("invalid base URL: %w", err)
 	}
+
+	log.Info().
+		Str("baseURL", baseURL).
+		Msg("ValhallaClient initialized with the following base URL")
 
 	return vc, nil
 }
 
-var _ re.RoutingClient[
+var _ re.Client[
 	*pb.Api,
 	*pb.Api,
 ] = (*ValhallaClient)(nil)
@@ -61,7 +68,7 @@ func (vc *ValhallaClient) Post(endpoint string, request *pb.Api) (*pb.Api, error
 	if err != nil {
 		log.Error().
 			Err(err).
-			Msg("failed to serialize request")
+			Msg("Failed to serialize the request to protobuf format")
 		return nil, fmt.Errorf("failed to serialize request: %w", err)
 	}
 
@@ -69,7 +76,8 @@ func (vc *ValhallaClient) Post(endpoint string, request *pb.Api) (*pb.Api, error
 	if err != nil {
 		log.Error().
 			Err(err).
-			Msg("failed to send request")
+			Str("endpoint", endpoint).
+			Msg("Failed to send HTTP POST request to Valhalla endpoint")
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 
@@ -77,9 +85,13 @@ func (vc *ValhallaClient) Post(endpoint string, request *pb.Api) (*pb.Api, error
 	if err != nil {
 		log.Error().
 			Err(err).
-			Msg("failed to deserialize response")
+			Msg("Failed to deserialize the response from protobuf format")
 		return nil, fmt.Errorf("failed to deserialize response: %w", err)
 	}
+
+	log.Debug().
+		Str("endpoint", endpoint).
+		Msg("Successfully received and processed response from Valhalla")
 
 	return response, nil
 }
@@ -94,7 +106,7 @@ func (vc *ValhallaClient) doPost(endpoint string, data []byte) ([]byte, error) {
 		log.Error().
 			Err(err).
 			Str("endpoint", endpoint).
-			Msg("HTTP POST failed")
+			Msg("HTTP POST request failed")
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 
@@ -103,7 +115,7 @@ func (vc *ValhallaClient) doPost(endpoint string, data []byte) ([]byte, error) {
 		if err != nil {
 			log.Warn().
 				Err(err).
-				Msg("failed to close response body")
+				Msg("Failed to close the response body")
 		}
 	}(resp.Body)
 
@@ -113,7 +125,7 @@ func (vc *ValhallaClient) doPost(endpoint string, data []byte) ([]byte, error) {
 			Int("status", resp.StatusCode).
 			Str("endpoint", endpoint).
 			Bytes("body_snippet", snippet).
-			Msg("non-successful HTTP response")
+			Msg("Received non-success HTTP response")
 		return nil, fmt.Errorf(
 			"unexpected HTTP status %d from %s: %q",
 			resp.StatusCode, endpoint, snippet,
@@ -122,26 +134,45 @@ func (vc *ValhallaClient) doPost(endpoint string, data []byte) ([]byte, error) {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to read response body")
+		log.Error().
+			Err(err).
+			Str("endpoint", endpoint).
+			Msg("Failed to read response body")
 		return nil, fmt.Errorf("reading response: %w", err)
 	}
+
+	log.Debug().
+		Str("endpoint", endpoint).
+		Int("statusCode", resp.StatusCode).
+		Msg("Successfully received HTTP response from Valhalla")
+
 	return body, nil
 }
 
 func (vc *ValhallaClient) serializeRequest(request *pb.Api) ([]byte, error) {
 	data, err := proto.Marshal(request)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to marshal protobuf request")
+		log.Error().
+			Err(err).
+			Msg("Failed to marshal protobuf request into byte format")
 		return nil, fmt.Errorf("failed to serialize request: %w", err)
 	}
+
+	log.Debug().
+		Msg("Protobuf request serialized successfully")
 	return data, nil
 }
 
 func (vc *ValhallaClient) deserializeResponse(body []byte) (*pb.Api, error) {
 	response := &pb.Api{}
 	if err := proto.Unmarshal(body, response); err != nil {
-		log.Error().Err(err).Msg("failed to unmarshal protobuf response")
+		log.Error().
+			Err(err).
+			Msg("Failed to unmarshal response body into protobuf format")
 		return nil, fmt.Errorf("failed to deserialize response: %w", err)
 	}
+
+	log.Debug().
+		Msg("Response successfully unmarshalled from protobuf format")
 	return response, nil
 }

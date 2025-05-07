@@ -5,30 +5,23 @@ import (
 	"fmt"
 )
 
-type DistanceUnit int
+type DistanceUnit string
 
 const (
-	Kilometer DistanceUnit = iota
-	Mile
+	DistanceUnitKilometer DistanceUnit = "kilometer"
+	DistanceUnitMile      DistanceUnit = "mile"
 )
 
 func (du DistanceUnit) IsValid() bool {
 	switch du {
-	case Kilometer, Mile:
+	case DistanceUnitKilometer, DistanceUnitMile:
 		return true
 	}
 	return false
 }
 
 func (du DistanceUnit) String() string {
-	switch du {
-	case Kilometer:
-		return "Kilometer"
-	case Mile:
-		return "Mile"
-	default:
-		return ""
-	}
+	return string(du)
 }
 
 type Distance struct {

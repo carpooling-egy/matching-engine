@@ -41,6 +41,6 @@ func (p *RouteParams) DepartureTime() time.Time {
 
 func (p *RouteParams) String() string {
 	return fmt.Sprintf("RouteParams{waypoints=%v, departureTime=%s}",
-		p.waypoints, p.departureTime.Format(time.RFC3339),
+		p.waypoints, p.departureTime,
 	)
 }
