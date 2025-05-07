@@ -1,47 +1,70 @@
-package models
+package model
 
 import (
+	"matching-engine/internal/enums"
 	"time"
 	// "matching-engine/internal/errors"
 )
 
-// PointType represents the type of path point (pickup or dropoff)
-type PointType string
+// PathPointType represents the type of path PathPoint (pickup or dropoff)
+type PathPointType string
 
-const (
-	PointTypePickup  PointType = "pickup"
-	PointTypeDropoff PointType = "dropoff"
-)
-
-// PathPoint represents a point in a driver's path
+// PathPathPoint represents a PathPoint in a driver's path
 type PathPoint struct {
+	owner               Role
 	coordinate          Coordinate
-	pointType           PointType
+	pointType           enums.PointType
 	expectedArrivalTime time.Time
-	riderRequest        *RiderRequest
 }
 
 func NewPathPoint(
-    coordinate Coordinate, pointType PointType, expectedArrivalTime time.Time, riderRequest *RiderRequest) *PathPoint {
-    
+	coordinate Coordinate, pointType enums.PointType, expectedArrivalTime time.Time, owner Role) *PathPoint {
+
 	// TODO: Validate parameters
-    return &PathPoint{
-        coordinate:          coordinate,
-        pointType:           pointType,
-        expectedArrivalTime: expectedArrivalTime,
-        riderRequest:        riderRequest,
-    }
+	return &PathPoint{
+		coordinate:          coordinate,
+		pointType:           pointType,
+		expectedArrivalTime: expectedArrivalTime,
+		owner:               owner,
+	}
 }
 
-func (p *PathPoint) Coordinate() Coordinate {
-	return p.coordinate
+// Owner returns the owner of the PathPoint
+func (p *PathPoint) Owner() Role {
+	return p.owner
 }
-func (p *PathPoint) PointType() PointType {
-	return p.pointType
+
+// SetOwner sets the owner of the PathPoint
+func (p *PathPoint) SetOwner(owner Role) {
+	p.owner = owner
 }
+
+// Coordinate returns the coordinate
+func (p *PathPoint) Coordinate() *Coordinate {
+	return &p.coordinate
+}
+
+// SetCoordinate sets the coordinate
+func (p *PathPoint) SetCoordinate(coordinate Coordinate) {
+	p.coordinate = coordinate
+}
+
+// Time returns the time
 func (p *PathPoint) ExpectedArrivalTime() time.Time {
 	return p.expectedArrivalTime
 }
-func (p *PathPoint) RiderRequest() *RiderRequest {
-	return p.riderRequest
+
+// SetTime sets the time
+func (p *PathPoint) SetExpectedArrivalTime(timestamp time.Time) {
+	p.expectedArrivalTime = timestamp
+}
+
+// PathPointType returns the PathPoint type
+func (p *PathPoint) PointType() enums.PointType {
+	return p.pointType
+}
+
+// SetPathPointType sets the PathPoint type
+func (p *PathPoint) SetPointType(pointType enums.PointType) {
+	p.pointType = pointType
 }

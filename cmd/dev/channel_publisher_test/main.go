@@ -92,7 +92,7 @@ func generateMatchingResults(count int) []*model.MatchingResult {
 		offerID := fmt.Sprintf("offer-%d", i+1)
 
 		// Create an empty path slice - will add points later
-		newPath := make([]*model.Point, 0)
+		newPath := make([]*model.PathPoint, 0)
 
 		// Create an empty assigned requests slice - will add requests later
 		assignedRequests := make([]*model.MatchedRequest, 0)
@@ -111,11 +111,13 @@ func generateMatchingResults(count int) []*model.MatchingResult {
 			userID,
 			*offerCoord,
 			*offerCoord,
-			offerDetourTime,
 			offerDepartureTime,
-			nil,
+			offerDetourTime,
+			3, // Adding capacity parameter (using 3 as a reasonable default)
 			offerPreference,
-			nil,
+			0, // Current number of requests (starting with 0)
+			make([]*model.PathPoint, 0), // Empty path
+			make([]*model.MatchedRequest, 0), // Empty matched requests
 		)
 
 		// Add some random assigned requests
@@ -179,13 +181,13 @@ func createRequest(requestID string) *model.Request {
 		earliestDeparture,
 		latestArrival,
 		maxWalkingTime,
-		preference,
 		numberOfRiders,
+		preference,
 	)
 }
 
 // generatePoints creates random pickup and dropoff points for a request
-func generatePoints(owner model.Role) (*model.Point, *model.Point) {
+func generatePoints(owner model.Role) (*model.PathPoint, *model.PathPoint) {
 	// Generate random coordinates for pickup
 	pickupLat := randomCoordinate(-90, 90)
 	pickupLng := randomCoordinate(-180, 180)
@@ -209,8 +211,8 @@ func generatePoints(owner model.Role) (*model.Point, *model.Point) {
 	pickupTime := now.Add(time.Duration(rand.Intn(60)) * time.Minute)
 	dropoffTime := pickupTime.Add(time.Duration(rand.Intn(120)+30) * time.Minute)
 
-	pickupPoint := model.NewPoint(owner, *pickupCoord, pickupTime, enums.Pickup)
-	dropoffPoint := model.NewPoint(owner, *dropoffCoord, dropoffTime, enums.Dropoff)
+	pickupPoint := model.NewPathPoint(*pickupCoord, enums.Pickup, dropoffTime, owner)
+	dropoffPoint := model.NewPathPoint(*dropoffCoord, enums.Dropoff,dropoffTime, owner)
 
 	return pickupPoint, dropoffPoint
 }

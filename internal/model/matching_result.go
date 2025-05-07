@@ -5,16 +5,16 @@ type MatchingResult struct {
 	userID                  string
 	offerID                 string
 	assignedMatchedRequests []*MatchedRequest
-	newPath                 []*Point
+	newPath                 []*PathPoint
 }
 
 // NewMatchingResult creates a new MatchingResult
-func NewMatchingResult(userID, offerID string, assignedMatchedRequests []*MatchedRequest, newPath []*Point) *MatchingResult {
+func NewMatchingResult(userID, offerID string, assignedMatchedRequests []*MatchedRequest, newPath []*PathPoint) *MatchingResult {
 	if assignedMatchedRequests == nil {
 		assignedMatchedRequests = make([]*MatchedRequest, 0)
 	}
 	if newPath == nil {
-		newPath = make([]*Point, 0)
+		newPath = make([]*PathPoint, 0)
 	}
 	return &MatchingResult{
 		userID:                  userID,
@@ -55,11 +55,11 @@ func (mr *MatchingResult) SetAssignedMatchedRequests(requests []*MatchedRequest)
 }
 
 // NewPath returns the new path
-func (mr *MatchingResult) NewPath() []*Point {
+func (mr *MatchingResult) NewPath() []*PathPoint {
 	return mr.newPath
 }
 
 // SetNewPath sets the new path
-func (mr *MatchingResult) SetNewPath(path []*Point) {
+func (mr *MatchingResult) SetNewPath(path []*PathPoint) {
 	mr.newPath = path
 }

@@ -1,8 +1,10 @@
 package entity
 
 import (
-	"matching-engine/internal/model"
 	"time"
+
+	"matching-engine/internal/enums"
+	"matching-engine/internal/model"
 )
 
 // RiderRequestDB is the database model for rider requests
@@ -20,7 +22,7 @@ type RiderRequestDB struct {
 	SameGender                bool          `gorm:"not null;default:false"`
 	AllowsSmoking             bool          `gorm:"not null;default:true"`
 	AllowsPets                bool          `gorm:"not null;default:true"`
-	IsMatched                 bool          `gorm:"default:false"`
+	UserGender                enums.Gender  `gorm:"type:gender_type;not null"`
 }
 
 // TableName specifies the table name for RiderRequestDB
@@ -29,25 +31,24 @@ func (RiderRequestDB) TableName() string {
 }
 
 // ToRiderRequest converts a RiderRequestDB to RiderRequest domain model
-func (r *RiderRequestDB) ToRiderRequest() *models.RiderRequest {
-    sourceCoord, _ := models.NewCoordinate(r.SourceLatitude, r.SourceLongitude)
-    
-    destCoord, _ := models.NewCoordinate(r.DestinationLatitude, r.DestinationLongitude)
-    
-    preferences := models.NewPreference(r.SameGender, r.AllowsSmoking, r.AllowsPets)
-    
-    // Call the constructor function properly and handle any potential errors
-    riderRequest := models.NewRiderRequest(
-        r.ID,
-        r.UserID,
-        *sourceCoord,
-        *destCoord,
-        r.EarliestDepartureTime,
-        r.LatestArrivalTime,
-        r.MaxWalkingDurationMinutes,
-        r.NumberOfRiders,
-        *preferences,
-		r.IsMatched,
-    )
-    return riderRequest
+func (r *RiderRequestDB) ToRiderRequest() *model.Request {
+	sourceCoord, _ := model.NewCoordinate(r.SourceLatitude, r.SourceLongitude)
+
+	destCoord, _ := model.NewCoordinate(r.DestinationLatitude, r.DestinationLongitude)
+
+	preferences := model.NewPreference(r.UserGender, r.SameGender, r.AllowsSmoking, r.AllowsPets)
+
+	// Call the constructor function properly and handle any potential errors
+	riderRequest := model.NewRequest(
+		r.ID,
+		r.UserID,
+		*sourceCoord,
+		*destCoord,
+		r.EarliestDepartureTime,
+		r.LatestArrivalTime,
+		r.MaxWalkingDurationMinutes,
+		r.NumberOfRiders,
+		*preferences,
+	)
+	return riderRequest
 }

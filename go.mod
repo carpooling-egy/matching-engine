@@ -3,11 +3,13 @@ module matching-engine
 go 1.24
 
 require (
+	github.com/joho/godotenv v1.5.1
+	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/google/uuid v1.6.0
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/nats-io/nats.go v1.42.0 // indirect
+	github.com/nats-io/nats.go v1.42.0
 	github.com/nats-io/nkeys v0.4.11 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/rs/zerolog v1.34.0

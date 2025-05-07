@@ -27,7 +27,7 @@ func NewPostgresDriverOfferRepository(db *gorm.DB) repository.DriverOfferRepo {
 }
 
 // GetByID fetches a driver offer by ID
-func (r *PostgresDriverOfferRepo) GetByID(ctx context.Context, id string) (*models.DriverOffer, error) {
+func (r *PostgresDriverOfferRepo) GetByID(ctx context.Context, id string) (*model.Offer, error) {
 	if id == "" {
 		return nil, errors.EmptyID("driver offer")
 	}
@@ -48,7 +48,7 @@ func (r *PostgresDriverOfferRepo) GetByID(ctx context.Context, id string) (*mode
 }
 
 // GetAvailable fetches available driver offers with their paths and associated rider requests
-func (r *PostgresDriverOfferRepo) GetAvailable(ctx context.Context, start, end time.Time) ([]*models.DriverOffer, error) {
+func (r *PostgresDriverOfferRepo) GetAvailable(ctx context.Context, start, end time.Time) ([]*model.Offer, error) {
 	if end.Before(start) {
 		return nil, errors.InvalidTimeRange()
 	}
@@ -74,9 +74,9 @@ func orderPathPointsByPathOrder(db *gorm.DB) *gorm.DB {
 	return db.Order("path_order ASC")
 }
 
-// convertToDriverOffers converts database models to domain models
-func convertToDriverOffers(driverOfferDB []entity.DriverOfferDB) []*models.DriverOffer {
-	offers := make([]*models.DriverOffer, 0, len(driverOfferDB))
+// convertToDriverOffers converts database model to domain model
+func convertToDriverOffers(driverOfferDB []entity.DriverOfferDB) []*model.Offer {
+	offers := make([]*model.Offer, 0, len(driverOfferDB))
 
 	for i := range driverOfferDB {
 		if domainModel := driverOfferDB[i].ToDriverOffer(); domainModel != nil {

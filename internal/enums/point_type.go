@@ -8,6 +8,8 @@ const (
 	Pickup PointType = "pickup"
 	// Dropoff represents a dropoff point
 	Dropoff PointType = "dropoff"
+	Source PointType = "source"
+	Destination PointType = "destination"
 )
 
 // IsValid checks if the PointType value is valid

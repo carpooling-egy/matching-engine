@@ -4,12 +4,12 @@ package model
 type MatchedRequest struct {
 	offer   *Offer
 	request *Request
-	pickup  Point
-	dropoff Point
+	pickup  PathPoint
+	dropoff PathPoint
 }
 
 // NewMatchedRequest creates a new MatchedRequest
-func NewMatchedRequest(offer *Offer, request *Request, pickup, dropoff Point) *MatchedRequest {
+func NewMatchedRequest(offer *Offer, request *Request, pickup, dropoff PathPoint) *MatchedRequest {
 	return &MatchedRequest{
 		offer:   offer,
 		request: request,
@@ -39,21 +39,21 @@ func (mr *MatchedRequest) SetRequest(request *Request) {
 }
 
 // Pickup returns the pickup point
-func (mr *MatchedRequest) Pickup() *Point {
+func (mr *MatchedRequest) Pickup() *PathPoint {
 	return &mr.pickup
 }
 
 // SetPickup sets the pickup point
-func (mr *MatchedRequest) SetPickup(pickup Point) {
+func (mr *MatchedRequest) SetPickup(pickup PathPoint) {
 	mr.pickup = pickup
 }
 
 // Dropoff returns the dropoff point
-func (mr *MatchedRequest) Dropoff() *Point {
+func (mr *MatchedRequest) Dropoff() *PathPoint {
 	return &mr.dropoff
 }
 
 // SetDropoff sets the dropoff point
-func (mr *MatchedRequest) SetDropoff(dropoff Point) {
+func (mr *MatchedRequest) SetDropoff(dropoff PathPoint) {
 	mr.dropoff = dropoff
 }

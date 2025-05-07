@@ -26,7 +26,7 @@ func NewPostgresRiderRequestRepo(db *gorm.DB) repository.RiderRequestRepo {
 }
 
 // GetByID fetches a rider request by ID
-func (r *PostgresRiderRequestRepo) GetByID(ctx context.Context, id string) (*models.RiderRequest, error) {
+func (r *PostgresRiderRequestRepo) GetByID(ctx context.Context, id string) (*model.Request, error) {
 	if id == "" {
 		return nil, errors.EmptyID("rider request")
 	}
@@ -48,7 +48,7 @@ func (r *PostgresRiderRequestRepo) GetByID(ctx context.Context, id string) (*mod
 }
 
 // FindUnmatched finds rider requests that can be matched within the specified time window
-func (r *PostgresRiderRequestRepo) FindUnmatched(ctx context.Context, start, end time.Time) ([]*models.RiderRequest, error) {
+func (r *PostgresRiderRequestRepo) FindUnmatched(ctx context.Context, start, end time.Time) ([]*model.Request, error) {
 	if end.Before(start) {
 		return nil, errors.InvalidTimeRange()
 	}
@@ -68,9 +68,9 @@ func (r *PostgresRiderRequestRepo) FindUnmatched(ctx context.Context, start, end
 	return convertToRiderRequests(riderRequestDB), nil
 }
 
-// convertToRiderRequests converts database models to domain models
-func convertToRiderRequests(riderRequestDB []entity.RiderRequestDB) []*models.RiderRequest {
-	requests := make([]*models.RiderRequest, 0, len(riderRequestDB))
+// convertToRiderRequests converts database model to domain model
+func convertToRiderRequests(riderRequestDB []entity.RiderRequestDB) []*model.Request {
+	requests := make([]*model.Request, 0, len(riderRequestDB))
 
 	for i := range riderRequestDB {
 		if domainModel := riderRequestDB[i].ToRiderRequest(); domainModel != nil {

@@ -1,6 +1,8 @@
 -- NOTE: Users ,their gender and Cars tables are in a separate database
 -- The schema below assumes user UUIDs will be provided from that external source
 CREATE TYPE point_type AS ENUM ('pickup', 'dropoff');
+CREATE TYPE gender_type AS ENUM ('male', 'female');
+
 
 -- Rider requests table
 CREATE TABLE rider_requests (
@@ -26,6 +28,7 @@ CREATE TABLE rider_requests (
     same_gender BOOLEAN NOT NULL DEFAULT FALSE,
     allows_smoking BOOLEAN NOT NULL DEFAULT TRUE,
     allows_pets BOOLEAN NOT NULL DEFAULT TRUE,
+    user_gender gender_type NOT NULL,
 
     is_matched BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -47,7 +50,9 @@ CREATE TABLE driver_offers (
     destination_address TEXT,
 
     departure_time TIMESTAMP WITH TIME ZONE NOT NULL,
-    estimated_arrival_time TIMESTAMP WITH TIME ZONE,
+    max_estimated_arrival_time TIMESTAMP WITH TIME ZONE,
+    estimated_arrival_time TIMESTAMP WITH TIME ZONE, 
+
     detour_duration_minutes INTEGER DEFAULT 0,
     capacity INTEGER NOT NULL CHECK (capacity > 0),
     selected_car_id UUID, -- Reference to car in external database
@@ -58,6 +63,7 @@ CREATE TABLE driver_offers (
     same_gender BOOLEAN NOT NULL DEFAULT FALSE,
     allows_smoking BOOLEAN NOT NULL DEFAULT TRUE,
     allows_pets BOOLEAN NOT NULL DEFAULT TRUE,
+    user_gender gender_type NOT NULL,
 
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -67,6 +73,9 @@ CREATE TABLE driver_offers (
 CREATE TABLE ride_matches (
     driver_offer_id UUID NOT NULL REFERENCES driver_offers(id) ON DELETE CASCADE,
     rider_request_id UUID NOT NULL REFERENCES rider_requests(id) ON DELETE CASCADE,
+
+    pickup_point_id UUID NOT NULL REFERENCES path_point(id) ON DELETE CASCADE,
+    dropoff_point_id UUID NOT NULL REFERENCES path_point(id) ON DELETE CASCADE,
 
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -85,7 +94,7 @@ CREATE TABLE path_point (
 
     -- pickup time or dropoff time depending on the type
     expected_arrival_time TIMESTAMP WITH TIME ZONE NOT NULL,
-    rider_request_id UUID NOT NULL REFERENCES rider_requests(id) ON DELETE CASCADE, -- Changed to NOT NULL and CASCADE
+    rider_request_id UUID NOT NULL REFERENCES rider_requests(id) ON DELETE CASCADE,
 
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,

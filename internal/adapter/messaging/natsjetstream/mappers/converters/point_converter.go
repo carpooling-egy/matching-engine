@@ -11,7 +11,7 @@ import (
 type PointConverter struct{}
 
 // ToDTO converts a domain Point to a PointDTO
-func (c *PointConverter) ToDTO(p *model.Point) dto.PointDTO {
+func (c *PointConverter) ToDTO(p *model.PathPoint) dto.PointDTO {
 	owner := p.Owner()
 	var id, ownerType string
 
@@ -30,13 +30,13 @@ func (c *PointConverter) ToDTO(p *model.Point) dto.PointDTO {
 			Lat: p.Coordinate().Lat(),
 			Lng: p.Coordinate().Lng(),
 		},
-		Time:      p.Time().Format(time.RFC3339),
+		Time:      p.ExpectedArrivalTime().Format(time.RFC3339),
 		PointType: p.PointType().String(),
 	}
 }
 
 // ToPointsDTO converts a slice of domain Points to a slice of PointDTOs
-func (c *PointConverter) ToPointsDTO(points []*model.Point) []dto.PointDTO {
+func (c *PointConverter) ToPointsDTO(points []*model.PathPoint) []dto.PointDTO {
 	result := make([]dto.PointDTO, 0, len(points))
 	for _, p := range points {
 		result = append(result, c.ToDTO(p))
