@@ -1,8 +1,14 @@
 package publisher
 
-import "matching-engine/internal/model"
+import (
+	"matching-engine/internal/model"
+)
 
-type ResultSink interface {
-	// Add adds a new matching result to the sink
-	publish(matchingResults []model.MatchingResult) error
+// Publisher represents a messaging system that can publish messages
+type Publisher interface {
+	// Publish the matching results to the messaging system
+	Publish(results []*model.MatchingResult) error
+
+	// Close releases resources used by the publisher
+	Close() error
 }

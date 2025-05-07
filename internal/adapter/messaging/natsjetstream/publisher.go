@@ -7,9 +7,9 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/rs/zerolog/log"
-	re "matching-engine/internal/adapter/messaging"
 	"matching-engine/internal/adapter/messaging/natsjetstream/mappers"
 	"matching-engine/internal/model"
+	re "matching-engine/internal/publisher"
 )
 
 // NATSPublisher implements the Publisher interface using NATS JetStream
@@ -78,7 +78,7 @@ func NewNATSPublisherWithConfig(config Config) (re.Publisher, error) {
 }
 
 // PublishMatchingResults publishes matching results to NATS JetStream
-func (p *NATSPublisher) PublishMatchingResults(results []*model.MatchingResult) error {
+func (p *NATSPublisher) Publish(results []*model.MatchingResult) error {
 	ctx, cancel := context.WithTimeout(context.Background(), p.config.PublishTimeout)
 	defer cancel()
 

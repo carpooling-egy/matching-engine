@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
-	"matching-engine/internal/adapter/messaging"
 	"matching-engine/internal/adapter/messaging/natsjetstream"
 	"matching-engine/internal/enums"
 	"matching-engine/internal/model"
+	"matching-engine/internal/publisher"
 
 	"math/rand"
 	"os"
@@ -18,7 +18,7 @@ import (
 func main() {
 
 	// Create a publisher using the messaging interface
-	var publisher messaging.Publisher
+	var publisher publisher.Publisher
 	var err2 error
 
 	// Use the existing NATS publisher implementation
@@ -51,7 +51,7 @@ func main() {
 	fmt.Printf("Publishing %d matching results...\n", len(results))
 
 	startTime := time.Now()
-	err2 = publisher.PublishMatchingResults(results)
+	err2 = publisher.Publish(results)
 
 	if err2 != nil {
 		log.Warn().Err(err2).Msg("Failed to publish matching results")
@@ -67,7 +67,7 @@ func main() {
 	fmt.Printf("Publishing %d matching results...\n", len(results))
 
 	startTime = time.Now()
-	err2 = publisher.PublishMatchingResults(results)
+	err2 = publisher.Publish(results)
 
 	if err2 != nil {
 		log.Warn().Err(err2).Msg("Failed to publish matching results")
