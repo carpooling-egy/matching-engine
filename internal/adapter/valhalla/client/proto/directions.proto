@@ -4,7 +4,7 @@ package valhalla;
 import public "common.proto";
 import public "sign.proto";
 
-option go_package = "matching-engine/internal/adapter/routing-engine/valhalla/client/pb;pb";
+option go_package = "matching-engine/internal/adapter/valhalla/client/pb;pb";
 
 message DirectionsLeg {
 

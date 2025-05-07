@@ -2,7 +2,7 @@ syntax = "proto2";
 option optimize_for = LITE_RUNTIME;
 package valhalla.mjolnir;
 
-option go_package = "matching-engine/internal/adapter/routing-engine/valhalla/client/pb;pb";
+option go_package = "matching-engine/internal/adapter/valhalla/client/pb;pb";
 
 message Transit_Fetch {
 

@@ -73,47 +73,6 @@ func TestValhalla_PlanDrivingRoute(t *testing.T) {
 	}
 }
 
-func TestValhalla_ComputeDrivingDistance(t *testing.T) {
-	v, err := valhalla.NewValhalla()
-	if err != nil {
-		t.Fatalf("failed to create Valhalla engine: %v", err)
-	}
-
-	testCases := []struct {
-		name       string
-		routeParam *model.RouteParams
-		wantErr    bool
-	}{
-		{
-			name: "valid distance",
-			routeParam: must(model.NewRouteParams(
-				[]model.Coordinate{
-					*must(model.NewCoordinate(42.5078, 1.5211)),
-					*must(model.NewCoordinate(42.5057, 1.5265)),
-				},
-				time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
-			)),
-			wantErr: false,
-		},
-		{
-			name:       "invalid params",
-			routeParam: nil,
-			wantErr:    true,
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			result, err := v.ComputeDrivingDistance(context.Background(), tc.routeParam)
-			if (err != nil) != tc.wantErr {
-				t.Errorf("unexpected error status: got %v, wantErr %v", err, tc.wantErr)
-				return
-			}
-			fmt.Println(result)
-		})
-	}
-}
-
 func TestValhalla_ComputeDrivingTime(t *testing.T) {
 	v, err := valhalla.NewValhalla()
 	if err != nil {
@@ -131,6 +90,7 @@ func TestValhalla_ComputeDrivingTime(t *testing.T) {
 				[]model.Coordinate{
 					*must(model.NewCoordinate(42.5078, 1.5211)),
 					*must(model.NewCoordinate(42.5057, 1.5265)),
+					*must(model.NewCoordinate(42.5057, 1.5650)),
 				},
 				time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 			)),
@@ -274,6 +234,42 @@ func TestValhalla_ComputeDistanceTimeMatrix(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			result, err := v.ComputeDistanceTimeMatrix(context.Background(), tc.req)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("unexpected error status: got %v, wantErr %v", err, tc.wantErr)
+				return
+			}
+			fmt.Println(result)
+		})
+	}
+}
+
+func TestValhalla_SnapPointToRoad(t *testing.T) {
+	fmt.Println("TestValhalla_SnapPointToRoad")
+	v, err := valhalla.NewValhalla()
+	if err != nil {
+		t.Fatalf("failed to create Valhalla engine: %v", err)
+	}
+
+	testCases := []struct {
+		name    string
+		point   *model.Coordinate
+		wantErr bool
+	}{
+		{
+			name:    "valid point",
+			point:   must(model.NewCoordinate(42.50828, 1.53210)),
+			wantErr: false,
+		},
+		{
+			name:    "nil point",
+			point:   nil,
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			result, err := v.SnapPointToRoad(context.Background(), tc.point)
 			if (err != nil) != tc.wantErr {
 				t.Errorf("unexpected error status: got %v, wantErr %v", err, tc.wantErr)
 				return

@@ -2,7 +2,7 @@ package mappers
 
 import (
 	"fmt"
-	re "matching-engine/internal/adapter/routing-engine"
+	re "matching-engine/internal/adapter/routing"
 	"matching-engine/internal/adapter/valhalla/client/pb"
 	"matching-engine/internal/adapter/valhalla/common"
 	"matching-engine/internal/model"
@@ -13,7 +13,7 @@ type DrivingTimeMapper struct{}
 
 var _ re.OperationMapper[
 	*model.RouteParams,
-	time.Duration,
+	[]time.Duration,
 	*pb.Api,
 	*pb.Api,
 ] = DrivingTimeMapper{}
@@ -54,16 +54,29 @@ func (DrivingTimeMapper) ToTransport(params *model.RouteParams) (*pb.Api, error)
 	}, nil
 }
 
-func (DrivingTimeMapper) FromTransport(response *pb.Api) (time.Duration, error) {
+func (DrivingTimeMapper) FromTransport(response *pb.Api) ([]time.Duration, error) {
 	if response == nil {
-		return 0, fmt.Errorf("response cannot be nil")
+		return nil, fmt.Errorf("response cannot be nil")
 	}
 
-	var timeInSeconds float64 = 0
-
-	for _, leg := range response.GetDirections().GetRoutes()[0].GetLegs() {
-		timeInSeconds += leg.GetSummary().Time
+	directions := response.GetDirections()
+	if directions == nil {
+		return nil, fmt.Errorf("directions cannot be nil")
 	}
 
-	return time.Duration(timeInSeconds * float64(time.Second)), nil
+	routes := directions.GetRoutes()
+	if len(routes) == 0 {
+		return nil, fmt.Errorf("no routes found in the response")
+	}
+
+	legs := routes[0].GetLegs()
+	durations := make([]time.Duration, len(legs)+1)
+
+	durations[0] = 0
+	for i, leg := range legs {
+		timeInSeconds := leg.GetSummary().Time
+		durations[i+1] = time.Duration(timeInSeconds * float64(time.Second))
+	}
+
+	return durations, nil
 }

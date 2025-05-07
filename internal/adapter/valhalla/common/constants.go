@@ -10,6 +10,7 @@ const (
 	DefaultShapeFormat           = pb2.ShapeFormat_polyline6
 	DefaultLocationType          = pb2.Location_kBreak
 	DefaultPedestrianMaxDistance = 100_000
+	DefaultSearchRadiusInMeters  = 100
 )
 
 var DefaultAutoCosting = &pb2.Costing{

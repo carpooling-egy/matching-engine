@@ -1,4 +1,4 @@
-package routing_engine
+package routing
 
 import (
 	"context"
@@ -13,19 +13,12 @@ type RoutingEngine interface {
 		routeParams *model.RouteParams,
 	) (*model.Route, error)
 
-	// ComputeDrivingDistance get the distance of a route crossing 2/3 points
-	// while driving with a departure time
-	ComputeDrivingDistance(
-		ctx context.Context,
-		routeParams *model.RouteParams,
-	) (*model.Distance, error)
-
-	// ComputeDrivingTime get the duration of a route crossing 2/3 points
-	// while driving with a departure time
+	// ComputeDrivingTime get the duration at each point of a route
+	// crossing 2/3 points while driving with a departure time
 	ComputeDrivingTime(
 		ctx context.Context,
 		routeParams *model.RouteParams,
-	) (time.Duration, error)
+	) ([]time.Duration, error)
 
 	// ComputeWalkingTime get the distance of a route between two points while walking
 	ComputeWalkingTime(
@@ -45,4 +38,9 @@ type RoutingEngine interface {
 		ctx context.Context,
 		req *model.DistanceTimeMatrixParams,
 	) (*model.DistanceTimeMatrix, error)
+
+	SnapPointToRoad(
+		ctx context.Context,
+		point *model.Coordinate,
+	) (*model.Coordinate, error)
 }

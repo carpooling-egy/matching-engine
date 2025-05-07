@@ -2,7 +2,7 @@ package mappers
 
 import (
 	"fmt"
-	re "matching-engine/internal/adapter/routing-engine"
+	re "matching-engine/internal/adapter/routing"
 	"matching-engine/internal/adapter/valhalla/client/pb"
 	"matching-engine/internal/adapter/valhalla/common"
 	"matching-engine/internal/model"

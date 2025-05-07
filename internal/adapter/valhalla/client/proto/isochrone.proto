@@ -3,7 +3,7 @@ syntax = "proto3";
 option optimize_for = LITE_RUNTIME;
 package valhalla;
 
-option go_package = "matching-engine/internal/adapter/routing-engine/valhalla/client/pb;pb";
+option go_package = "matching-engine/internal/adapter/valhalla/client/pb;pb";
 
 message Isochrone {
 
