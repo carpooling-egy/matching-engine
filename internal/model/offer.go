@@ -1,7 +1,6 @@
 package model
 
 import (
-	"matching-engine/internal/enums"
 	"time"
 )
 
@@ -70,8 +69,8 @@ func (o *Offer) SetSource(source Coordinate) {
 }
 
 // GetDestination returns the destination coordinate
-func (o *Offer) GetDestination() Coordinate {
-	return o.destination
+func (o *Offer) GetDestination() *Coordinate {
+	return &o.destination
 }
 
 // SetDestination sets the destination coordinate
@@ -129,7 +128,10 @@ func (o *Offer) SetPath(path []*Point) {
 	o.path = path
 }
 
-// GetRoleType returns the role type of the offer
-func (o *Offer) GetRoleType() enums.RoleType {
-	return enums.Offer
+func (o *Offer) AsOffer() (*Offer, bool) {
+	return o, true
+}
+
+func (o *Offer) AsRequest() (*Request, bool) {
+	return nil, false
 }

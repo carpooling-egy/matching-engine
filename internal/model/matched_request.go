@@ -39,8 +39,8 @@ func (mr *MatchedRequest) SetRequest(request *Request) {
 }
 
 // GetPickup returns the pickup point
-func (mr *MatchedRequest) GetPickup() Point {
-	return mr.pickup
+func (mr *MatchedRequest) GetPickup() *Point {
+	return &mr.pickup
 }
 
 // SetPickup sets the pickup point
@@ -49,8 +49,8 @@ func (mr *MatchedRequest) SetPickup(pickup Point) {
 }
 
 // GetDropoff returns the dropoff point
-func (mr *MatchedRequest) GetDropoff() Point {
-	return mr.dropoff
+func (mr *MatchedRequest) GetDropoff() *Point {
+	return &mr.dropoff
 }
 
 // SetDropoff sets the dropoff point
