@@ -94,7 +94,7 @@ func (p *NATSPublisher) PublishMatchingResults(results []*model.MatchingResult) 
 
 	for i, result := range results {
 		logCtx.Debug().
-			Str("offerId", result.OfferID()).
+			Str("offerId", result.GetOfferID()).
 			Int("index", i).
 			Int("total", len(results)).
 			Msg("Publishing matching result")
@@ -103,7 +103,7 @@ func (p *NATSPublisher) PublishMatchingResults(results []*model.MatchingResult) 
 		if err != nil {
 			logCtx.Error().
 				Err(err).
-				Str("offerId", result.OfferID()).
+				Str("offerId", result.GetOfferID()).
 				Int("index", i).
 				Msg("Failed to marshal result")
 			failed = append(failed, result)
@@ -123,7 +123,7 @@ func (p *NATSPublisher) PublishMatchingResults(results []*model.MatchingResult) 
 
 			logCtx.Error().
 				Err(err).
-				Str("offerId", result.OfferID()).
+				Str("offerId", result.GetOfferID()).
 				Int("index", i).
 				Msg("Failed to publish result")
 			failed = append(failed, result)
@@ -131,7 +131,7 @@ func (p *NATSPublisher) PublishMatchingResults(results []*model.MatchingResult) 
 		}
 
 		logCtx.Debug().
-			Str("offerId", result.OfferID()).
+			Str("offerId", result.GetOfferID()).
 			Int("dataSize", len(data)).
 			Msg("Successfully published result")
 

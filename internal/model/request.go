@@ -1,7 +1,6 @@
 package model
 
 import (
-	"matching-engine/internal/enums"
 	"time"
 )
 
@@ -54,8 +53,8 @@ func (r *Request) SetUserID(userID string) {
 }
 
 // GetSource returns the source coordinate
-func (r *Request) GetSource() Coordinate {
-	return r.source
+func (r *Request) GetSource() *Coordinate {
+	return &r.source
 }
 
 // SetSource sets the source coordinate
@@ -64,8 +63,8 @@ func (r *Request) SetSource(source Coordinate) {
 }
 
 // GetDestination returns the destination coordinate
-func (r *Request) GetDestination() Coordinate {
-	return r.destination
+func (r *Request) GetDestination() *Coordinate {
+	return &r.destination
 }
 
 // SetDestination sets the destination coordinate
@@ -123,8 +122,10 @@ func (r *Request) SetNumberOfRiders(count int) {
 	r.numberOfRiders = count
 }
 
-// GetRoleType returns the role type of the request.
-// This method identifies the request as a specific role type in the system.
-func (r *Request) GetRoleType() enums.RoleType {
-	return enums.Request
+func (r *Request) AsOffer() (*Offer, bool) {
+	return nil, false
+}
+
+func (r *Request) AsRequest() (*Request, bool) {
+	return r, true
 }

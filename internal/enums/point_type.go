@@ -1,6 +1,6 @@
 package enums
 
-// PointType represents the type of a point (pickup or dropoff)
+// PointType represents the type of point (pickup or dropoff)
 type PointType string
 
 const (

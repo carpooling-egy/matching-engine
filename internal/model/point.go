@@ -7,14 +7,14 @@ import (
 
 // Point represents a location point with owner, time, and type information
 type Point struct {
-	owner      *Role
+	owner      Role
 	coordinate Coordinate
 	time       time.Time
 	pointType  enums.PointType
 }
 
 // NewPoint creates a new Point
-func NewPoint(owner *Role, coordinate Coordinate, time time.Time, pointType enums.PointType) *Point {
+func NewPoint(owner Role, coordinate Coordinate, time time.Time, pointType enums.PointType) *Point {
 	return &Point{
 		owner:      owner,
 		coordinate: coordinate,
@@ -24,18 +24,18 @@ func NewPoint(owner *Role, coordinate Coordinate, time time.Time, pointType enum
 }
 
 // GetOwner returns the owner of the point
-func (p *Point) GetOwner() *Role {
+func (p *Point) GetOwner() Role {
 	return p.owner
 }
 
 // SetOwner sets the owner of the point
-func (p *Point) SetOwner(owner *Role) {
+func (p *Point) SetOwner(owner Role) {
 	p.owner = owner
 }
 
 // GetCoordinate returns the coordinate
-func (p *Point) GetCoordinate() Coordinate {
-	return p.coordinate
+func (p *Point) GetCoordinate() *Coordinate {
+	return &p.coordinate
 }
 
 // SetCoordinate sets the coordinate

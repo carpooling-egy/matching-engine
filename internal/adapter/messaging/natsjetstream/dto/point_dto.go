@@ -2,8 +2,9 @@ package dto
 
 // PointDTO is a Data Transfer Object for Point
 type PointDTO struct {
-	RequestID string        `json:"requestId"`
+	OwnerType string        `json:"ownerType"`
+	OwnerID   string        `json:"ownerID"`
 	Point     CoordinateDTO `json:"point"`
 	Time      string        `json:"time"`
-	PointType int           `json:"pointType"`
+	PointType string        `json:"pointType"`
 }
