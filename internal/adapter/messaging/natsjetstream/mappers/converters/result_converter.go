@@ -14,10 +14,10 @@ type ResultConverter struct {
 // ToDTO converts a domain MatchingResult to a MatchingResultDTO
 func (c *ResultConverter) ToDTO(result *model.MatchingResult) dto.MatchingResultDTO {
 	return dto.MatchingResultDTO{
-		UserID:                  result.GetUserID(),
-		OfferID:                 result.GetOfferID(),
-		AssignedMatchedRequests: c.requestConverter.ToMatchedRequestsDTO(result.GetAssignedMatchedRequests()),
-		Path:                    c.pointConverter.ToPointsDTO(result.GetNewPath()),
+		UserID:                  result.UserID(),
+		OfferID:                 result.OfferID(),
+		AssignedMatchedRequests: c.requestConverter.ToMatchedRequestsDTO(result.AssignedMatchedRequests()),
+		Path:                    c.pointConverter.ToPointsDTO(result.NewPath()),
 	}
 }
 

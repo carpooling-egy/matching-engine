@@ -18,8 +18,8 @@ func NewPreference(gender enums.Gender, smoker, pets bool) *Preference {
 	}
 }
 
-// GetGender returns the gender preference
-func (p *Preference) GetGender() enums.Gender {
+// Gender returns the gender preference
+func (p *Preference) Gender() enums.Gender {
 	return p.gender
 }
 

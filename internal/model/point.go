@@ -23,8 +23,8 @@ func NewPoint(owner Role, coordinate Coordinate, time time.Time, pointType enums
 	}
 }
 
-// GetOwner returns the owner of the point
-func (p *Point) GetOwner() Role {
+// Owner returns the owner of the point
+func (p *Point) Owner() Role {
 	return p.owner
 }
 
@@ -33,8 +33,8 @@ func (p *Point) SetOwner(owner Role) {
 	p.owner = owner
 }
 
-// GetCoordinate returns the coordinate
-func (p *Point) GetCoordinate() *Coordinate {
+// Coordinate returns the coordinate
+func (p *Point) Coordinate() *Coordinate {
 	return &p.coordinate
 }
 
@@ -43,8 +43,8 @@ func (p *Point) SetCoordinate(coordinate Coordinate) {
 	p.coordinate = coordinate
 }
 
-// GetTime returns the time
-func (p *Point) GetTime() time.Time {
+// Time returns the time
+func (p *Point) Time() time.Time {
 	return p.time
 }
 
@@ -53,8 +53,8 @@ func (p *Point) SetTime(timestamp time.Time) {
 	p.time = timestamp
 }
 
-// GetPointType returns the point type
-func (p *Point) GetPointType() enums.PointType {
+// PointType returns the point type
+func (p *Point) PointType() enums.PointType {
 	return p.pointType
 }
 

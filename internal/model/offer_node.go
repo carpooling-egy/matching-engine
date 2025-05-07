@@ -18,8 +18,8 @@ func NewOfferNode(offer *Offer) *OfferNode {
 	}
 }
 
-// GetOffer returns the offer
-func (node *OfferNode) GetOffer() *Offer {
+// Offer returns the offer
+func (node *OfferNode) Offer() *Offer {
 	return node.offer
 }
 
@@ -28,8 +28,8 @@ func (node *OfferNode) SetOffer(offer *Offer) {
 	node.offer = offer
 }
 
-// GetNewlyAssignedMatchedRequests returns the newly assigned matched requests
-func (node *OfferNode) GetNewlyAssignedMatchedRequests() []*MatchedRequest {
+// NewlyAssignedMatchedRequests returns the newly assigned matched requests
+func (node *OfferNode) NewlyAssignedMatchedRequests() []*MatchedRequest {
 	return node.newlyAssignedMatchedRequests
 }
 
@@ -38,8 +38,8 @@ func (node *OfferNode) SetNewlyAssignedMatchedRequests(requests []*MatchedReques
 	node.newlyAssignedMatchedRequests = requests
 }
 
-// GetEdges returns the edges
-func (node *OfferNode) GetEdges() []*Edge {
+// Edges returns the edges
+func (node *OfferNode) Edges() []*Edge {
 	return node.edges
 }
 

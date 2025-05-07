@@ -10,7 +10,8 @@ func NewGraph(offerNodes []*OfferNode) *Graph {
 	}
 }
 
-func (g *Graph) GetOfferNodes() []*OfferNode {
+// OfferNodes returns the offer nodes
+func (g *Graph) OfferNodes() []*OfferNode {
 	return g.offerNodes
 }
 

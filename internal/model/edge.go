@@ -21,8 +21,8 @@ func NewEdge(requestNode *RequestNode, pickup, dropoff *Point, newPath []*Point)
 	}
 }
 
-// GetRequestNode returns the request node
-func (e *Edge) GetRequestNode() *RequestNode {
+// RequestNode returns the request node
+func (e *Edge) RequestNode() *RequestNode {
 	return e.requestNode
 }
 
@@ -31,8 +31,8 @@ func (e *Edge) SetRequestNode(requestNode *RequestNode) {
 	e.requestNode = requestNode
 }
 
-// GetNewPath returns the new path
-func (e *Edge) GetNewPath() []*Point {
+// NewPath returns the new path
+func (e *Edge) NewPath() []*Point {
 	return e.newPath
 }
 
@@ -41,8 +41,8 @@ func (e *Edge) SetNewPath(newPath []*Point) {
 	e.newPath = newPath
 }
 
-// GetPickup returns the pickup point
-func (e *Edge) GetPickup() *Point {
+// Pickup returns the pickup point
+func (e *Edge) Pickup() *Point {
 	return e.pickup
 }
 
@@ -51,8 +51,8 @@ func (e *Edge) SetPickup(pickup *Point) {
 	e.pickup = pickup
 }
 
-// GetDropoff returns the dropoff point
-func (e *Edge) GetDropoff() *Point {
+// Dropoff returns the dropoff point
+func (e *Edge) Dropoff() *Point {
 	return e.dropoff
 }
 

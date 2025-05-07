@@ -24,8 +24,8 @@ func NewMatchingResult(userID, offerID string, assignedMatchedRequests []*Matche
 	}
 }
 
-// GetUserID returns the user ID
-func (mr *MatchingResult) GetUserID() string {
+// UserID returns the user ID
+func (mr *MatchingResult) UserID() string {
 	return mr.userID
 }
 
@@ -34,8 +34,8 @@ func (mr *MatchingResult) SetUserID(userID string) {
 	mr.userID = userID
 }
 
-// GetOfferID returns the offer ID
-func (mr *MatchingResult) GetOfferID() string {
+// OfferID returns the offer ID
+func (mr *MatchingResult) OfferID() string {
 	return mr.offerID
 }
 
@@ -44,8 +44,8 @@ func (mr *MatchingResult) SetOfferID(offerID string) {
 	mr.offerID = offerID
 }
 
-// GetAssignedMatchedRequests returns the assigned matched requests
-func (mr *MatchingResult) GetAssignedMatchedRequests() []*MatchedRequest {
+// AssignedMatchedRequests returns the assigned matched requests
+func (mr *MatchingResult) AssignedMatchedRequests() []*MatchedRequest {
 	return mr.assignedMatchedRequests
 }
 
@@ -54,8 +54,8 @@ func (mr *MatchingResult) SetAssignedMatchedRequests(requests []*MatchedRequest)
 	mr.assignedMatchedRequests = requests
 }
 
-// GetNewPath returns the new path
-func (mr *MatchingResult) GetNewPath() []*Point {
+// NewPath returns the new path
+func (mr *MatchingResult) NewPath() []*Point {
 	return mr.newPath
 }
 

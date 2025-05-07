@@ -12,8 +12,8 @@ func NewRequestNode(request *Request) *RequestNode {
 	}
 }
 
-// GetRequest returns the request
-func (rn *RequestNode) GetRequest() *Request {
+// Request returns the request
+func (rn *RequestNode) Request() *Request {
 	return rn.request
 }
 

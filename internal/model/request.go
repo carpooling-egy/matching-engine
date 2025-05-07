@@ -32,8 +32,8 @@ func NewRequest(id, userID string, source, destination Coordinate, earliestDepar
 	}
 }
 
-// GetID returns the request ID
-func (r *Request) GetID() string {
+// ID returns the request ID
+func (r *Request) ID() string {
 	return r.id
 }
 
@@ -42,8 +42,8 @@ func (r *Request) SetID(id string) {
 	r.id = id
 }
 
-// GetUserID returns the user ID
-func (r *Request) GetUserID() string {
+// UserID returns the user ID
+func (r *Request) UserID() string {
 	return r.userID
 }
 
@@ -52,8 +52,8 @@ func (r *Request) SetUserID(userID string) {
 	r.userID = userID
 }
 
-// GetSource returns the source coordinate
-func (r *Request) GetSource() *Coordinate {
+// Source returns the source coordinate
+func (r *Request) Source() *Coordinate {
 	return &r.source
 }
 
@@ -62,8 +62,8 @@ func (r *Request) SetSource(source Coordinate) {
 	r.source = source
 }
 
-// GetDestination returns the destination coordinate
-func (r *Request) GetDestination() *Coordinate {
+// Destination returns the destination coordinate
+func (r *Request) Destination() *Coordinate {
 	return &r.destination
 }
 
@@ -72,8 +72,8 @@ func (r *Request) SetDestination(destination Coordinate) {
 	r.destination = destination
 }
 
-// GetEarliestDepartureTime returns the earliest departure time
-func (r *Request) GetEarliestDepartureTime() time.Time {
+// EarliestDepartureTime returns the earliest departure time
+func (r *Request) EarliestDepartureTime() time.Time {
 	return r.earliestDepartureTime
 }
 
@@ -82,8 +82,8 @@ func (r *Request) SetEarliestDepartureTime(departureTime time.Time) {
 	r.earliestDepartureTime = departureTime
 }
 
-// GetLatestArrivalTime returns the latest arrival time
-func (r *Request) GetLatestArrivalTime() time.Time {
+// LatestArrivalTime returns the latest arrival time
+func (r *Request) LatestArrivalTime() time.Time {
 	return r.latestArrivalTime
 }
 
@@ -92,8 +92,8 @@ func (r *Request) SetLatestArrivalTime(arrivalTime time.Time) {
 	r.latestArrivalTime = arrivalTime
 }
 
-// GetMaxWalkingTime returns the maximum walking time
-func (r *Request) GetMaxWalkingTime() time.Duration {
+// MaxWalkingTime returns the maximum walking time
+func (r *Request) MaxWalkingTime() time.Duration {
 	return r.maxWalkingTime
 }
 
@@ -102,8 +102,8 @@ func (r *Request) SetMaxWalkingTime(duration time.Duration) {
 	r.maxWalkingTime = duration
 }
 
-// GetPreference returns the preference
-func (r *Request) GetPreference() Preference {
+// Preference returns the preference
+func (r *Request) Preference() Preference {
 	return r.preference
 }
 
@@ -112,8 +112,8 @@ func (r *Request) SetPreference(preference Preference) {
 	r.preference = preference
 }
 
-// GetNumberOfRiders returns the number of riders
-func (r *Request) GetNumberOfRiders() int {
+// NumberOfRiders returns the number of riders
+func (r *Request) NumberOfRiders() int {
 	return r.numberOfRiders
 }
 

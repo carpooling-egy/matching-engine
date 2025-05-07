@@ -13,10 +13,10 @@ type RequestConverter struct {
 // ToDTO converts a domain MatchedRequest to a MatchedRequestDTO
 func (c *RequestConverter) ToDTO(req *model.MatchedRequest) dto.MatchedRequestDTO {
 	return dto.MatchedRequestDTO{
-		UserID:       req.GetRequest().GetUserID(),
-		RequestID:    req.GetRequest().GetID(),
-		PickupPoint:  c.pointConverter.ToDTO(req.GetPickup()),
-		DropoffPoint: c.pointConverter.ToDTO(req.GetDropoff()),
+		UserID:       req.Request().UserID(),
+		RequestID:    req.Request().ID(),
+		PickupPoint:  c.pointConverter.ToDTO(req.Pickup()),
+		DropoffPoint: c.pointConverter.ToDTO(req.Dropoff()),
 	}
 }
 

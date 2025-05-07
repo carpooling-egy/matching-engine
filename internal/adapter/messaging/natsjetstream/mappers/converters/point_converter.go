@@ -12,14 +12,14 @@ type PointConverter struct{}
 
 // ToDTO converts a domain Point to a PointDTO
 func (c *PointConverter) ToDTO(p *model.Point) dto.PointDTO {
-	owner := p.GetOwner()
+	owner := p.Owner()
 	var id, ownerType string
 
 	if offer, ok := owner.AsOffer(); ok {
-		id = offer.GetID()
+		id = offer.ID()
 		ownerType = string(enums.Offer)
 	} else if request, ok := owner.AsRequest(); ok {
-		id = request.GetID()
+		id = request.ID()
 		ownerType = string(enums.Request)
 	}
 
@@ -27,11 +27,11 @@ func (c *PointConverter) ToDTO(p *model.Point) dto.PointDTO {
 		OwnerType: ownerType,
 		OwnerID:   id,
 		Point: dto.CoordinateDTO{
-			Lat: p.GetCoordinate().Lat(),
-			Lng: p.GetCoordinate().Lng(), // Fixed bug: now using Lng() instead of Lat() twice
+			Lat: p.Coordinate().Lat(),
+			Lng: p.Coordinate().Lng(),
 		},
-		Time:      p.GetTime().Format(time.RFC3339),
-		PointType: p.GetPointType().String(),
+		Time:      p.Time().Format(time.RFC3339),
+		PointType: p.PointType().String(),
 	}
 }
 

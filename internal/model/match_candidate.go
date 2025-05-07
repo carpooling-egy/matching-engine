@@ -14,8 +14,8 @@ func NewMatchCandidate(request *Request, offer *Offer) *MatchCandidate {
 	}
 }
 
-// GetRequest returns the request
-func (mc *MatchCandidate) GetRequest() *Request {
+// Request returns the request
+func (mc *MatchCandidate) Request() *Request {
 	return mc.request
 }
 
@@ -24,8 +24,8 @@ func (mc *MatchCandidate) SetRequest(request *Request) {
 	mc.request = request
 }
 
-// GetOffer returns the offer
-func (mc *MatchCandidate) GetOffer() *Offer {
+// Offer returns the offer
+func (mc *MatchCandidate) Offer() *Offer {
 	return mc.offer
 }
 

@@ -1,6 +1,6 @@
 package enums
 
-// OwnerType represents the type of entity that owns a point
+// RoleType represents the type of entity that owns a point
 type RoleType string
 
 const (

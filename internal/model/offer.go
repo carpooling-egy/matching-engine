@@ -38,8 +38,8 @@ func NewOffer(id, userID string, source, destination Coordinate, detourTime time
 	}
 }
 
-// GetID returns the offer ID
-func (o *Offer) GetID() string {
+// ID returns the offer ID
+func (o *Offer) ID() string {
 	return o.id
 }
 
@@ -48,8 +48,8 @@ func (o *Offer) SetID(id string) {
 	o.id = id
 }
 
-// GetUserID returns the user ID
-func (o *Offer) GetUserID() string {
+// UserID returns the user ID
+func (o *Offer) UserID() string {
 	return o.userID
 }
 
@@ -58,8 +58,8 @@ func (o *Offer) SetUserID(userID string) {
 	o.userID = userID
 }
 
-// GetSource returns the source coordinate
-func (o *Offer) GetSource() Coordinate {
+// Source returns the source coordinate
+func (o *Offer) Source() Coordinate {
 	return o.source
 }
 
@@ -68,8 +68,8 @@ func (o *Offer) SetSource(source Coordinate) {
 	o.source = source
 }
 
-// GetDestination returns the destination coordinate
-func (o *Offer) GetDestination() *Coordinate {
+// Destination returns the destination coordinate
+func (o *Offer) Destination() *Coordinate {
 	return &o.destination
 }
 
@@ -78,8 +78,8 @@ func (o *Offer) SetDestination(destination Coordinate) {
 	o.destination = destination
 }
 
-// GetDetourTime returns the detour time
-func (o *Offer) GetDetourTime() time.Duration {
+// DetourTime returns the detour time
+func (o *Offer) DetourTime() time.Duration {
 	return o.detourTime
 }
 
@@ -88,8 +88,8 @@ func (o *Offer) SetDetourTime(detourTime time.Duration) {
 	o.detourTime = detourTime
 }
 
-// GetDepartureTime returns the departure time
-func (o *Offer) GetDepartureTime() time.Time {
+// DepartureTime returns the departure time
+func (o *Offer) DepartureTime() time.Time {
 	return o.departureTime
 }
 
@@ -98,8 +98,8 @@ func (o *Offer) SetDepartureTime(departureTime time.Time) {
 	o.departureTime = departureTime
 }
 
-// GetMatchedRequests returns the matched requests
-func (o *Offer) GetMatchedRequests() []*MatchedRequest {
+// MatchedRequests returns the matched requests
+func (o *Offer) MatchedRequests() []*MatchedRequest {
 	return o.matchedRequests
 }
 
@@ -108,8 +108,8 @@ func (o *Offer) SetMatchedRequests(matchedRequests []*MatchedRequest) {
 	o.matchedRequests = matchedRequests
 }
 
-// GetPreference returns the preference
-func (o *Offer) GetPreference() Preference {
+// Preference returns the preference
+func (o *Offer) Preference() Preference {
 	return o.preference
 }
 
@@ -118,8 +118,8 @@ func (o *Offer) SetPreference(preference Preference) {
 	o.preference = preference
 }
 
-// GetPath returns the path
-func (o *Offer) GetPath() []*Point {
+// Path returns the path
+func (o *Offer) Path() []*Point {
 	return o.path
 }
 

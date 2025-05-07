@@ -133,12 +133,12 @@ func generateMatchingResults(count int) []*model.MatchingResult {
 			matchedRequest := model.NewMatchedRequest(offer, request, *pickup, *dropoff)
 
 			// Add to the assigned matched requests
-			currentRequests := result.GetAssignedMatchedRequests()
+			currentRequests := result.AssignedMatchedRequests()
 			currentRequests = append(currentRequests, matchedRequest)
 			result.SetAssignedMatchedRequests(currentRequests)
 
 			// Add points to the path
-			currentPath := result.GetNewPath()
+			currentPath := result.NewPath()
 			currentPath = append(currentPath, pickup, dropoff)
 			result.SetNewPath(currentPath)
 		}
