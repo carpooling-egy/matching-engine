@@ -55,16 +55,16 @@ func NewOffer(
 }
 
 // Getters for immutable fields
-func (d *Offer) ID() string                           { return d.id }
-func (d *Offer) UserID() string                       { return d.userID }
-func (d *Offer) Source() Coordinate                   { return d.source }
-func (d *Offer) Destination() Coordinate              { return d.destination }
-func (d *Offer) DepartureTime() time.Time             { return d.departureTime }
-func (d *Offer) DetourDurationMinutes() time.Duration { return d.detourDurMins }
-func (d *Offer) Capacity() int                        { return d.capacity }
-func (d *Offer) Preferences() Preference              { return d.preference }
-func (d *Offer) CurrentNumberOfRequests() int         { return d.currentNumberOfRequests }
-func (d *Offer) PathPoints() []*PathPoint {return d.path}
+func (o *Offer) ID() string                           { return o.id }
+func (o *Offer) UserID() string                       { return o.userID }
+func (o *Offer) Source() Coordinate                   { return o.source }
+func (o *Offer) Destination() Coordinate              { return o.destination }
+func (o *Offer) DepartureTime() time.Time             { return o.departureTime }
+func (o *Offer) DetourDurationMinutes() time.Duration { return o.detourDurMins }
+func (o *Offer) Capacity() int                        { return o.capacity }
+func (o *Offer) Preferences() Preference              { return o.preference }
+func (o *Offer) CurrentNumberOfRequests() int         { return o.currentNumberOfRequests }
+func (o *Offer) PathPoints() []*PathPoint             { return o.path }
 func (o *Offer) MatchedRequests() []*MatchedRequest {
 	return o.matchedRequests
 }
@@ -92,6 +92,6 @@ func (o *Offer) AsRequest() (*Request, bool) {
 	return nil, false
 }
 
-func (d *Offer) SetCurrentNumberOfRequests(count int) {
-	d.currentNumberOfRequests = count
+func (o *Offer) SetCurrentNumberOfRequests(count int) {
+	o.currentNumberOfRequests = count
 }
