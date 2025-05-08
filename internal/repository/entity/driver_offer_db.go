@@ -106,6 +106,9 @@ func (d *DriverOfferDB) ToDriverOffer() *model.Offer {
 		pathPoints,
 		matchedRequests,
 	)
+	
+	driverOffer.Path()[0].SetOwner(driverOffer)
+	driverOffer.Path()[len(driverOffer.Path())-1].SetOwner(driverOffer)
 
 	return driverOffer
 }
