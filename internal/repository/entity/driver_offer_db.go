@@ -9,16 +9,16 @@ import (
 
 // DriverOfferDB is the database model for driver offers
 type DriverOfferDB struct {
-	ID                      string        `gorm:"type:uuid;primaryKey"`
-	UserID                  string        `gorm:"type:uuid;not null"`
-	SourceLatitude          float64       `gorm:"type:decimal(10,8);not null"`
-	SourceLongitude         float64       `gorm:"type:decimal(11,8);not null"`
-	DestinationLatitude     float64       `gorm:"type:decimal(10,8);not null"`
-	DestinationLongitude    float64       `gorm:"type:decimal(11,8);not null"`
-	DepartureTime           time.Time     `gorm:"type:timestamp with time zone;not null"`
+	ID                   string    `gorm:"type:uuid;primaryKey"`
+	UserID               string    `gorm:"type:uuid;not null"`
+	SourceLatitude       float64   `gorm:"type:decimal(10,8);not null"`
+	SourceLongitude      float64   `gorm:"type:decimal(11,8);not null"`
+	DestinationLatitude  float64   `gorm:"type:decimal(10,8);not null"`
+	DestinationLongitude float64   `gorm:"type:decimal(11,8);not null"`
+	DepartureTime        time.Time `gorm:"type:timestamp with time zone;not null"`
 
 	EstimatedArrivalTime    time.Time     `gorm:"type:timestamp with time zone"`
-    MaxEstimatedArrivalTime time.Time     `gorm:"type:timestamp with time zone"`
+	MaxEstimatedArrivalTime time.Time     `gorm:"type:timestamp with time zone"`
 	DetourDurationMinutes   time.Duration `gorm:"type:interval;default:'0 minutes'"`
 	Capacity                int           `gorm:"not null;check:capacity > 0"`
 	CurrentNumberOfRequests int           `gorm:"not null;default:0"`
@@ -48,51 +48,49 @@ func (d *DriverOfferDB) ToDriverOffer() *model.Offer {
 	// Pre-allocate pathPoints slice
 	pathPoints := make([]*model.PathPoint, 0, len(d.PathPoints))
 
-    // Create a map to store pickup points by request ID
-    pickupPointsByRequestID := make(map[string]*model.PathPoint)
-    // And store path points by request ID for both pickup and dropoff
-    dropoffPointsByRequestID := make(map[string]*model.PathPoint)
+	// Create a map to store pickup points by request ID
+	pickupPointsByRequestID := make(map[string]*model.PathPoint)
+	// And store path points by request ID for both pickup and dropoff
+	dropoffPointsByRequestID := make(map[string]*model.PathPoint)
 
 	matchedRequests := make([]*model.MatchedRequest, 0, len(d.PathPoints)/2)
-
 
 	sourcePoint := model.NewPathPoint(*sourceCoord, enums.Source, d.DepartureTime, nil)
 	pathPoints = append(pathPoints, sourcePoint)
 
+	for _, pp := range d.PathPoints {
+		pathPoint := pp.ToPathPoint()
+		pathPoints = append(pathPoints, pathPoint)
 
-    for _, pp := range d.PathPoints {
-        pathPoint := pp.ToPathPoint()
-        pathPoints = append(pathPoints, pathPoint)
-        
-        // If the path point has a request associated with it
-        if pathPoint.Owner() != nil {
-            request, _ := pathPoint.Owner().AsRequest()
-            requestID := request.ID()
-            
-            // If it's a pickup point, store it
-            if pathPoint.PointType() == enums.Pickup {
-                pickupPointsByRequestID[requestID] = pathPoint
-            } else if pathPoint.PointType() == enums.Dropoff {
-                dropoffPointsByRequestID[requestID] = pathPoint
-            }
-            
-        }
-    }
+		// If the path point has a request associated with it
+		if pathPoint.Owner() != nil {
+			request, _ := pathPoint.Owner().AsRequest()
+			requestID := request.ID()
+
+			// If it's a pickup point, store it
+			if pathPoint.PointType() == enums.Pickup {
+				pickupPointsByRequestID[requestID] = pathPoint
+			} else if pathPoint.PointType() == enums.Dropoff {
+				dropoffPointsByRequestID[requestID] = pathPoint
+			}
+
+		}
+	}
 
 	destPoint := model.NewPathPoint(*destCoord, enums.Destination, d.MaxEstimatedArrivalTime, nil)
 	pathPoints = append(pathPoints, destPoint)
 
-    // Now create matched requests
-    for requestID, pickupPoint := range pickupPointsByRequestID {
-        // Check if there's a corresponding dropoff point
-        dropoffPoint, exists := dropoffPointsByRequestID[requestID]
-        if exists {
-            request, _ := pickupPoint.Owner().AsRequest()
-            // Create matched request using the constructor
-            matchedRequest := model.NewMatchedRequest(nil, request, *pickupPoint, *dropoffPoint)
-            matchedRequests = append(matchedRequests, matchedRequest)
-        }
-    }
+	// Now create matched requests
+	for requestID, pickupPoint := range pickupPointsByRequestID {
+		// Check if there's a corresponding dropoff point
+		dropoffPoint, exists := dropoffPointsByRequestID[requestID]
+		if exists {
+			request, _ := pickupPoint.Owner().AsRequest()
+			// Create matched request using the constructor
+			matchedRequest := model.NewMatchedRequest(request, *pickupPoint, *dropoffPoint)
+			matchedRequests = append(matchedRequests, matchedRequest)
+		}
+	}
 
 	// Create driver offer with the already converted path points
 	driverOffer := model.NewOffer(
@@ -106,7 +104,7 @@ func (d *DriverOfferDB) ToDriverOffer() *model.Offer {
 		*preferences,
 		d.CurrentNumberOfRequests,
 		pathPoints,
-        matchedRequests,
+		matchedRequests,
 	)
 
 	return driverOffer

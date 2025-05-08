@@ -2,30 +2,18 @@ package model
 
 // MatchedRequest represents a request that has been matched with an offer
 type MatchedRequest struct {
-	offer   *Offer
 	request *Request
 	pickup  PathPoint
 	dropoff PathPoint
 }
 
 // NewMatchedRequest creates a new MatchedRequest
-func NewMatchedRequest(offer *Offer, request *Request, pickup, dropoff PathPoint) *MatchedRequest {
+func NewMatchedRequest(request *Request, pickup, dropoff PathPoint) *MatchedRequest {
 	return &MatchedRequest{
-		offer:   offer,
 		request: request,
 		pickup:  pickup,
 		dropoff: dropoff,
 	}
-}
-
-// Offer returns the offer
-func (mr *MatchedRequest) Offer() *Offer {
-	return mr.offer
-}
-
-// SetOffer sets the offer
-func (mr *MatchedRequest) SetOffer(offer *Offer) {
-	mr.offer = offer
 }
 
 // Request returns the request
