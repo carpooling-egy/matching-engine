@@ -17,19 +17,19 @@ import (
 
 func main() {
 
-	// Create a publisher using the messaging interface
-	var publisher publisher.Publisher
+	// Create a p using the messaging interface
+	var p publisher.Publisher
 	var err2 error
 
-	// Use the existing NATS publisher implementation
-	publisher, err2 = natsjetstream.NewNATSPublisher()
+	// Use the existing NATS p implementation
+	p, err2 = natsjetstream.NewNATSPublisher()
 	if err2 != nil {
 		fmt.Printf("Error connecting to NATS: %v\n", err2)
 		return
 	}
 	defer func() {
-		if err := publisher.Close(); err != nil {
-			log.Printf("Error closing publisher: %v", err)
+		if err := p.Close(); err != nil {
+			log.Printf("Error closing p: %v", err)
 		}
 	}()
 
@@ -39,9 +39,9 @@ func main() {
 
 	go func() {
 		<-signalChan
-		fmt.Println("\nReceived shutdown signal. Closing publisher...")
-		if err := publisher.Close(); err != nil {
-			log.Printf("Error closing publisher: %v", err)
+		fmt.Println("\nReceived shutdown signal. Closing p...")
+		if err := p.Close(); err != nil {
+			log.Printf("Error closing p: %v", err)
 		}
 		os.Exit(0)
 	}()
@@ -51,7 +51,7 @@ func main() {
 	fmt.Printf("Publishing %d matching results...\n", len(results))
 
 	startTime := time.Now()
-	err2 = publisher.Publish(results)
+	err2 = p.Publish(results)
 
 	if err2 != nil {
 		log.Warn().Err(err2).Msg("Failed to publish matching results")
@@ -67,7 +67,7 @@ func main() {
 	fmt.Printf("Publishing %d matching results...\n", len(results))
 
 	startTime = time.Now()
-	err2 = publisher.Publish(results)
+	err2 = p.Publish(results)
 
 	if err2 != nil {
 		log.Warn().Err(err2).Msg("Failed to publish matching results")
@@ -100,26 +100,6 @@ func generateMatchingResults(count int) []*model.MatchingResult {
 		// Create the matching result using the model constructor
 		result := model.NewMatchingResult(userID, offerID, assignedRequests, newPath)
 
-		// Create an offer for this matching result
-		offerCoord, _ := model.NewCoordinate(randomCoordinate(-90, 90), randomCoordinate(-180, 180))
-		offerDetourTime := time.Duration(rand.Intn(60)) * time.Minute
-		offerDepartureTime := time.Now().Add(time.Duration(rand.Intn(120)) * time.Minute)
-		offerPreference := model.Preference{}
-
-		offer := model.NewOffer(
-			offerID,
-			userID,
-			*offerCoord,
-			*offerCoord,
-			offerDepartureTime,
-			offerDetourTime,
-			3, // Adding capacity parameter (using 3 as a reasonable default)
-			offerPreference,
-			0, // Current number of requests (starting with 0)
-			make([]*model.PathPoint, 0), // Empty path
-			make([]*model.MatchedRequest, 0), // Empty matched requests
-		)
-
 		// Add some random assigned requests
 		numRequests := 1 + rand.Intn(3) // 1-3 requests per matching result
 		for j := 0; j < numRequests; j++ {
@@ -132,7 +112,7 @@ func generateMatchingResults(count int) []*model.MatchingResult {
 			pickup, dropoff := generatePoints(request)
 
 			// Create matched request with the offer and request
-			matchedRequest := model.NewMatchedRequest(offer, request, *pickup, *dropoff)
+			matchedRequest := model.NewMatchedRequest(request, *pickup, *dropoff)
 
 			// Add to the assigned matched requests
 			currentRequests := result.AssignedMatchedRequests()
@@ -212,7 +192,7 @@ func generatePoints(owner model.Role) (*model.PathPoint, *model.PathPoint) {
 	dropoffTime := pickupTime.Add(time.Duration(rand.Intn(120)+30) * time.Minute)
 
 	pickupPoint := model.NewPathPoint(*pickupCoord, enums.Pickup, dropoffTime, owner)
-	dropoffPoint := model.NewPathPoint(*dropoffCoord, enums.Dropoff,dropoffTime, owner)
+	dropoffPoint := model.NewPathPoint(*dropoffCoord, enums.Dropoff, dropoffTime, owner)
 
 	return pickupPoint, dropoffPoint
 }
