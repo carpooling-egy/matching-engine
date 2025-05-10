@@ -1,18 +1,20 @@
 package downsampling
 
 import (
+	"github.com/golang/geo/s1"
 	"github.com/golang/geo/s2"
 	"matching-engine/internal/geo"
 	"matching-engine/internal/model"
 )
 
 type RDPDownSampler struct {
-	eps float64
+	eps s1.ChordAngle
 }
 
-func NewRDPDownSampler(epsInMeters float64) *RDPDownSampler {
+func NewRDPDownSampler(epsMeters float64) *RDPDownSampler {
+	epsAngle := epsMeters / geo.EarthRadiusInMeters
 	return &RDPDownSampler{
-		eps: epsInMeters,
+		eps: s1.ChordAngleFromAngle(s1.Angle(epsAngle)),
 	}
 }
 
@@ -21,41 +23,79 @@ var _ RouteDownSampler = (*RDPDownSampler)(nil)
 func (r *RDPDownSampler) DownSample(
 	route model.LineString,
 ) (model.LineString, error) {
-	if len(route) < 3 {
-		out := make(model.LineString, len(route))
+	n := len(route)
+	if n < 3 {
+		out := make(model.LineString, n)
 		copy(out, route)
 		return out, nil
 	}
 
-	return r.rdp(route), nil
-}
+	points := convertCoordsToS2Points(route)
 
-func (r *RDPDownSampler) rdp(points model.LineString) model.LineString {
-	if len(points) < 3 {
-		out := make(model.LineString, len(points))
-		copy(out, points)
-		return out
-	}
+	toKeep := make([]bool, n)
+	toKeep[0], toKeep[n-1] = true, true
 
-	start, end := points[0], points[len(points)-1]
-	maxIdx, maxD := 0, 0.0
-	for i := 1; i < len(points)-1; i++ {
-		if d := perpendicularDistance(points[i], start, end); d > maxD {
-			maxD, maxIdx = d, i
+	type segment struct{ start, end int }
+	stack := []segment{{0, n - 1}}
+
+	for len(stack) > 0 {
+		seg := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		start, end := seg.start, seg.end
+		idx, maxChord := findMaxChordIndex(points, start, end)
+
+		if maxChord > r.eps {
+			toKeep[idx] = true
+			stack = append(stack, segment{start, idx}, segment{idx, end})
 		}
 	}
-	if maxD <= r.eps {
-		return model.LineString{start, end}
-	}
-	left := r.rdp(points[:maxIdx+1])
-	right := r.rdp(points[maxIdx:])
-	return append(left[:len(left)-1], right...)
+
+	return buildOutput(route, toKeep), nil
 }
 
-func perpendicularDistance(p, start, end model.Coordinate) float64 {
-	pPoint := s2.PointFromLatLng(s2.LatLngFromDegrees(p.Lat(), p.Lng()))
-	startPoint := s2.PointFromLatLng(s2.LatLngFromDegrees(start.Lat(), start.Lng()))
-	endPoint := s2.PointFromLatLng(s2.LatLngFromDegrees(end.Lat(), end.Lng()))
-	distanceRad := s2.DistanceFromSegment(pPoint, startPoint, endPoint)
-	return distanceRad.Radians() * geo.EarthRadiusInMeters
+func convertCoordsToS2Points(route model.LineString) []s2.Point {
+	points := make([]s2.Point, len(route))
+	for i, pt := range route {
+		points[i] = s2.PointFromLatLng(
+			s2.LatLngFromDegrees(pt.Lat(), pt.Lng()),
+		)
+	}
+	return points
+}
+
+func findMaxChordIndex(points []s2.Point, start, end int) (int, s1.ChordAngle) {
+	var maxChord s1.ChordAngle
+	idx := -1
+
+	for i := start + 1; i < end; i++ {
+		ang := s2.DistanceFromSegment(
+			points[i], points[start], points[end],
+		)
+		chord := s1.ChordAngleFromAngle(ang)
+		if chord > maxChord {
+			maxChord, idx = chord, i
+		}
+	}
+
+	return idx, maxChord
+}
+
+func buildOutput(route model.LineString, toKeep []bool) model.LineString {
+	count := 0
+	for _, keep := range toKeep {
+		if keep {
+			count++
+		}
+	}
+
+	out := make(model.LineString, count)
+	j := 0
+	for i, keep := range toKeep {
+		if keep {
+			out[j] = route[i]
+			j++
+		}
+	}
+	return out
 }
