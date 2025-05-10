@@ -3,19 +3,36 @@ package downsampling
 import (
 	"github.com/golang/geo/s1"
 	"github.com/golang/geo/s2"
+	"matching-engine/internal/collections"
 	"matching-engine/internal/geo"
 	"matching-engine/internal/model"
 )
+
+const DefaultEpsilonMeters = 10.0
+const DefaultMinRoutePoints = 2
 
 type RDPDownSampler struct {
 	eps s1.ChordAngle
 }
 
-func NewRDPDownSampler(epsMeters float64) *RDPDownSampler {
-	epsAngle := epsMeters / geo.EarthRadiusInMeters
-	return &RDPDownSampler{
-		eps: s1.ChordAngleFromAngle(s1.Angle(epsAngle)),
+type RDPDownSamplerOption func(*RDPDownSampler)
+
+func WithEpsilonMeters(epsMeters float64) RDPDownSamplerOption {
+	return func(s *RDPDownSampler) {
+		s.eps = metersToChord(epsMeters)
 	}
+}
+
+func NewRDPDownSampler(opts ...RDPDownSamplerOption) *RDPDownSampler {
+	s := &RDPDownSampler{
+		eps: metersToChord(DefaultEpsilonMeters),
+	}
+
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	return s
 }
 
 var _ RouteDownSampler = (*RDPDownSampler)(nil)
@@ -24,7 +41,7 @@ func (r *RDPDownSampler) DownSample(
 	route model.LineString,
 ) (model.LineString, error) {
 	n := len(route)
-	if n < 3 {
+	if n <= DefaultMinRoutePoints {
 		out := make(model.LineString, n)
 		copy(out, route)
 		return out, nil
@@ -35,19 +52,22 @@ func (r *RDPDownSampler) DownSample(
 	toKeep := make([]bool, n)
 	toKeep[0], toKeep[n-1] = true, true
 
-	type segment struct{ start, end int }
-	stack := []segment{{0, n - 1}}
+	stack := collections.NewStack[collections.Tuple2[int, int]]()
+	stack.Push(collections.NewTuple2(0, n-1))
 
-	for len(stack) > 0 {
-		seg := stack[len(stack)-1]
-		stack = stack[:len(stack)-1]
+	for !stack.IsEmpty() {
+		seg, err := stack.Pop()
+		if err != nil {
+			break
+		}
 
-		start, end := seg.start, seg.end
+		start, end := seg.First, seg.Second
 		idx, maxChord := findMaxChordIndex(points, start, end)
 
 		if maxChord > r.eps {
 			toKeep[idx] = true
-			stack = append(stack, segment{start, idx}, segment{idx, end})
+			stack.Push(collections.NewTuple2(start, idx))
+			stack.Push(collections.NewTuple2(idx, end))
 		}
 	}
 
@@ -98,4 +118,9 @@ func buildOutput(route model.LineString, toKeep []bool) model.LineString {
 		}
 	}
 	return out
+}
+
+func metersToChord(epsMeters float64) s1.ChordAngle {
+	epsAngle := epsMeters / geo.EarthRadiusInMeters
+	return s1.ChordAngleFromAngle(s1.Angle(epsAngle))
 }
