@@ -75,7 +75,7 @@ func (DrivingTimeMapper) FromTransport(response *pb.Api) ([]time.Duration, error
 	durations[0] = 0
 	for i, leg := range legs {
 		timeInSeconds := leg.GetSummary().Time
-		durations[i+1] = time.Duration(timeInSeconds * float64(time.Second))
+		durations[i+1] = durations[i] + time.Duration(timeInSeconds*float64(time.Second))
 	}
 
 	return durations, nil
