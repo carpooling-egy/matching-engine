@@ -213,8 +213,8 @@ func TestValhalla_ComputeDistanceTimeMatrix(t *testing.T) {
 					*must(model.NewCoordinate(42.5440, 1.5148)),
 					*must(model.NewCoordinate(42.5057, 1.5265)),
 				},
-				time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 				model.ProfileAuto,
+				model.WithDepartureTime(time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)),
 				model.WithTargets([]model.Coordinate{
 					*must(model.NewCoordinate(42.5057, 1.5265)),
 					*must(model.NewCoordinate(42.5440, 1.5148)),

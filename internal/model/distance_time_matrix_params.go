@@ -22,9 +22,14 @@ func WithTargets(targets []Coordinate) MatrixOption {
 	}
 }
 
+func WithDepartureTime(departureTime time.Time) MatrixOption {
+	return func(p *DistanceTimeMatrixParams) {
+		p.departureTime = departureTime
+	}
+}
+
 func NewDistanceTimeMatrixParams(
 	sources []Coordinate,
-	departureTime time.Time,
 	profile Profile,
 	opts ...MatrixOption,
 ) (*DistanceTimeMatrixParams, error) {
@@ -33,19 +38,14 @@ func NewDistanceTimeMatrixParams(
 		return nil, fmt.Errorf("sources cannot be empty")
 	}
 
-	if departureTime.Before(time.Now()) {
-		return nil, errors.New("departure time is in the past")
-	}
-
 	if !profile.IsValid() {
 		return nil, errors.New("invalid profile")
 	}
 
 	dtm := &DistanceTimeMatrixParams{
-		sources:       sources,
-		targets:       sources,
-		departureTime: departureTime,
-		profile:       profile,
+		sources: sources,
+		targets: sources,
+		profile: profile,
 	}
 
 	for _, opt := range opts {
@@ -54,6 +54,10 @@ func NewDistanceTimeMatrixParams(
 
 	if len(dtm.targets) == 0 {
 		return nil, errors.New("targets cannot be empty")
+	}
+
+	if dtm.departureTime.Before(time.Now()) {
+		return nil, errors.New("departure time is in the past")
 	}
 
 	return dtm, nil
