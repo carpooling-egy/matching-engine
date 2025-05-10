@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"math"
 )
 
 type Coordinate struct {
@@ -61,4 +62,9 @@ func validateLongitude(lng float64) error {
 
 func (c *Coordinate) String() string {
 	return fmt.Sprintf("Coordinate{lat: %.6f, lng: %.6f}", c.lat, c.lng)
+}
+
+func (c *Coordinate) Equal(other *Coordinate) bool {
+	const tolerance = 1e-9
+	return math.Abs(c.Lat()-other.Lat()) < tolerance && math.Abs(c.Lng()-other.Lng()) < tolerance
 }
