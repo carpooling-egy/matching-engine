@@ -18,6 +18,7 @@ func (c *ResultConverter) ToDTO(result *model.MatchingResult) dto.MatchingResult
 		OfferID:                 result.OfferID(),
 		AssignedMatchedRequests: c.requestConverter.ToMatchedRequestsDTO(result.AssignedMatchedRequests()),
 		Path:                    c.pointConverter.ToPointsDTO(result.NewPath()),
+		CurrentNumberOfRequests: result.CurrentNumberOfRequests(),
 	}
 }
 

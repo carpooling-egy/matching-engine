@@ -6,10 +6,11 @@ type MatchingResult struct {
 	offerID                 string
 	assignedMatchedRequests []*MatchedRequest
 	newPath                 []*PathPoint
+	currentNumberOfRequests int
 }
 
 // NewMatchingResult creates a new MatchingResult
-func NewMatchingResult(userID, offerID string, assignedMatchedRequests []*MatchedRequest, newPath []*PathPoint) *MatchingResult {
+func NewMatchingResult(userID, offerID string, assignedMatchedRequests []*MatchedRequest, newPath []*PathPoint, currentNumberOfRequests int) *MatchingResult {
 	if assignedMatchedRequests == nil {
 		assignedMatchedRequests = make([]*MatchedRequest, 0)
 	}
@@ -21,6 +22,7 @@ func NewMatchingResult(userID, offerID string, assignedMatchedRequests []*Matche
 		offerID:                 offerID,
 		assignedMatchedRequests: assignedMatchedRequests,
 		newPath:                 newPath,
+		currentNumberOfRequests: currentNumberOfRequests,
 	}
 }
 
@@ -62,4 +64,14 @@ func (mr *MatchingResult) NewPath() []*PathPoint {
 // SetNewPath sets the new path
 func (mr *MatchingResult) SetNewPath(path []*PathPoint) {
 	mr.newPath = path
+}
+
+// CurrentNumberOfRequests returns the current number of requests
+func (mr *MatchingResult) CurrentNumberOfRequests() int {
+	return mr.currentNumberOfRequests
+}
+
+// SetCurrentNumberOfRequests sets the current number of requests
+func (mr *MatchingResult) SetCurrentNumberOfRequests(count int) {
+	mr.currentNumberOfRequests = count
 }

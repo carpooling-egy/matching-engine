@@ -6,4 +6,5 @@ type MatchingResultDTO struct {
 	OfferID                 string              `json:"offerId"`
 	AssignedMatchedRequests []MatchedRequestDTO `json:"assignedMatchedRequests"`
 	Path                    []PointDTO          `json:"path"`
+	CurrentNumberOfRequests int                 `json:"currentNumberOfRequests"`
 }
