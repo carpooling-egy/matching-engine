@@ -6,7 +6,7 @@ import (
 )
 
 type RoutePruner interface {
-	Prune(threshold time.Duration) (model.LineString, error)
+	Prune(origin *model.Coordinate, threshold time.Duration) (model.LineString, error)
 }
 
 type RoutePrunerFactory interface {
