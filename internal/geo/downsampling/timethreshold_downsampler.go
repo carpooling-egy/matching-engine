@@ -2,6 +2,7 @@ package downsampling
 
 import (
 	"errors"
+	"github.com/golang/geo/s1"
 	"github.com/golang/geo/s2"
 	"matching-engine/internal/geo"
 	"matching-engine/internal/model"
@@ -9,56 +10,51 @@ import (
 )
 
 type TimeThresholdDownSampler struct {
-	interval time.Duration
+	intervalAngle s1.Angle
 }
 
 func NewTimeThresholdDownSampler(interval time.Duration) *TimeThresholdDownSampler {
+	distMeters := geo.WalkingSpeedMPS * interval.Seconds()
+	angleRad := distMeters / geo.EarthRadiusInMeters
 	return &TimeThresholdDownSampler{
-		interval: interval,
+		intervalAngle: s1.Angle(angleRad),
 	}
 }
 
 func (t *TimeThresholdDownSampler) DownSample(
 	route model.LineString,
 ) (model.LineString, error) {
-
-	if len(route) == 0 {
+	n := len(route)
+	if n == 0 {
 		return nil, errors.New("empty route")
 	}
-	if len(route) == 1 {
+	if n == 1 {
 		return route, nil
 	}
 
-	result := make(model.LineString, 0, len(route)/2)
-	result = append(result, route[0])
+	points := make([]s2.LatLng, n)
+	for i, pt := range route {
+		points[i] = s2.LatLngFromDegrees(pt.Lat(), pt.Lng())
+	}
 
-	accumulatedTime := 0.0
-	thresholdSec := t.interval.Seconds()
+	out := make(model.LineString, 0, n/2)
+	out = append(out, route[0])
 
-	for i := 1; i < len(route); i++ {
-		prev := route[i-1]
-		curr := route[i]
-
-		distMeters := geodesicDistance(prev, curr)
-		segmentTime := distMeters / geo.WalkingSpeedMPS
-
-		accumulatedTime += segmentTime
-
-		if accumulatedTime >= thresholdSec {
-			result = append(result, curr)
-			accumulatedTime -= thresholdSec
+	var accAngle s1.Angle
+	for i := 1; i < n; i++ {
+		prev := points[i-1]
+		cur := points[i]
+		segAngle := prev.Distance(cur)
+		accAngle += segAngle
+		if accAngle >= t.intervalAngle {
+			out = append(out, route[i])
+			accAngle -= t.intervalAngle
 		}
 	}
 
-	if len(result) == 0 || !result[len(result)-1].Equal(&route[len(route)-1]) {
-		result = append(result, route[len(route)-1])
+	if !out[len(out)-1].Equal(&route[n-1]) {
+		out = append(out, route[n-1])
 	}
 
-	return result, nil
-}
-
-func geodesicDistance(a, b model.Coordinate) float64 {
-	p1 := s2.LatLngFromDegrees(a.Lat(), a.Lng())
-	p2 := s2.LatLngFromDegrees(b.Lat(), b.Lng())
-	return p1.Distance(p2).Radians() * geo.EarthRadiusInMeters
+	return out, nil
 }
