@@ -34,7 +34,7 @@ func NewNATSPublisherWithConfig(config Config) (re.Publisher, error) {
 		//nats.MaxReconnects(config.MaxReconnects),
 		//nats.ReconnectWait(config.ReconnectWait),
 		nats.Timeout(config.ConnectTimeout),
-		nats.UserInfo("publisher", "publisherpass"),
+		nats.UserInfo(config.NatsUsername, config.NatsPassword),
 
 		// Connection event handlers for logging
 		nats.DisconnectErrHandler(func(nc *nats.Conn, err error) {
