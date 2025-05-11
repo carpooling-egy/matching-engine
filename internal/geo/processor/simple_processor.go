@@ -70,6 +70,7 @@ func (p *processorImpl) ComputeClosestRoutePoint(
 	ctx := context.Background()
 
 	prunedRoute, err := p.Prune(point, walkingTime)
+	prunedRoute, err := p.Prune(point, walkingTime)
 
 	if err != nil {
 		return nil, 0, err
