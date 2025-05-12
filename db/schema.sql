@@ -6,8 +6,8 @@ CREATE TYPE gender_type AS ENUM ('male', 'female');
 
 -- Rider requests table
 CREATE TABLE rider_requests (
-    id UUID PRIMARY KEY,
-    user_id UUID NOT NULL,
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL,
 
     -- source
     source_latitude DECIMAL(10, 8) NOT NULL,
@@ -37,8 +37,8 @@ CREATE TABLE rider_requests (
 
 -- Driver offers table
 CREATE TABLE driver_offers (
-    id UUID PRIMARY KEY,
-    user_id UUID NOT NULL,
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL,
     --source
     source_latitude DECIMAL(10, 8) NOT NULL,
     source_longitude DECIMAL(11, 8) NOT NULL,
@@ -55,7 +55,6 @@ CREATE TABLE driver_offers (
 
     detour_duration_minutes INTEGER DEFAULT 0,
     capacity INTEGER NOT NULL CHECK (capacity > 0),
-    selected_car_id UUID, -- Reference to car in external database
 
     current_number_of_requests INTEGER NOT NULL DEFAULT 0,
 
@@ -71,11 +70,11 @@ CREATE TABLE driver_offers (
 
 -- Table to store matching information between driver offers and rider requests
 CREATE TABLE ride_matches (
-    driver_offer_id UUID NOT NULL REFERENCES driver_offers(id) ON DELETE CASCADE,
-    rider_request_id UUID NOT NULL REFERENCES rider_requests(id) ON DELETE CASCADE,
+    driver_offer_id VARCHAR(50) NOT NULL REFERENCES driver_offers(id) ON DELETE CASCADE,
+    rider_request_id VARCHAR(50) NOT NULL REFERENCES rider_requests(id) ON DELETE CASCADE,
 
-    pickup_point_id UUID NOT NULL REFERENCES path_point(id) ON DELETE CASCADE,
-    dropoff_point_id UUID NOT NULL REFERENCES path_point(id) ON DELETE CASCADE,
+    pickup_point_id VARCHAR(50) NOT NULL REFERENCES path_point(id) ON DELETE CASCADE,
+    dropoff_point_id VARCHAR(50) NOT NULL REFERENCES path_point(id) ON DELETE CASCADE,
 
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -83,8 +82,8 @@ CREATE TABLE ride_matches (
 );
 
 CREATE TABLE path_point (
-    id UUID PRIMARY KEY,
-    driver_offer_id UUID NOT NULL REFERENCES driver_offers(id) ON DELETE CASCADE,
+    id VARCHAR(50) PRIMARY KEY,
+    driver_offer_id VARCHAR(50) NOT NULL REFERENCES driver_offers(id) ON DELETE CASCADE,
     path_order INTEGER NOT NULL,
     type point_type NOT NULL,
     

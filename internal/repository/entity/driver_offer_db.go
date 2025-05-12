@@ -9,23 +9,28 @@ import (
 
 // DriverOfferDB is the database model for driver offers
 type DriverOfferDB struct {
-	ID                   string    `gorm:"type:uuid;primaryKey"`
-	UserID               string    `gorm:"type:uuid;not null"`
-	SourceLatitude       float64   `gorm:"type:decimal(10,8);not null"`
-	SourceLongitude      float64   `gorm:"type:decimal(11,8);not null"`
-	DestinationLatitude  float64   `gorm:"type:decimal(10,8);not null"`
-	DestinationLongitude float64   `gorm:"type:decimal(11,8);not null"`
-	DepartureTime        time.Time `gorm:"type:timestamp with time zone;not null"`
+	ID                      string        `gorm:"type:varchar(50);primaryKey"`
+	UserID                  string        `gorm:"type:varchar(50);not null"`
 
+	SourceLatitude          float64       `gorm:"type:decimal(10,8);not null"`
+	SourceLongitude         float64       `gorm:"type:decimal(11,8);not null"`
+
+	DestinationLatitude     float64       `gorm:"type:decimal(10,8);not null"`
+	DestinationLongitude    float64       `gorm:"type:decimal(11,8);not null"`
+
+	DepartureTime           time.Time     `gorm:"type:timestamp with time zone;not null"`
 	EstimatedArrivalTime    time.Time     `gorm:"type:timestamp with time zone"`
 	MaxEstimatedArrivalTime time.Time     `gorm:"type:timestamp with time zone"`
-	DetourDurationMinutes   time.Duration `gorm:"type:interval;default:'0 minutes'"`
+	
+	DetourDurationMinutes   time.Duration `gorm:"default:0"`
 	Capacity                int           `gorm:"not null;check:capacity > 0"`
 	CurrentNumberOfRequests int           `gorm:"not null;default:0"`
+
 	SameGender              bool          `gorm:"not null;default:false"`
 	AllowsSmoking           bool          `gorm:"not null;default:true"`
 	AllowsPets              bool          `gorm:"not null;default:true"`
 	UserGender              enums.Gender  `gorm:"type:gender_type;not null"`
+
 	PathPoints              []PathPointDB `gorm:"foreignKey:DriverOfferID"`
 }
 
@@ -106,7 +111,7 @@ func (d *DriverOfferDB) ToDriverOffer() *model.Offer {
 		pathPoints,
 		matchedRequests,
 	)
-	
+
 	driverOffer.Path()[0].SetOwner(driverOffer)
 	driverOffer.Path()[len(driverOffer.Path())-1].SetOwner(driverOffer)
 
