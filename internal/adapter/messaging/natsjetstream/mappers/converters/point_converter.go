@@ -36,10 +36,10 @@ func (c *PointConverter) ToDTO(p *model.PathPoint) dto.PointDTO {
 }
 
 // ToPointsDTO converts a slice of domain Points to a slice of PointDTOs
-func (c *PointConverter) ToPointsDTO(points []*model.PathPoint) []dto.PointDTO {
+func (c *PointConverter) ToPointsDTO(points []model.PathPoint) []dto.PointDTO {
 	result := make([]dto.PointDTO, 0, len(points))
-	for _, p := range points {
-		result = append(result, c.ToDTO(p))
+	for i := range points {
+		result = append(result, c.ToDTO(&points[i]))
 	}
 	return result
 }

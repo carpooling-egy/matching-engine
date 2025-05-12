@@ -92,7 +92,7 @@ func generateMatchingResults(count int) []*model.MatchingResult {
 		offerID := fmt.Sprintf("offer-%d", i+1)
 
 		// Create an empty path slice - will add points later
-		newPath := make([]*model.PathPoint, 0)
+		newPath := make([]model.PathPoint, 0)
 
 		// Create an empty assigned requests slice - will add requests later
 		assignedRequests := make([]*model.Request, 0)
@@ -118,7 +118,7 @@ func generateMatchingResults(count int) []*model.MatchingResult {
 
 			// Add points to the path
 			currentPath := result.NewPath()
-			currentPath = append(currentPath, pickup, dropoff)
+			currentPath = append(currentPath, *pickup, *dropoff)
 			result.SetNewPath(currentPath)
 		}
 

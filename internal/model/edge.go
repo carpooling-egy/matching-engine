@@ -3,15 +3,15 @@ package model
 // Edge represents a connection between an offer node and a request node
 type Edge struct {
 	requestNode *RequestNode
-	newPath     []*PathPoint
+	newPath     []PathPoint
 	pickup      *PathPoint
 	dropoff     *PathPoint
 }
 
 // NewEdge creates a new Edge
-func NewEdge(requestNode *RequestNode, pickup, dropoff *PathPoint, newPath []*PathPoint) *Edge {
+func NewEdge(requestNode *RequestNode, pickup, dropoff *PathPoint, newPath []PathPoint) *Edge {
 	if newPath == nil {
-		newPath = make([]*PathPoint, 0)
+		newPath = make([]PathPoint, 0)
 	}
 	return &Edge{
 		requestNode: requestNode,
@@ -32,12 +32,12 @@ func (e *Edge) SetRequestNode(requestNode *RequestNode) {
 }
 
 // NewPath returns the new path
-func (e *Edge) NewPath() []*PathPoint {
+func (e *Edge) NewPath() []PathPoint {
 	return e.newPath
 }
 
 // SetNewPath sets the new path
-func (e *Edge) SetNewPath(newPath []*PathPoint) {
+func (e *Edge) SetNewPath(newPath []PathPoint) {
 	e.newPath = newPath
 }
 
