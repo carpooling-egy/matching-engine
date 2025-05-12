@@ -16,11 +16,11 @@ type Offer struct {
 	capacity      int
 
 	currentNumberOfRequests int
-	matchedRequests         []*MatchedRequest
+	matchedRequests         []*Request
 	path                    []*PathPoint
 }
 
-// No need to validate parameters as they will be read from database
+// NewOffer creates a new offer. No need to validate parameters as they will be read from database
 // This constructor should be only used from database entities
 func NewOffer(
 	id, userID string,
@@ -31,10 +31,10 @@ func NewOffer(
 	preference Preference,
 	currentNumberOfRequests int,
 	path []*PathPoint,
-	matchedRequests []*MatchedRequest,
+	matchedRequests []*Request,
 ) *Offer {
 	if matchedRequests == nil {
-		matchedRequests = make([]*MatchedRequest, 0)
+		matchedRequests = make([]*Request, 0)
 	}
 	if path == nil {
 		path = make([]*PathPoint, 0)
@@ -65,12 +65,12 @@ func (o *Offer) Capacity() int                        { return o.capacity }
 func (o *Offer) Preferences() Preference              { return o.preference }
 func (o *Offer) CurrentNumberOfRequests() int         { return o.currentNumberOfRequests }
 func (o *Offer) PathPoints() []*PathPoint             { return o.path }
-func (o *Offer) MatchedRequests() []*MatchedRequest {
+func (o *Offer) MatchedRequests() []*Request {
 	return o.matchedRequests
 }
 
 // SetMatchedRequests sets the matched requests
-func (o *Offer) SetMatchedRequests(matchedRequests []*MatchedRequest) {
+func (o *Offer) SetMatchedRequests(matchedRequests []*Request) {
 	o.matchedRequests = matchedRequests
 }
 

@@ -3,7 +3,7 @@ package model
 // OfferNode represents a node in the offer graph
 type OfferNode struct {
 	offer                        *Offer
-	newlyAssignedMatchedRequests []*MatchedRequest
+	newlyAssignedMatchedRequests []*Request
 	edges                        []*Edge
 	isMatched                    bool
 }
@@ -12,7 +12,7 @@ type OfferNode struct {
 func NewOfferNode(offer *Offer) *OfferNode {
 	return &OfferNode{
 		offer:                        offer,
-		newlyAssignedMatchedRequests: make([]*MatchedRequest, 0),
+		newlyAssignedMatchedRequests: make([]*Request, 0),
 		edges:                        make([]*Edge, 0),
 		isMatched:                    false,
 	}
@@ -29,12 +29,12 @@ func (node *OfferNode) SetOffer(offer *Offer) {
 }
 
 // NewlyAssignedMatchedRequests returns the newly assigned matched requests
-func (node *OfferNode) NewlyAssignedMatchedRequests() []*MatchedRequest {
+func (node *OfferNode) NewlyAssignedMatchedRequests() []*Request {
 	return node.newlyAssignedMatchedRequests
 }
 
 // SetNewlyAssignedMatchedRequests sets the newly assigned matched requests
-func (node *OfferNode) SetNewlyAssignedMatchedRequests(requests []*MatchedRequest) {
+func (node *OfferNode) SetNewlyAssignedMatchedRequests(requests []*Request) {
 	node.newlyAssignedMatchedRequests = requests
 }
 
@@ -59,6 +59,6 @@ func (node *OfferNode) SetMatched(isMatched bool) {
 }
 
 // GetAllRequests returns all matched requests, both existing and newly assigned
-func (node *OfferNode) GetAllRequests() []*MatchedRequest {
+func (node *OfferNode) GetAllRequests() []*Request {
 	return append(node.offer.matchedRequests, node.newlyAssignedMatchedRequests...)
 }

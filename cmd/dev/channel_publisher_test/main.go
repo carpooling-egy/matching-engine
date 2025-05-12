@@ -95,10 +95,10 @@ func generateMatchingResults(count int) []*model.MatchingResult {
 		newPath := make([]*model.PathPoint, 0)
 
 		// Create an empty assigned requests slice - will add requests later
-		assignedRequests := make([]*model.MatchedRequest, 0)
+		assignedRequests := make([]*model.Request, 0)
 
 		// Create the matching result using the model constructor
-		result := model.NewMatchingResult(userID, offerID, assignedRequests, newPath)
+		result := model.NewMatchingResult(userID, offerID, assignedRequests, newPath, 3)
 
 		// Add some random assigned requests
 		numRequests := 1 + rand.Intn(3) // 1-3 requests per matching result
@@ -106,13 +106,10 @@ func generateMatchingResults(count int) []*model.MatchingResult {
 			requestID := fmt.Sprintf("request-%d-%d", i+1, j+1)
 
 			// Create a request to use as owner for the points
-			request := createRequest(requestID)
+			matchedRequest := createRequest(requestID)
 
 			// Create pickup and dropoff points for this request
-			pickup, dropoff := generatePoints(request)
-
-			// Create matched request with the offer and request
-			matchedRequest := model.NewMatchedRequest(request, *pickup, *dropoff)
+			pickup, dropoff := generatePoints(matchedRequest)
 
 			// Add to the assigned matched requests
 			currentRequests := result.AssignedMatchedRequests()
