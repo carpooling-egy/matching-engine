@@ -4,20 +4,16 @@ package model
 type Edge struct {
 	requestNode *RequestNode
 	newPath     []PathPoint
-	pickup      *PathPoint
-	dropoff     *PathPoint
 }
 
 // NewEdge creates a new Edge
-func NewEdge(requestNode *RequestNode, pickup, dropoff *PathPoint, newPath []PathPoint) *Edge {
+func NewEdge(requestNode *RequestNode, newPath []PathPoint) *Edge {
 	if newPath == nil {
 		newPath = make([]PathPoint, 0)
 	}
 	return &Edge{
 		requestNode: requestNode,
 		newPath:     newPath,
-		pickup:      pickup,
-		dropoff:     dropoff,
 	}
 }
 
@@ -39,24 +35,4 @@ func (e *Edge) NewPath() []PathPoint {
 // SetNewPath sets the new path
 func (e *Edge) SetNewPath(newPath []PathPoint) {
 	e.newPath = newPath
-}
-
-// Pickup returns the pickup PathPoint
-func (e *Edge) Pickup() *PathPoint {
-	return e.pickup
-}
-
-// SetPickup sets the pickup PathPoint
-func (e *Edge) SetPickup(pickup *PathPoint) {
-	e.pickup = pickup
-}
-
-// Dropoff returns the dropoff PathPoint
-func (e *Edge) Dropoff() *PathPoint {
-	return e.dropoff
-}
-
-// SetDropoff sets the dropoff PathPoint
-func (e *Edge) SetDropoff(dropoff *PathPoint) {
-	e.dropoff = dropoff
 }
