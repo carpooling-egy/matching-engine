@@ -12,7 +12,7 @@ type Preference struct {
 	allowsPets    bool
 }
 
-// No need to validate parameters as they will be read from database
+// NewPreference Creates a new Preference. No need to validate parameters as they will be read from database
 // This constructor should be only used from database entities
 func NewPreference(gender enums.Gender, sameGender, allowsSmoking, allowsPets bool) *Preference {
 	return &Preference{

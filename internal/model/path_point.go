@@ -9,7 +9,7 @@ import (
 // PathPointType represents the type of path PathPoint (pickup or dropoff)
 type PathPointType string
 
-// PathPathPoint represents a PathPoint in a driver's path
+// PathPoint represents a PathPoint in a driver's path
 type PathPoint struct {
 	owner               Role
 	coordinate          Coordinate
@@ -49,22 +49,22 @@ func (p *PathPoint) SetCoordinate(coordinate Coordinate) {
 	p.coordinate = coordinate
 }
 
-// Time returns the time
+// ExpectedArrivalTime Time returns the time
 func (p *PathPoint) ExpectedArrivalTime() time.Time {
 	return p.expectedArrivalTime
 }
 
-// SetTime sets the time
+// SetExpectedArrivalTime sets the time
 func (p *PathPoint) SetExpectedArrivalTime(timestamp time.Time) {
 	p.expectedArrivalTime = timestamp
 }
 
-// PathPointType returns the PathPoint type
+// PointType returns the PathPoint type
 func (p *PathPoint) PointType() enums.PointType {
 	return p.pointType
 }
 
-// SetPathPointType sets the PathPoint type
+// SetPointType sets the PathPoint type
 func (p *PathPoint) SetPointType(pointType enums.PointType) {
 	p.pointType = pointType
 }
