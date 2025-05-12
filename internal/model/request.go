@@ -16,8 +16,8 @@ type Request struct {
 	preferences               Preference
 }
 
-// No need to validate parameters as they will be read from database
-// This constructor should be only used from database entities
+// newRequest creates a new Request. No need to validate parameters as they will be read from the database.
+// This constructor should only be used for database entities.
 func NewRequest(
 	id string,
 	userID string,

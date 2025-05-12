@@ -11,17 +11,15 @@ type RequestConverter struct {
 }
 
 // ToDTO converts a domain MatchedRequest to a MatchedRequestDTO
-func (c *RequestConverter) ToDTO(req *model.MatchedRequest) dto.MatchedRequestDTO {
+func (c *RequestConverter) ToDTO(req *model.Request) dto.MatchedRequestDTO {
 	return dto.MatchedRequestDTO{
-		UserID:       req.Request().UserID(),
-		RequestID:    req.Request().ID(),
-		PickupPoint:  c.pointConverter.ToDTO(req.Pickup()),
-		DropoffPoint: c.pointConverter.ToDTO(req.Dropoff()),
+		UserID:    req.UserID(),
+		RequestID: req.ID(),
 	}
 }
 
 // ToMatchedRequestsDTO converts a slice of domain MatchedRequests to a slice of MatchedRequestDTOs
-func (c *RequestConverter) ToMatchedRequestsDTO(requests []*model.MatchedRequest) []dto.MatchedRequestDTO {
+func (c *RequestConverter) ToMatchedRequestsDTO(requests []*model.Request) []dto.MatchedRequestDTO {
 	result := make([]dto.MatchedRequestDTO, 0, len(requests))
 	for _, req := range requests {
 		result = append(result, c.ToDTO(req))

@@ -16,11 +16,11 @@ type Offer struct {
 	capacity      int
 
 	currentNumberOfRequests int
-	matchedRequests         []*MatchedRequest
-	path                    []*PathPoint
+	matchedRequests         []*Request
+	path                    []PathPoint
 }
 
-// No need to validate parameters as they will be read from database
+// NewOffer creates a new offer. No need to validate parameters as they will be read from database
 // This constructor should be only used from database entities
 func NewOffer(
 	id, userID string,
@@ -30,14 +30,14 @@ func NewOffer(
 	capacity int,
 	preference Preference,
 	currentNumberOfRequests int,
-	path []*PathPoint,
-	matchedRequests []*MatchedRequest,
+	path []PathPoint,
+	matchedRequests []*Request,
 ) *Offer {
 	if matchedRequests == nil {
-		matchedRequests = make([]*MatchedRequest, 0)
+		matchedRequests = make([]*Request, 0)
 	}
 	if path == nil {
-		path = make([]*PathPoint, 0)
+		path = make([]PathPoint, 0)
 	}
 	return &Offer{
 		id:                      id,
@@ -64,23 +64,23 @@ func (o *Offer) DetourDurationMinutes() time.Duration { return o.detourDurMins }
 func (o *Offer) Capacity() int                        { return o.capacity }
 func (o *Offer) Preferences() Preference              { return o.preference }
 func (o *Offer) CurrentNumberOfRequests() int         { return o.currentNumberOfRequests }
-func (o *Offer) PathPoints() []*PathPoint             { return o.path }
-func (o *Offer) MatchedRequests() []*MatchedRequest {
+func (o *Offer) PathPoints() []PathPoint              { return o.path }
+func (o *Offer) MatchedRequests() []*Request {
 	return o.matchedRequests
 }
 
 // SetMatchedRequests sets the matched requests
-func (o *Offer) SetMatchedRequests(matchedRequests []*MatchedRequest) {
+func (o *Offer) SetMatchedRequests(matchedRequests []*Request) {
 	o.matchedRequests = matchedRequests
 }
 
 // Path returns the path
-func (o *Offer) Path() []*PathPoint {
+func (o *Offer) Path() []PathPoint {
 	return o.path
 }
 
 // SetPath sets the path
-func (o *Offer) SetPath(path []*PathPoint) {
+func (o *Offer) SetPath(path []PathPoint) {
 	o.path = path
 }
 

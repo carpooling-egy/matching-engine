@@ -4,18 +4,18 @@ package model
 type MatchingResult struct {
 	userID                  string
 	offerID                 string
-	assignedMatchedRequests []*MatchedRequest
-	newPath                 []*PathPoint
+	assignedMatchedRequests []*Request
+	newPath                 []PathPoint
 	currentNumberOfRequests int
 }
 
 // NewMatchingResult creates a new MatchingResult
-func NewMatchingResult(userID, offerID string, assignedMatchedRequests []*MatchedRequest, newPath []*PathPoint, currentNumberOfRequests int) *MatchingResult {
+func NewMatchingResult(userID, offerID string, assignedMatchedRequests []*Request, newPath []PathPoint, currentNumberOfRequests int) *MatchingResult {
 	if assignedMatchedRequests == nil {
-		assignedMatchedRequests = make([]*MatchedRequest, 0)
+		assignedMatchedRequests = make([]*Request, 0)
 	}
 	if newPath == nil {
-		newPath = make([]*PathPoint, 0)
+		newPath = make([]PathPoint, 0)
 	}
 	return &MatchingResult{
 		userID:                  userID,
@@ -47,22 +47,22 @@ func (mr *MatchingResult) SetOfferID(offerID string) {
 }
 
 // AssignedMatchedRequests returns the assigned matched requests
-func (mr *MatchingResult) AssignedMatchedRequests() []*MatchedRequest {
+func (mr *MatchingResult) AssignedMatchedRequests() []*Request {
 	return mr.assignedMatchedRequests
 }
 
 // SetAssignedMatchedRequests sets the assigned matched requests
-func (mr *MatchingResult) SetAssignedMatchedRequests(requests []*MatchedRequest) {
+func (mr *MatchingResult) SetAssignedMatchedRequests(requests []*Request) {
 	mr.assignedMatchedRequests = requests
 }
 
 // NewPath returns the new path
-func (mr *MatchingResult) NewPath() []*PathPoint {
+func (mr *MatchingResult) NewPath() []PathPoint {
 	return mr.newPath
 }
 
 // SetNewPath sets the new path
-func (mr *MatchingResult) SetNewPath(path []*PathPoint) {
+func (mr *MatchingResult) SetNewPath(path []PathPoint) {
 	mr.newPath = path
 }
 
