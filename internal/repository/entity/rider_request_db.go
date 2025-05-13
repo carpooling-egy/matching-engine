@@ -9,15 +9,15 @@ import (
 
 // RiderRequestDB is the database model for rider requests
 type RiderRequestDB struct {
-	ID                        string        `gorm:"type:uuid;primaryKey"`
-	UserID                    string        `gorm:"type:uuid;not null"`
+	ID                        string        `gorm:"type:varchar(50);primaryKey"`
+	UserID                    string        `gorm:"type:varchar(50);not null"`
 	SourceLatitude            float64       `gorm:"type:decimal(10,8);not null"`
 	SourceLongitude           float64       `gorm:"type:decimal(11,8);not null"`
 	DestinationLatitude       float64       `gorm:"type:decimal(10,8);not null"`
 	DestinationLongitude      float64       `gorm:"type:decimal(11,8);not null"`
 	EarliestDepartureTime     time.Time     `gorm:"type:timestamp with time zone;not null"`
 	LatestArrivalTime         time.Time     `gorm:"type:timestamp with time zone;not null"`
-	MaxWalkingDurationMinutes time.Duration `gorm:"type:interval;default:'5 minutes'"`
+	MaxWalkingDurationMinutes time.Duration `gorm:"column:max_walking_duration_minutes;default:10"`
 	NumberOfRiders            int           `gorm:"not null;default:1;check:number_of_riders > 0"`
 	SameGender                bool          `gorm:"not null;default:false"`
 	AllowsSmoking             bool          `gorm:"not null;default:true"`

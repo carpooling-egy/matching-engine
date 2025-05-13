@@ -57,12 +57,12 @@ func NewOffer(
 // Getters for immutable fields
 func (o *Offer) ID() string                           { return o.id }
 func (o *Offer) UserID() string                       { return o.userID }
-func (o *Offer) Source() Coordinate                   { return o.source }
-func (o *Offer) Destination() Coordinate              { return o.destination }
+func (o *Offer) Source() *Coordinate                  { return &o.source }
+func (o *Offer) Destination() *Coordinate             { return &o.destination }
 func (o *Offer) DepartureTime() time.Time             { return o.departureTime }
 func (o *Offer) DetourDurationMinutes() time.Duration { return o.detourDurMins }
 func (o *Offer) Capacity() int                        { return o.capacity }
-func (o *Offer) Preferences() Preference              { return o.preference }
+func (o *Offer) Preferences() *Preference             { return &o.preference }
 func (o *Offer) CurrentNumberOfRequests() int         { return o.currentNumberOfRequests }
 func (o *Offer) PathPoints() []PathPoint              { return o.path }
 func (o *Offer) MatchedRequests() []*Request {

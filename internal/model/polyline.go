@@ -164,7 +164,7 @@ func (p *Polyline) ToWKT() (string, error) {
 
 	var parts []string
 	for _, coord := range coords {
-		parts = append(parts, fmt.Sprintf("%f %f", coord.Lng, coord.Lat))
+		parts = append(parts, fmt.Sprintf("%f %f", coord.Lng(), coord.Lat()))
 	}
 	return "LINESTRING(" + strings.Join(parts, ",") + ")", nil
 }
