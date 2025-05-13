@@ -53,7 +53,8 @@ func (s *Set[T]) ToSlice() []T {
 	return result
 }
 
-// ForEach executes a function for each element in the set
+// ForEach executes a function for each element in the set.
+// Note: The iteration order over the set is unspecified and may vary.
 func (s *Set[T]) ForEach(f func(T)) {
 	s.elements.Range(func(key, value interface{}) bool {
 		f(key.(T))
