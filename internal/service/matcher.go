@@ -159,9 +159,9 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request, 
 		}
 
 		// Process the matching results
-		for offerNode, edge := range maximumMatchingEdges {
+		maximumMatchingEdges.Range(func(offerNode *model.OfferNode, edge *model.Edge) bool {
 			if edge == nil || edge.RequestNode() == nil || offerNode == nil {
-				continue
+				return true // continue
 			}
 
 			requestNode := edge.RequestNode()
@@ -192,7 +192,8 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request, 
 				matcher.availableOffers.Delete(offerID)
 				results = append(results, *createMatchingResult(offerNode, matchedRequests))
 			}
-		}
+			return true // continue
+		})
 
 		// Clear the graph and edges for the next iteration
 		graph.ClearOfferNodes()
