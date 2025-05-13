@@ -6,15 +6,15 @@ import (
 
 // Offer represents a service provider's offer
 type Offer struct {
-	id            string
-	userID        string
-	source        Coordinate
-	destination   Coordinate
-	detourDurMins time.Duration
-	departureTime time.Time
-	preference    Preference
-	capacity      int
-
+	id                      string
+	userID                  string
+	source                  Coordinate
+	destination             Coordinate
+	detourDurMins           time.Duration
+	departureTime           time.Time
+	preference              Preference
+	capacity                int
+	maxEstimatedArrivalTime time.Time
 	currentNumberOfRequests int
 	matchedRequests         []*Request
 	path                    []PathPoint
@@ -29,6 +29,7 @@ func NewOffer(
 	detourDurMins time.Duration,
 	capacity int,
 	preference Preference,
+	maxEstimatedArrivalTime time.Time,
 	currentNumberOfRequests int,
 	path []PathPoint,
 	matchedRequests []*Request,
@@ -49,6 +50,7 @@ func NewOffer(
 		capacity:                capacity,
 		matchedRequests:         matchedRequests,
 		preference:              preference,
+		maxEstimatedArrivalTime: maxEstimatedArrivalTime,
 		currentNumberOfRequests: currentNumberOfRequests,
 		path:                    path,
 	}
@@ -63,6 +65,7 @@ func (o *Offer) DepartureTime() time.Time             { return o.departureTime }
 func (o *Offer) DetourDurationMinutes() time.Duration { return o.detourDurMins }
 func (o *Offer) Capacity() int                        { return o.capacity }
 func (o *Offer) Preferences() *Preference             { return &o.preference }
+func (o *Offer) MaxEstimatedArrivalTime() time.Time   { return o.maxEstimatedArrivalTime }
 func (o *Offer) CurrentNumberOfRequests() int         { return o.currentNumberOfRequests }
 func (o *Offer) PathPoints() []PathPoint              { return o.path }
 func (o *Offer) MatchedRequests() []*Request {
