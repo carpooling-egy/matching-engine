@@ -173,34 +173,17 @@ func printOfferDetails(driver *model.Offer) {
         }
         
         // Request details
-        if matched.Request() != nil {
-            if req, ok := matched.Request().AsRequest(); ok {
-                fmt.Printf("Request ID: %s\n", req.ID())
-                fmt.Printf("   User ID: %s\n", req.UserID())
-                if req.Source() != nil {
-                    fmt.Printf("   Source: (%.6f, %.6f)\n", req.Source().Lat(), req.Source().Lng())
-                }
-                if req.Destination() != nil {
-                    fmt.Printf("   Destination: (%.6f, %.6f)\n", req.Destination().Lat(), req.Destination().Lng())
-                }
-                fmt.Printf("   # of Riders: %d\n", req.NumberOfRiders())
-                fmt.Printf("   Earliest Departure: %v\n", req.EarliestDepartureTime())
-                fmt.Printf("   Latest Arrival: %v\n", req.LatestArrivalTime())
-                fmt.Printf("   Max Walking Duration: %v\n", req.MaxWalkingDurationMinutes())
-            } else {
-                fmt.Printf("Request: Unknown Type %T\n", matched.Request())
-            }
-        } else {
-            fmt.Println("Request: <nil>")
-        }
+    
+        fmt.Printf("Request ID: %s\n", matched.ID())
+        fmt.Printf("   User ID: %s\n", matched.UserID())
+
+        fmt.Printf("   # of Riders: %d\n", matched.NumberOfRiders())
+        fmt.Printf("   Earliest Departure: %v\n", matched.EarliestDepartureTime())
+        fmt.Printf("   Latest Arrival: %v\n", matched.LatestArrivalTime())
+        fmt.Printf("   Max Walking Duration: %v\n", matched.MaxWalkingDurationMinutes())
+
+
         
-        // Pickup point details
-        fmt.Println("   Pickup Point:")
-        printPathPointDetails(*matched.Pickup())
-        
-        // Dropoff point details
-        fmt.Println("   Dropoff Point:")
-        printPathPointDetails(*matched.Dropoff())
     }
 }
 

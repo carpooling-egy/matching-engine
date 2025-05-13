@@ -41,79 +41,75 @@ func (DriverOfferDB) TableName() string {
 
 // ToDriverOffer converts a DriverOfferDB to DriverOffer domain model
 func (d *DriverOfferDB) ToDriverOffer() *model.Offer {
-	// Create source coordinate
-	sourceCoord, _ := model.NewCoordinate(d.SourceLatitude, d.SourceLongitude)
+    // Create source coordinate
+    sourceCoord, _ := model.NewCoordinate(d.SourceLatitude, d.SourceLongitude)
 
-	// Create destination coordinate
-	destCoord, _ := model.NewCoordinate(d.DestinationLatitude, d.DestinationLongitude)
+    // Create destination coordinate
+    destCoord, _ := model.NewCoordinate(d.DestinationLatitude, d.DestinationLongitude)
 
-	// Create preference using the constructor
-	preferences := model.NewPreference(d.UserGender, d.SameGender, d.AllowsSmoking, d.AllowsPets)
+    // Create preference using the constructor
+    preferences := model.NewPreference(d.UserGender, d.SameGender, d.AllowsSmoking, d.AllowsPets)
 
-	// Pre-allocate pathPoints slice
-	pathPoints := make([]*model.PathPoint, 0, len(d.PathPoints))
+    // Pre-allocate pathPoints slice
+    pathPoints := make([]model.PathPoint, 0, len(d.PathPoints)+2) // +2 for source and destination
 
-	// Create a map to store pickup points by request ID
-	pickupPointsByRequestID := make(map[string]*model.PathPoint)
-	// And store path points by request ID for both pickup and dropoff
-	dropoffPointsByRequestID := make(map[string]*model.PathPoint)
+    // Create a map to store requests by ID
+    requestsMap := make(map[string]*model.Request)
 
-	matchedRequests := make([]*model.MatchedRequest, 0, len(d.PathPoints)/2)
+    // Add source point
+    sourcePoint := model.NewPathPoint(*sourceCoord, enums.Source, d.DepartureTime, nil)
+    pathPoints = append(pathPoints, *sourcePoint) // Use the value, not the pointer
 
-	sourcePoint := model.NewPathPoint(*sourceCoord, enums.Source, d.DepartureTime, nil)
-	pathPoints = append(pathPoints, sourcePoint)
+    // Process path points from database
+    for _, pp := range d.PathPoints {
+        pathPoint := pp.ToPathPoint()
+        pathPoints = append(pathPoints, *pathPoint) // Use the value, not the pointer
 
-	for _, pp := range d.PathPoints {
-		pathPoint := pp.ToPathPoint()
-		pathPoints = append(pathPoints, pathPoint)
+        // If the path point has a request associated with it
+        if pathPoint.Owner() != nil {
+            request, ok := pathPoint.Owner().AsRequest()
+            if ok && request != nil {
+                requestID := request.ID()
+                requestsMap[requestID] = request
+            }
+        }
+    }
 
-		// If the path point has a request associated with it
-		if pathPoint.Owner() != nil {
-			request, _ := pathPoint.Owner().AsRequest()
-			requestID := request.ID()
+    // Add destination point
+    arrivalTime := d.MaxEstimatedArrivalTime
+    if arrivalTime.IsZero() {
+        arrivalTime = d.EstimatedArrivalTime
+    }
+    destPoint := model.NewPathPoint(*destCoord, enums.Destination, arrivalTime, nil)
+    pathPoints = append(pathPoints, *destPoint) // Use the value, not the pointer
 
-			// If it's a pickup point, store it
-			if pathPoint.PointType() == enums.Pickup {
-				pickupPointsByRequestID[requestID] = pathPoint
-			} else if pathPoint.PointType() == enums.Dropoff {
-				dropoffPointsByRequestID[requestID] = pathPoint
-			}
+    // Convert requests map to slice
+    requests := make([]*model.Request, 0, len(requestsMap))
+    for _, request := range requestsMap {
+        requests = append(requests, request)
+    }
 
-		}
-	}
 
-	destPoint := model.NewPathPoint(*destCoord, enums.Destination, d.MaxEstimatedArrivalTime, nil)
-	pathPoints = append(pathPoints, destPoint)
+    // Create driver offer with the already converted path points
+    driverOffer := model.NewOffer(
+        d.ID,
+        d.UserID,
+        *sourceCoord,
+        *destCoord,
+        d.DepartureTime,
+        d.DetourDurationMinutes,
+        d.Capacity,
+        *preferences,
+        d.CurrentNumberOfRequests,
+        pathPoints,
+        requests,
+    )
 
-	// Now create matched requests
-	for requestID, pickupPoint := range pickupPointsByRequestID {
-		// Check if there's a corresponding dropoff point
-		dropoffPoint, exists := dropoffPointsByRequestID[requestID]
-		if exists {
-			request, _ := pickupPoint.Owner().AsRequest()
-			// Create matched request using the constructor
-			matchedRequest := model.NewMatchedRequest(request, *pickupPoint, *dropoffPoint)
-			matchedRequests = append(matchedRequests, matchedRequest)
-		}
-	}
+    // Set the driver as owner of the first and last path points
+    if len(driverOffer.Path()) > 0 {
+        driverOffer.Path()[0].SetOwner(driverOffer)
+        driverOffer.Path()[len(driverOffer.Path())-1].SetOwner(driverOffer)
+    }
 
-	// Create driver offer with the already converted path points
-	driverOffer := model.NewOffer(
-		d.ID,
-		d.UserID,
-		*sourceCoord,
-		*destCoord,
-		d.DepartureTime,
-		d.DetourDurationMinutes,
-		d.Capacity,
-		*preferences,
-		d.CurrentNumberOfRequests,
-		pathPoints,
-		matchedRequests,
-	)
-
-	driverOffer.Path()[0].SetOwner(driverOffer)
-	driverOffer.Path()[len(driverOffer.Path())-1].SetOwner(driverOffer)
-
-	return driverOffer
+    return driverOffer
 }
