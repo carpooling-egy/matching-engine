@@ -10,9 +10,9 @@ import (
 )
 
 type Matcher struct {
-	availableOffers        map[string]*model.OfferNode
-	availableRequests      map[string]*model.RequestNode
-	potentialOfferRequests map[string]*collections.Set[string]
+	availableOffers        *collections.SyncMap[string, *model.OfferNode]
+	availableRequests      *collections.SyncMap[string, *model.RequestNode]
+	potentialOfferRequests *collections.SyncMap[string, *collections.Set[string]]
 	pathPlanner            path_generator.PathPlanner
 	candidateGenerator     earlypruning.CandidateGenerator
 	maximumMatching        maximummatching.MaximumMatching
@@ -21,9 +21,9 @@ type Matcher struct {
 // NewMatcher creates a new Matcher instance
 func NewMatcher(planner path_generator.PathPlanner, generator earlypruning.CandidateGenerator, matching maximummatching.MaximumMatching) *Matcher {
 	return &Matcher{
-		availableOffers:        make(map[string]*model.OfferNode),
-		availableRequests:      make(map[string]*model.RequestNode),
-		potentialOfferRequests: make(map[string]*collections.Set[string]),
+		availableOffers:        collections.New[string, *model.OfferNode](),
+		availableRequests:      collections.New[string, *model.RequestNode](),
+		potentialOfferRequests: collections.New[string, *collections.Set[string]](),
 		pathPlanner:            planner,
 		candidateGenerator:     generator,
 		maximumMatching:        matching,
@@ -66,57 +66,67 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request, 
 		offerID := offer.ID()
 		requestID := request.ID()
 
-		if _, exists := matcher.potentialOfferRequests[offerID]; !exists {
-			matcher.potentialOfferRequests[offerID] = collections.NewSet[string]()
+		// Get or create a set of request IDs for this offer
+		requestSet, exists := matcher.potentialOfferRequests.Get(offerID)
+		if !exists {
+			requestSet = collections.NewSet[string]()
+			matcher.potentialOfferRequests.Set(offerID, requestSet)
 		}
-		matcher.potentialOfferRequests[offerID].Add(requestID)
+		requestSet.Add(requestID)
 
-		if _, exists := matcher.availableOffers[offerID]; !exists {
-			matcher.availableOffers[offerID] = model.NewOfferNode(offer)
+		// Store the offer node if it doesn't exist
+		_, exists = matcher.availableOffers.Get(offerID)
+		if !exists {
+			matcher.availableOffers.Set(offerID, model.NewOfferNode(offer))
 		}
 
-		if _, exists := matcher.availableRequests[requestID]; !exists {
-			matcher.availableRequests[requestID] = model.NewRequestNode(request)
+		// Store the request node if it doesn't exist
+		_, exists = matcher.availableRequests.Get(requestID)
+		if !exists {
+			matcher.availableRequests.Set(requestID, model.NewRequestNode(request))
 		}
 	}
 
 	// Create a slice to store the matching results
-	results := make([]model.MatchingResult, 0, len(matcher.potentialOfferRequests))
+	results := make([]model.MatchingResult, 0, matcher.potentialOfferRequests.Size())
 	graph := model.NewGraph()
 
-	for len(matcher.availableOffers) > 0 && len(matcher.availableRequests) > 0 {
+	for matcher.availableOffers.Size() > 0 && matcher.availableRequests.Size() > 0 {
 		hasNewEdge := false
-		potentialRequests := make(map[string]*model.RequestNode)
+		potentialRequests := collections.New[string, *model.RequestNode]()
 
 		// Find feasible paths and build the graph
-		for offerID, requests := range matcher.potentialOfferRequests {
-			offerNode, exists := matcher.availableOffers[offerID]
+		matcher.potentialOfferRequests.Range(func(offerID string, requests *collections.Set[string]) bool {
+			offerNode, exists := matcher.availableOffers.Get(offerID)
 			if !exists {
-				continue
+				return true // continue
 			}
 
 			for _, requestID := range requests.ToSlice() {
-				requestNode, exists := matcher.availableRequests[requestID]
+				requestNode, exists := matcher.availableRequests.Get(requestID)
 				if !exists {
 					continue
 				}
 
 				newPath, isFeasible, err := matcher.pathPlanner.FindFirstFeasiblePath(offerNode, requestNode)
 				if err != nil {
-					return nil, fmt.Errorf("failed to find feasible path: %w", err)
+					// We can't return an error directly from the Range function, so we'll set it and break the loop
+					err = fmt.Errorf("failed to find feasible path: %w", err)
+					return false // break
 				}
 
 				if isFeasible {
 					hasNewEdge = true
 					edge := model.NewEdge(requestNode, newPath)
 					offerNode.AddEdge(edge)
-					potentialRequests[requestID] = requestNode
+					potentialRequests.Set(requestID, requestNode)
 					graph.AddOfferNode(offerNode)
 				} else {
 					requests.Remove(requestID)
 				}
 			}
-		}
+			return true // continue
+		})
 
 		// If no new edges were found, break the loop
 		if !hasNewEdge {
@@ -125,20 +135,21 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request, 
 
 		// Process offers that are not in the graph
 		potentialOffers := graph.OfferNodes()
-		for offerID, offerNode := range matcher.availableOffers {
+		matcher.availableOffers.Range(func(offerID string, offerNode *model.OfferNode) bool {
 			if potentialOffers.Contains(offerNode) {
-				continue
+				return true // continue
 			}
 
 			if offerNode.IsMatched() {
 				results = append(results, *createMatchingResult(offerNode, offerNode.NewlyAssignedMatchedRequests()))
 			}
 
-			delete(matcher.potentialOfferRequests, offerID)
-			delete(matcher.availableOffers, offerID)
-		}
+			matcher.potentialOfferRequests.Delete(offerID)
+			matcher.availableOffers.Delete(offerID)
+			return true // continue
+		})
 
-		// Update available requests
+		// Update available requests by replacing the current cache with the new one
 		matcher.availableRequests = potentialRequests
 
 		// Find maximum matching
@@ -165,34 +176,37 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request, 
 			offerNode.Offer().SetPath(edge.NewPath())
 
 			// Delete the request node from the available requests
-			delete(matcher.availableRequests, requestID)
+			matcher.availableRequests.Delete(requestID)
 
 			// Remove the request from the potential offer requests
-			matcher.potentialOfferRequests[offerID].Remove(requestID)
+			requestSet, exists := matcher.potentialOfferRequests.Get(offerID)
+			if exists {
+				requestSet.Remove(requestID)
+			}
 
 			if len(matchedRequests) < limit {
 				offerNode.SetMatched(true)
 				offerNode.SetNewlyAssignedMatchedRequests(matchedRequests)
 			} else {
-				delete(matcher.potentialOfferRequests, offerID)
-				delete(matcher.availableOffers, offerID)
+				matcher.potentialOfferRequests.Delete(offerID)
+				matcher.availableOffers.Delete(offerID)
 				results = append(results, *createMatchingResult(offerNode, matchedRequests))
 			}
 		}
 
 		// Clear the graph and edges for the next iteration
 		graph.ClearOfferNodes()
-		for _, offerNode := range matcher.availableOffers {
+		matcher.availableOffers.ForEach(func(offerID string, offerNode *model.OfferNode) {
 			offerNode.ClearEdges()
-		}
+		})
 	}
 
 	// Add any remaining matched offers to the results
-	for _, offerNode := range matcher.availableOffers {
+	matcher.availableOffers.ForEach(func(offerID string, offerNode *model.OfferNode) {
 		if offerNode.IsMatched() {
 			results = append(results, *createMatchingResult(offerNode, offerNode.NewlyAssignedMatchedRequests()))
 		}
-	}
+	})
 
 	return results, nil
 }
