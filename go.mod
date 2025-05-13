@@ -5,7 +5,6 @@ go 1.24
 require (
 	github.com/joho/godotenv v1.5.1
 	github.com/klauspost/compress v1.18.0 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/nats-io/nats.go v1.42.0
@@ -16,19 +15,16 @@ require (
 )
 
 require (
-	github.com/joho/godotenv v1.5.1
-	github.com/mattn/go-colorable v0.1.14 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/rs/zerolog v1.34.0
-	golang.org/x/crypto v0.37.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/crypto v0.37.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.26.0
 )
 
+require github.com/dhconnelly/rtreego v1.2.0
+
 require (
+	github.com/golang/geo v0.0.0-20250509130527-0a13e5a5d53d // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.7.4 // indirect
