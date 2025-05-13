@@ -48,6 +48,7 @@ func NewOffer(
 		detourDurMins:           detourDurMins,
 		departureTime:           departureTime,
 		capacity:                capacity,
+		maxEstimatedArrivalTime: maxEstimatedArrivalTime,
 		matchedRequests:         matchedRequests,
 		preference:              preference,
 		maxEstimatedArrivalTime: maxEstimatedArrivalTime,
@@ -64,6 +65,7 @@ func (o *Offer) Destination() *Coordinate             { return &o.destination }
 func (o *Offer) DepartureTime() time.Time             { return o.departureTime }
 func (o *Offer) DetourDurationMinutes() time.Duration { return o.detourDurMins }
 func (o *Offer) Capacity() int                        { return o.capacity }
+func (o *Offer) MaxEstimatedArrivalTime() time.Time   { return o.maxEstimatedArrivalTime }
 func (o *Offer) Preferences() *Preference             { return &o.preference }
 func (o *Offer) MaxEstimatedArrivalTime() time.Time   { return o.maxEstimatedArrivalTime }
 func (o *Offer) CurrentNumberOfRequests() int         { return o.currentNumberOfRequests }
@@ -93,8 +95,4 @@ func (o *Offer) AsOffer() (*Offer, bool) {
 
 func (o *Offer) AsRequest() (*Request, bool) {
 	return nil, false
-}
-
-func (o *Offer) SetCurrentNumberOfRequests(count int) {
-	o.currentNumberOfRequests = count
 }

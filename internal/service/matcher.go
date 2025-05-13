@@ -21,9 +21,9 @@ type Matcher struct {
 // NewMatcher creates a new Matcher instance
 func NewMatcher(planner path_generator.PathPlanner, generator earlypruning.CandidateGenerator, matching maximummatching.MaximumMatching) *Matcher {
 	return &Matcher{
-		availableOffers:        collections.New[string, *model.OfferNode](),
-		availableRequests:      collections.New[string, *model.RequestNode](),
-		potentialOfferRequests: collections.New[string, *collections.Set[string]](),
+		availableOffers:        collections.NewSyncMap[string, *model.OfferNode](),
+		availableRequests:      collections.NewSyncMap[string, *model.RequestNode](),
+		potentialOfferRequests: collections.NewSyncMap[string, *collections.Set[string]](),
 		pathPlanner:            planner,
 		candidateGenerator:     generator,
 		maximumMatching:        matching,
@@ -93,7 +93,7 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request, 
 
 	for matcher.availableOffers.Size() > 0 && matcher.availableRequests.Size() > 0 {
 		hasNewEdge := false
-		potentialRequests := collections.New[string, *model.RequestNode]()
+		potentialRequests := collections.NewSyncMap[string, *model.RequestNode]()
 
 		// Find feasible paths and build the graph
 		matcher.potentialOfferRequests.Range(func(offerID string, requests *collections.Set[string]) bool {
