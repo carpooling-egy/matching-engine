@@ -48,6 +48,16 @@ func (node *OfferNode) SetEdges(edges []*Edge) {
 	node.edges = edges
 }
 
+// AddEdge adds an edge to the node
+func (node *OfferNode) AddEdge(edge *Edge) {
+	node.edges = append(node.edges, edge)
+}
+
+// ClearEdges clears the edges
+func (node *OfferNode) ClearEdges() {
+	node.edges = make([]*Edge, 0)
+}
+
 // IsMatched returns whether the node is matched
 func (node *OfferNode) IsMatched() bool {
 	return node.isMatched
