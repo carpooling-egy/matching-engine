@@ -98,7 +98,7 @@ func generateMatchingResults(count int) []*model.MatchingResult {
 		assignedRequests := make([]*model.MatchedRequest, 0)
 
 		// Create the matching result using the model constructor
-		result := model.NewMatchingResult(userID, offerID, assignedRequests, newPath)
+		result := model.NewMatchingResult(userID, offerID, assignedRequests,newPath ,5)
 
 		// Add some random assigned requests
 		numRequests := 1 + rand.Intn(3) // 1-3 requests per matching result

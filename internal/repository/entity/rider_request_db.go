@@ -17,7 +17,7 @@ type RiderRequestDB struct {
 	DestinationLongitude      float64       `gorm:"type:decimal(11,8);not null"`
 	EarliestDepartureTime     time.Time     `gorm:"type:timestamp with time zone;not null"`
 	LatestArrivalTime         time.Time     `gorm:"type:timestamp with time zone;not null"`
-	MaxWalkingDurationMinutes time.Duration `gorm:"default:5"`
+	MaxWalkingDurationMinutes time.Duration `gorm:"column:max_walking_duration_minutes;default:10"`
 	NumberOfRiders            int           `gorm:"not null;default:1;check:number_of_riders > 0"`
 	SameGender                bool          `gorm:"not null;default:false"`
 	AllowsSmoking             bool          `gorm:"not null;default:true"`
