@@ -1,0 +1,48 @@
+package pickupdropoffservice
+
+import (
+	"context"
+	"fmt"
+	"matching-engine/internal/model"
+	"matching-engine/internal/service/pickupdropoffservice/pickupdropoffcache"
+)
+
+type PickupDropoffSelector struct {
+	// generator is the underlying generator that will be used to get the pickup and dropoff points
+	generator             PickupDropoffGenerator
+	walkingTimeCalculator *WalkingTimeCalculator
+	// cache is a map that will store the cached pickup and dropoff points
+	cache *pickupdropoffcache.PickupDropoffCache
+}
+
+func NewPickupDropoffSelector(generator PickupDropoffGenerator, walkingTimeCalculator *WalkingTimeCalculator, cache *pickupdropoffcache.PickupDropoffCache) *PickupDropoffSelector {
+	return &PickupDropoffSelector{
+		generator:             generator,
+		walkingTimeCalculator: walkingTimeCalculator,
+		cache:                 cache,
+	}
+}
+
+// GetPickupDropoffPointsAndDurations retrieves the pickup and dropoff points and durations for the given request and offer.
+func (selector *PickupDropoffSelector) GetPickupDropoffPointsAndDurations(request *model.Request, offer *model.Offer) (value *pickupdropoffcache.Value, err error) {
+	cacheKey := pickupdropoffcache.NewKey(
+		offer.ID(),
+		request.ID())
+	if cachedValue, ok := selector.cache.Get(cacheKey); ok {
+		return cachedValue, nil
+	}
+	// Call the underlying generator to get the pickup and dropoff points
+	pickup, dropoff, err := selector.generator.GeneratePickupDropoffPoints(request, offer)
+	if err != nil {
+		return nil, fmt.Errorf("pickup dropoff generator error: %v", err)
+	}
+	pickupWalkingDuration, dropoffWalkingDuration, err := selector.walkingTimeCalculator.ComputeWalkingDurations(context.Background(), request, pickup, dropoff)
+	if err != nil {
+		return nil, err
+	}
+	// Store the pickup and dropoff points in the cache
+	cacheValue := pickupdropoffcache.NewValue(pickup, dropoff, pickupWalkingDuration, dropoffWalkingDuration)
+	selector.cache.Set(cacheKey, cacheValue)
+	// Return the pickup and dropoff points
+	return cacheValue, nil
+}
