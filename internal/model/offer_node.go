@@ -72,3 +72,7 @@ func (node *OfferNode) SetMatched(isMatched bool) {
 func (node *OfferNode) GetAllRequests() []*Request {
 	return append(node.offer.matchedRequests, node.newlyAssignedMatchedRequests...)
 }
+
+func (node *OfferNode) AddMatchedRequest(request *Request) {
+	node.newlyAssignedMatchedRequests = append(node.newlyAssignedMatchedRequests, request)
+}
