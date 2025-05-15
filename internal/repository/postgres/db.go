@@ -62,41 +62,41 @@ func loadEnv() error {
 
 // loadConfigFromEnv loads database configuration from environment variables
 func loadConfigFromEnv() (*Config, error) {
-    config := &Config{
-        Host:        getEnvOrDefault("DB_HOST", ""),
-        Port:        getEnvAsIntOrDefault("DB_PORT", 5432),
-        DBName:      getEnvOrDefault("DB_NAME", ""),
-        Username:    getEnvOrDefault("DB_USER", ""),
-        Password:    getEnvOrDefault("DB_PASSWORD", ""),
-        SSLMode:     getEnvOrDefault("DB_SSLMODE", "require"),
-        MaxConns:    getEnvAsIntOrDefault("DB_MAX_CONNS", 10),
-        MinConns:    getEnvAsIntOrDefault("DB_MIN_CONNS", 2),
-        MaxIdleTime: 5 * time.Minute, // Default value
-        MaxLifetime: 1 * time.Hour,   // Default value
-        LogLevel:    parseLogLevel(getEnvOrDefault("DB_LOG_LEVEL", "silent")),
-    }
+	config := &Config{
+		Host:        getEnvOrDefault("DB_HOST", ""),
+		Port:        getEnvAsIntOrDefault("DB_PORT", 5432),
+		DBName:      getEnvOrDefault("DB_NAME", ""),
+		Username:    getEnvOrDefault("DB_USER", ""),
+		Password:    getEnvOrDefault("DB_PASSWORD", ""),
+		SSLMode:     getEnvOrDefault("DB_SSLMODE", "require"),
+		MaxConns:    getEnvAsIntOrDefault("DB_MAX_CONNS", 10),
+		MinConns:    getEnvAsIntOrDefault("DB_MIN_CONNS", 2),
+		MaxIdleTime: 5 * time.Minute, // Default value
+		MaxLifetime: 1 * time.Hour,   // Default value
+		LogLevel:    parseLogLevel(getEnvOrDefault("DB_LOG_LEVEL", "silent")),
+	}
 
-    // Validate required fields
-    var missingFields []string
-    
-    if config.Host == "" {
-        missingFields = append(missingFields, "DB_HOST")
-    }
-    if config.DBName == "" {
-        missingFields = append(missingFields, "DB_NAME")
-    }
-    if config.Username == "" {
-        missingFields = append(missingFields, "DB_USER")
-    }
-    if config.Password == "" {
-        missingFields = append(missingFields, "DB_PASSWORD")
-    }
-    
-    if len(missingFields) > 0 {
-        return nil, errors.InvalidInput(fmt.Sprintf("missing required database configuration: %v", missingFields))
-    }
+	// Validate required fields
+	var missingFields []string
 
-    return config, nil
+	if config.Host == "" {
+		missingFields = append(missingFields, "DB_HOST")
+	}
+	if config.DBName == "" {
+		missingFields = append(missingFields, "DB_NAME")
+	}
+	if config.Username == "" {
+		missingFields = append(missingFields, "DB_USER")
+	}
+	if config.Password == "" {
+		missingFields = append(missingFields, "DB_PASSWORD")
+	}
+
+	if len(missingFields) > 0 {
+		return nil, errors.InvalidInput(fmt.Sprintf("missing required database configuration: %v", missingFields))
+	}
+
+	return config, nil
 }
 
 // getEnvOrDefault returns environment variable or default if not set
