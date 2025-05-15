@@ -1,7 +1,10 @@
 // Package collections SyncMap provides a generic, thread-safe syncMap implementation
 package collections
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 // SyncMap is a generic thread-safe syncMap generic structure
 type SyncMap[K comparable, V any] struct {
@@ -41,21 +44,54 @@ func (c *SyncMap[K, V]) Delete(key K) {
 	c.store.Delete(key)
 }
 
-// Range iterates over the SyncMap and calls the function for each key-value pair.
-// If the function returns false, the iteration stops.
-func (c *SyncMap[K, V]) Range(f func(K, V) bool) {
+// Range processes key-value pairs, stopping at the first error.
+// Returns the first error encountered, or nil if none.
+// Safely handles type assertions to prevent panics.
+func (c *SyncMap[K, V]) Range(f func(K, V) error) error {
+	var err error
 	c.store.Range(func(key, value interface{}) bool {
-		return f(key.(K), value.(V))
+		k, ok1 := key.(K)
+		if !ok1 {
+			err = fmt.Errorf("type assertion failed for key: %v", key)
+			return false
+		}
+
+		v, ok2 := value.(V)
+		if !ok2 {
+			err = fmt.Errorf("type assertion failed for value: %v", value)
+			return false
+		}
+
+		err = f(k, v)
+		return err == nil // Stop if error occurs
 	})
+	return err
 }
 
-// ForEach executes a function for each key-value pair in the SyncMap.
-// Note: The iteration order over the SyncMap is unspecified and may vary.
-func (c *SyncMap[K, V]) ForEach(f func(K, V)) {
+// ForEach processes all key-value pairs, collecting any errors.
+// Returns a slice of all errors encountered, or empty if none.
+// Safely handles type assertions to prevent panics.
+func (c *SyncMap[K, V]) ForEach(f func(K, V) error) []error {
+	var errors []error
 	c.store.Range(func(key, value interface{}) bool {
-		f(key.(K), value.(V))
-		return true
+		k, ok1 := key.(K)
+		if !ok1 {
+			errors = append(errors, fmt.Errorf("type assertion failed for key: %v", key))
+			return true // Continue despite error
+		}
+
+		v, ok2 := value.(V)
+		if !ok2 {
+			errors = append(errors, fmt.Errorf("type assertion failed for value: %v", value))
+			return true // Continue despite error
+		}
+
+		if err := f(k, v); err != nil {
+			errors = append(errors, err)
+		}
+		return true // Always continue
 	})
+	return errors
 }
 
 // Contains checks if a key exists in the SyncMap

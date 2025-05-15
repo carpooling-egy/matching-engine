@@ -6,7 +6,9 @@ import (
 	"matching-engine/internal/model"
 	"matching-engine/internal/service/earlypruning"
 	"matching-engine/internal/service/maximummatching"
-	"matching-engine/internal/service/path-generator"
+	path_generator "matching-engine/internal/service/path-generator"
+
+	"github.com/rs/zerolog/log"
 )
 
 type Matcher struct {
@@ -31,9 +33,40 @@ func NewMatcher(planner path_generator.PathPlanner, generator earlypruning.Candi
 }
 
 // createMatchingResult is a helper function to create a matching result
-func createMatchingResult(offerNode *model.OfferNode, requests []*model.Request) *model.MatchingResult {
-	offerID := offerNode.Offer().ID()
-	return model.NewMatchingResult(offerID, offerID, requests, offerNode.Offer().Path(), len(offerNode.GetAllRequests()))
+func createMatchingResult(offerNode *model.OfferNode) (*model.MatchingResult, error) {
+	if offerNode == nil {
+		return nil, fmt.Errorf("offer node is nil")
+	}
+
+	offer := offerNode.Offer()
+	if offer == nil {
+		return nil, fmt.Errorf("offer node has nil offer")
+	}
+
+	offerID := offer.ID()
+	if offerID == "" {
+		return nil, fmt.Errorf("offer ID is empty")
+	}
+	path := offer.Path()
+	if path == nil {
+		return nil, fmt.Errorf("offer node has nil path")
+	}
+	if len(path) == 0 {
+		return nil, fmt.Errorf("offer node has empty path")
+	}
+	newlyMatchedRequests := offerNode.NewlyAssignedMatchedRequests()
+	if newlyMatchedRequests == nil {
+		return nil, fmt.Errorf("offer node has nil newly assigned matched requests")
+	}
+	if len(newlyMatchedRequests) == 0 {
+		return nil, fmt.Errorf("offer node has empty newly assigned matched requests")
+	}
+	allRequests := offerNode.GetAllRequests()
+	allRequestsCount := 0
+	if allRequests != nil {
+		allRequestsCount = len(allRequests)
+	}
+	return model.NewMatchingResult(offer.UserID(), offerID, newlyMatchedRequests, path, allRequestsCount), nil
 }
 
 func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request, limit int) ([]model.MatchingResult, error) {
@@ -54,12 +87,18 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request, 
 		}
 
 		if candidate == nil {
+			log.Error().Msg("candidate is nil")
 			continue
 		}
 
 		offer := candidate.Offer()
 		request := candidate.Request()
-		if offer == nil || request == nil {
+		if offer == nil {
+			log.Error().Msg("offer is nil")
+			continue
+		}
+		if request == nil {
+			log.Error().Msg("request is nil")
 			continue
 		}
 
@@ -96,37 +135,62 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request, 
 		potentialRequests := collections.NewSyncMap[string, *model.RequestNode]()
 
 		// Find feasible paths and build the graph
-		matcher.potentialOfferRequests.Range(func(offerID string, requests *collections.Set[string]) bool {
+		err := matcher.potentialOfferRequests.Range(func(offerID string, requests *collections.Set[string]) error {
+			if offerID == "" {
+				return fmt.Errorf("empty offer ID encountered")
+			}
+
+			if requests == nil {
+				return fmt.Errorf("nil requests set for offer ID: %s", offerID)
+			}
+
 			offerNode, exists := matcher.availableOffers.Get(offerID)
 			if !exists {
-				return true // continue
+				return nil // continue
+			}
+
+			if offerNode == nil {
+				return fmt.Errorf("nil offer node found for ID: %s", offerID)
 			}
 
 			for _, requestID := range requests.ToSlice() {
+				if requestID == "" {
+					continue // Skip empty request IDs
+				}
+
 				requestNode, exists := matcher.availableRequests.Get(requestID)
 				if !exists {
 					continue
 				}
 
+				if requestNode == nil {
+					continue // Skip nil request nodes
+				}
+
 				newPath, isFeasible, err := matcher.pathPlanner.FindFirstFeasiblePath(offerNode, requestNode)
 				if err != nil {
-					// We can't return an error directly from the Range function, so we'll set it and break the loop
-					err = fmt.Errorf("failed to find feasible path: %w", err)
-					return false // break
+					return fmt.Errorf("failed to find feasible path for offer %s and request %s: %w", offerID, requestID, err)
 				}
 
 				if isFeasible {
+					if newPath == nil {
+						return fmt.Errorf("feasible path is nil for offer %s and request %s", offerID, requestID)
+					}
 					hasNewEdge = true
 					edge := model.NewEdge(requestNode, newPath)
 					offerNode.AddEdge(edge)
 					potentialRequests.Set(requestID, requestNode)
 					graph.AddOfferNode(offerNode)
 				} else {
+					log.Info().Msgf("no feasible path for offer %s and request %s", offerID, requestID)
 					requests.Remove(requestID)
 				}
 			}
-			return true // continue
+			return nil // continue
 		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to process potential offer requests: %w", err)
+		}
 
 		// If no new edges were found, break the loop
 		if !hasNewEdge {
@@ -135,18 +199,23 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request, 
 
 		// Process offers that are not in the graph
 		potentialOffers := graph.OfferNodes()
-		matcher.availableOffers.Range(func(offerID string, offerNode *model.OfferNode) bool {
+		matcher.availableOffers.ForEach(func(offerID string, offerNode *model.OfferNode) error {
 			if potentialOffers.Contains(offerNode) {
-				return true // continue
+				return nil // continue
 			}
 
 			if offerNode.IsMatched() {
-				results = append(results, *createMatchingResult(offerNode, offerNode.NewlyAssignedMatchedRequests()))
+				matchingResult, err := createMatchingResult(offerNode)
+				if err != nil {
+					log.Error().Err(err).Msgf("failed to create matching result for offer %s", offerID)
+					return nil // continue
+				}
+				results = append(results, *matchingResult)
 			}
 
 			matcher.potentialOfferRequests.Delete(offerID)
 			matcher.availableOffers.Delete(offerID)
-			return true // continue
+			return nil // continue
 		})
 
 		// Update available requests by replacing the current cache with the new one
@@ -159,21 +228,52 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request, 
 		}
 
 		// Process the matching results
-		maximumMatchingEdges.Range(func(offerNode *model.OfferNode, edge *model.Edge) bool {
-			if edge == nil || edge.RequestNode() == nil || offerNode == nil {
-				return true // continue
+		err = maximumMatchingEdges.Range(func(offerNode *model.OfferNode, edge *model.Edge) error {
+			if edge == nil {
+				return fmt.Errorf("nil edge encountered in maximum matching")
+			}
+
+			if edge.RequestNode() == nil {
+				return fmt.Errorf("edge with nil request node encountered")
+			}
+
+			if offerNode == nil {
+				return fmt.Errorf("nil offer node encountered in maximum matching")
+			}
+
+			if offerNode.Offer() == nil {
+				return fmt.Errorf("offer node with nil offer encountered")
 			}
 
 			requestNode := edge.RequestNode()
 			request := requestNode.Request()
+			if request == nil {
+				return fmt.Errorf("request node with nil request encountered")
+			}
+
 			offerID := offerNode.Offer().ID()
+			if offerID == "" {
+				return fmt.Errorf("offer with empty ID encountered")
+			}
+
 			requestID := request.ID()
+			if requestID == "" {
+				return fmt.Errorf("request with empty ID encountered")
+			}
 
 			// Add the new request to the matched requests
-			matchedRequests := append(offerNode.NewlyAssignedMatchedRequests(), request)
+			newlyMatchedRequests := offerNode.NewlyAssignedMatchedRequests()
+			if newlyMatchedRequests == nil {
+				newlyMatchedRequests = make([]*model.Request, 0)
+			}
+			newlyMatchedRequests = append(newlyMatchedRequests, request)
 
 			// Set the path for the offer node
-			offerNode.Offer().SetPath(edge.NewPath())
+			newPath := edge.NewPath()
+			if newPath == nil {
+				return fmt.Errorf("edge with nil path encountered for offer %s and request %s", offerID, requestID)
+			}
+			offerNode.Offer().SetPath(newPath)
 
 			// Delete the request node from the available requests
 			matcher.availableRequests.Delete(requestID)
@@ -183,30 +283,57 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request, 
 			if exists {
 				requestSet.Remove(requestID)
 			}
+			offerNode.SetMatched(true)
+			offerNode.SetNewlyAssignedMatchedRequests(newlyMatchedRequests)
 
-			if len(matchedRequests) < limit {
-				offerNode.SetMatched(true)
-				offerNode.SetNewlyAssignedMatchedRequests(matchedRequests)
-			} else {
+			if len(offerNode.GetAllRequests()) >= limit {
 				matcher.potentialOfferRequests.Delete(offerID)
 				matcher.availableOffers.Delete(offerID)
-				results = append(results, *createMatchingResult(offerNode, matchedRequests))
+				matchingResult, err := createMatchingResult(offerNode)
+				if err != nil {
+					return fmt.Errorf("failed to create matching result for offer %s: %w", offerID, err)
+				}
+				results = append(results, *matchingResult)
 			}
-			return true // continue
+			return nil // continue
 		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to process maximum matching edges: %w", err)
+		}
 
 		// Clear the graph and edges for the next iteration
 		graph.ClearOfferNodes()
-		matcher.availableOffers.ForEach(func(offerID string, offerNode *model.OfferNode) {
+		matcher.availableOffers.ForEach(func(offerID string, offerNode *model.OfferNode) error {
+			if offerNode == nil {
+				log.Warn().Msgf("nil offer node found with ID: %s", offerID)
+				matcher.availableOffers.Delete(offerID)
+				matcher.potentialOfferRequests.Delete(offerID)
+				return nil
+			}
 			offerNode.ClearEdges()
+			return nil
 		})
 	}
 
 	// Add any remaining matched offers to the results
-	matcher.availableOffers.ForEach(func(offerID string, offerNode *model.OfferNode) {
-		if offerNode.IsMatched() {
-			results = append(results, *createMatchingResult(offerNode, offerNode.NewlyAssignedMatchedRequests()))
+	matcher.availableOffers.ForEach(func(offerID string, offerNode *model.OfferNode) error {
+		if offerNode == nil {
+			log.Warn().Msgf("nil offer node found with ID: %s", offerID)
+			return nil
 		}
+
+		if offerNode.IsMatched() {
+			matchedRequests := offerNode.NewlyAssignedMatchedRequests()
+			if matchedRequests == nil {
+				return fmt.Errorf("matched offer node with ID: %s has nil matched requests", offerID)
+			}
+			matchingResult, err := createMatchingResult(offerNode)
+			if err != nil {
+				return fmt.Errorf("failed to create matching result for offer %s: %w", offerID, err)
+			}
+			results = append(results, *matchingResult)
+		}
+		return nil
 	})
 
 	return results, nil
