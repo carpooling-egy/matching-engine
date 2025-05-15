@@ -51,7 +51,6 @@ func NewOffer(
 		maxEstimatedArrivalTime: maxEstimatedArrivalTime,
 		matchedRequests:         matchedRequests,
 		preference:              preference,
-		maxEstimatedArrivalTime: maxEstimatedArrivalTime,
 		currentNumberOfRequests: currentNumberOfRequests,
 		path:                    path,
 	}
@@ -67,7 +66,6 @@ func (o *Offer) DetourDurationMinutes() time.Duration { return o.detourDurMins }
 func (o *Offer) Capacity() int                        { return o.capacity }
 func (o *Offer) MaxEstimatedArrivalTime() time.Time   { return o.maxEstimatedArrivalTime }
 func (o *Offer) Preferences() *Preference             { return &o.preference }
-func (o *Offer) MaxEstimatedArrivalTime() time.Time   { return o.maxEstimatedArrivalTime }
 func (o *Offer) CurrentNumberOfRequests() int         { return o.currentNumberOfRequests }
 func (o *Offer) PathPoints() []PathPoint              { return o.path }
 func (o *Offer) MatchedRequests() []*Request {
