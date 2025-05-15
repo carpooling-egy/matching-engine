@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"fmt"
 	"matching-engine/internal/enums"
 	"matching-engine/internal/model"
 	"matching-engine/internal/service/earlypruning"
@@ -42,8 +41,6 @@ func TestPreChecksCandidateGenerator_GenerateCandidates(t *testing.T) {
 		if candidate == nil {
 			t.Fatal("Expected candidate to be non-nil")
 		}
-		fmt.Println(
-			"Candidate:", candidate.Offer().ID(), "->", candidate.Request().ID())
 		candidateCount++
 	}
 
