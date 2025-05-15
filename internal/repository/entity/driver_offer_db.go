@@ -99,6 +99,7 @@ func (d *DriverOfferDB) ToDriverOffer() *model.Offer {
 		d.DetourDurationMinutes,
 		d.Capacity,
 		*preferences,
+		d.MaxEstimatedArrivalTime,
 		d.CurrentNumberOfRequests,
 		pathPoints,
 		requests,
