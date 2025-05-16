@@ -79,6 +79,12 @@ func (m *MockEngine) SnapPointToRoad(ctx context.Context, point *model.Coordinat
 	return nil, fmt.Errorf("not implemented")
 }
 
+// directDuration is a constant representing the direct duration of the trip
+const directDuration = 40 * time.Minute
+
+func computeMaxEstimatedArrivalTime(offerDepartureTime time.Time, detourTime time.Duration) time.Time {
+	return offerDepartureTime.Add(directDuration + detourTime)
+}
 func TestDetourTimeChecker_Check(t *testing.T) {
 	// Define test times for clarity - use a fixed time in the future
 	now := time.Now().Add(24 * time.Hour) // Use tomorrow to ensure it's in the future
@@ -144,7 +150,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				now, 10*time.Minute, // Only 10 minutes detour allowed
 				3,
 				*model.NewPreference(enums.Male, false, false, false),
-				now.Add(50*time.Minute), // maxEstimatedArrivalTime - set to less than total trip duration
+				computeMaxEstimatedArrivalTime(now, 10*time.Minute),
 				0,
 				nil,
 				nil,
@@ -240,7 +246,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				now, 30*time.Minute,
 				3,
 				*model.NewPreference(enums.Male, false, false, false),
-				twoHoursLater, // maxEstimatedArrivalTime
+				computeMaxEstimatedArrivalTime(now, 30*time.Minute), // maxEstimatedArrivalTime
 				0,
 				nil,
 				nil,
@@ -272,7 +278,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				now, 30*time.Minute,
 				3,
 				*model.NewPreference(enums.Male, false, false, false),
-				twoHoursLater, // maxEstimatedArrivalTime
+				computeMaxEstimatedArrivalTime(now, 30*time.Minute), // maxEstimatedArrivalTime
 				0,
 				nil,
 				nil,
@@ -304,7 +310,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				now, 30*time.Minute,
 				3,
 				*model.NewPreference(enums.Male, false, false, false),
-				twoHoursLater, // maxEstimatedArrivalTime
+				computeMaxEstimatedArrivalTime(now, 30*time.Minute), // maxEstimatedArrivalTime
 				0,
 				nil,
 				nil,
@@ -336,7 +342,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				now, 30*time.Minute,
 				3,
 				*model.NewPreference(enums.Male, false, false, false),
-				twoHoursLater, // maxEstimatedArrivalTime
+				computeMaxEstimatedArrivalTime(now, 30*time.Minute), // maxEstimatedArrivalTime
 				0,
 				nil,
 				nil,
@@ -365,7 +371,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				now, 30*time.Minute,
 				3,
 				*model.NewPreference(enums.Male, false, false, false),
-				twoHoursLater, // maxEstimatedArrivalTime
+				computeMaxEstimatedArrivalTime(now, 30*time.Minute), // maxEstimatedArrivalTime
 				0,
 				nil,
 				nil,
