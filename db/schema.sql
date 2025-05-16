@@ -89,6 +89,7 @@ CREATE TABLE path_point (
     
     latitude DECIMAL(10, 8) NOT NULL,
     longitude DECIMAL(11, 8) NOT NULL,
+    walking_duration_minutes INTEGER DEFAULT 0,
     address TEXT,
 
     -- pickup time or dropoff time depending on the type

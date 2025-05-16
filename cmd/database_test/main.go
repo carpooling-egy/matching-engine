@@ -120,6 +120,7 @@ func printOfferDetails(driver *model.Offer) {
 	fmt.Printf("Capacity: %d\n", driver.Capacity())
 	fmt.Printf("Current Number of Requests: %d\n", driver.CurrentNumberOfRequests())
 	fmt.Printf("Detour Duration: %v\n", driver.DetourDurationMinutes())
+	fmt.Printf("Max Estimated Arrival Time: %v\n", driver.MaxEstimatedArrivalTime())
 
 	// Preferences
 	pref := driver.Preferences()
@@ -141,6 +142,7 @@ func printOfferDetails(driver *model.Offer) {
 		}
 
 		fmt.Printf("   Expected Arrival: %v\n", point.ExpectedArrivalTime())
+		fmt.Printf("	  Walking Duration: %v\n", point.WalkingDuration())
 
 		// Owner information
 		if point.Owner() != nil {

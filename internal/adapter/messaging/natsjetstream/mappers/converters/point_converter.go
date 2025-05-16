@@ -30,8 +30,9 @@ func (c *PointConverter) ToDTO(p *model.PathPoint) dto.PointDTO {
 			Lat: p.Coordinate().Lat(),
 			Lng: p.Coordinate().Lng(),
 		},
-		Time:      p.ExpectedArrivalTime().Format(time.RFC3339),
-		PointType: p.PointType().String(),
+		Time:                   p.ExpectedArrivalTime().Format(time.RFC3339),
+		PointType:              p.PointType().String(),
+		WalkingDurationMinutes: int(p.WalkingDuration().Minutes()),
 	}
 }
 
