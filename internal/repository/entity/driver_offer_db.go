@@ -22,16 +22,15 @@ type DriverOfferDB struct {
 	EstimatedArrivalTime    time.Time `gorm:"type:timestamp with time zone"`
 	MaxEstimatedArrivalTime time.Time `gorm:"type:timestamp with time zone"`
 
-	DetourDurationMinutes   time.Duration `gorm:"default:0"`
-	Capacity                int           `gorm:"not null;check:capacity > 0"`
-	CurrentNumberOfRequests int           `gorm:"not null;default:0"`
+	DetourDurationMinutes   int `gorm:"default:0"`
+	Capacity                int `gorm:"not null;check:capacity > 0"`
+	CurrentNumberOfRequests int `gorm:"not null;default:0"`
 
-	SameGender    bool         `gorm:"not null;default:false"`
-	AllowsSmoking bool         `gorm:"not null;default:true"`
-	AllowsPets    bool         `gorm:"not null;default:true"`
-	UserGender    enums.Gender `gorm:"type:gender_type;not null"`
-
-	PathPoints []PathPointDB `gorm:"foreignKey:DriverOfferID"`
+	SameGender    bool          `gorm:"not null;default:false"`
+	AllowsSmoking bool          `gorm:"not null;default:true"`
+	AllowsPets    bool          `gorm:"not null;default:true"`
+	UserGender    enums.Gender  `gorm:"type:gender_type;not null"`
+	PathPoints    []PathPointDB `gorm:"foreignKey:DriverOfferID"`
 }
 
 // TableName specifies the table name for DriverOfferDB
@@ -57,7 +56,7 @@ func (d *DriverOfferDB) ToDriverOffer() *model.Offer {
 	requestsMap := make(map[string]*model.Request)
 
 	// Add source point
-	sourcePoint := model.NewPathPoint(*sourceCoord, enums.Source, d.DepartureTime, nil)
+	sourcePoint := model.NewPathPoint(*sourceCoord, enums.Source, d.DepartureTime, nil, 0)
 	pathPoints = append(pathPoints, *sourcePoint) // Use the value, not the pointer
 
 	// Process path points from database
@@ -80,7 +79,7 @@ func (d *DriverOfferDB) ToDriverOffer() *model.Offer {
 	if arrivalTime.IsZero() {
 		arrivalTime = d.EstimatedArrivalTime
 	}
-	destPoint := model.NewPathPoint(*destCoord, enums.Destination, arrivalTime, nil)
+	destPoint := model.NewPathPoint(*destCoord, enums.Destination, arrivalTime, nil, 0)
 	pathPoints = append(pathPoints, *destPoint) // Use the value, not the pointer
 
 	// Convert requests map to slice
@@ -96,9 +95,10 @@ func (d *DriverOfferDB) ToDriverOffer() *model.Offer {
 		*sourceCoord,
 		*destCoord,
 		d.DepartureTime,
-		d.DetourDurationMinutes,
+		time.Duration(d.DetourDurationMinutes)*time.Minute,
 		d.Capacity,
 		*preferences,
+		d.MaxEstimatedArrivalTime,
 		d.CurrentNumberOfRequests,
 		pathPoints,
 		requests,

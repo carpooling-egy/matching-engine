@@ -31,6 +31,7 @@ func (selector *PickupDropoffSelector) GetPickupDropoffPointsAndDurations(reques
 	if cachedValue, ok := selector.cache.Get(cacheKey); ok {
 		return cachedValue, nil
 	}
+
 	// Call the underlying generator to get the pickup and dropoff points
 	pickup, dropoff, err := selector.generator.GeneratePickupDropoffPoints(request, offer)
 	if err != nil {
@@ -40,9 +41,15 @@ func (selector *PickupDropoffSelector) GetPickupDropoffPointsAndDurations(reques
 	if err != nil {
 		return nil, err
 	}
+
+	// Set the walking durations for the pickup and dropoff points
+	pickup.SetWalkingDuration(pickupWalkingDuration)
+	dropoff.SetWalkingDuration(dropoffWalkingDuration)
+
 	// Store the pickup and dropoff points in the cache
-	cacheValue := pickupdropoffcache.NewValue(pickup, dropoff, pickupWalkingDuration, dropoffWalkingDuration)
+	cacheValue := pickupdropoffcache.NewValue(pickup, dropoff)
 	selector.cache.Set(cacheKey, cacheValue)
+
 	// Return the pickup and dropoff points
 	return cacheValue, nil
 }
