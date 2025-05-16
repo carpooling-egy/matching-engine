@@ -33,38 +33,25 @@ func (m *MockPickupDropoffSelector) GetPickupDropoffPointsAndDurations(request *
 
 // MockEngine implements the routing.Engine interface for testing
 type MockEngine struct {
-	// For the regular route
-	regularDurations []time.Duration
-	regularErr       error
-
-	// For the direct route
-	directDurations []time.Duration
-	directErr       error
+	// For the route
+	durations []time.Duration
+	err       error
 }
 
 // NewMockEngine creates a new MockEngine
 func NewMockEngine(
-	regularDurations []time.Duration,
-	regularErr error,
-	directDurations []time.Duration,
-	directErr error,
+	durations []time.Duration,
+	err error,
 ) routing.Engine {
 	return &MockEngine{
-		regularDurations: regularDurations,
-		regularErr:       regularErr,
-		directDurations:  directDurations,
-		directErr:        directErr,
+		durations: durations,
+		err:       err,
 	}
 }
 
 // ComputeDrivingTime implements the routing.Engine interface
 func (m *MockEngine) ComputeDrivingTime(ctx context.Context, routeParams *model.RouteParams) ([]time.Duration, error) {
-	// Check if this is the direct route call (only 2 waypoints)
-	if len(routeParams.Waypoints()) == 2 {
-		return m.directDurations, m.directErr
-	}
-	// Otherwise, it's the full route call
-	return m.regularDurations, m.regularErr
+	return m.durations, m.err
 }
 
 // PlanDrivingRoute implements the routing.Engine interface
@@ -114,8 +101,6 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 		mockSelectorErr      error
 		mockDrivingDurations []time.Duration
 		mockDrivingErr       error
-		mockDirectDurations  []time.Duration
-		mockDirectErr        error
 		expected             bool
 		expectError          bool
 	}{
@@ -142,16 +127,12 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				*model.NewPreference(enums.Female, false, false, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
-				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil),
-				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil),
-				5*time.Minute,  // pickupWalkingDuration
-				10*time.Minute, // dropoffWalkingDuration
+				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
+				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil, 10*time.Minute),
 			),
 			mockSelectorErr:      nil,
 			mockDrivingDurations: []time.Duration{0, 20 * time.Minute, 40 * time.Minute, 60 * time.Minute}, // Source, Pickup, Dropoff, Destination
 			mockDrivingErr:       nil,
-			mockDirectDurations:  []time.Duration{0, 40 * time.Minute}, // Source, Destination (direct route)
-			mockDirectErr:        nil,
 			expected:             true,
 			expectError:          false,
 		},
@@ -163,7 +144,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				now, 10*time.Minute, // Only 10 minutes detour allowed
 				3,
 				*model.NewPreference(enums.Male, false, false, false),
-				twoHoursLater, // maxEstimatedArrivalTime
+				now.Add(50*time.Minute), // maxEstimatedArrivalTime - set to less than total trip duration
 				0,
 				nil,
 				nil,
@@ -178,17 +159,13 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				*model.NewPreference(enums.Female, false, false, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
-				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil),
-				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil),
-				5*time.Minute,  // pickupWalkingDuration
-				10*time.Minute, // dropoffWalkingDuration
+				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
+				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil, 10*time.Minute),
 			),
 			mockSelectorErr:      nil,
 			mockDrivingDurations: []time.Duration{0, 20 * time.Minute, 40 * time.Minute, 60 * time.Minute}, // Source, Pickup, Dropoff, Destination
 			mockDrivingErr:       nil,
-			mockDirectDurations:  []time.Duration{0, 30 * time.Minute}, // Source, Destination (direct route)
-			mockDirectErr:        nil,
-			expected:             false, // Detour is 30 minutes (60-30), which exceeds the 10 minutes allowed
+			expected:             false, // Total trip duration (60 min) exceeds maxEstimatedArrivalTime (50 min)
 			expectError:          false,
 		},
 		{
@@ -214,16 +191,12 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				*model.NewPreference(enums.Female, false, false, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
-				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil),
-				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil),
-				5*time.Minute,  // pickupWalkingDuration
-				10*time.Minute, // dropoffWalkingDuration
+				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
+				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil, 10*time.Minute),
 			),
 			mockSelectorErr:      nil,
 			mockDrivingDurations: []time.Duration{0, 20 * time.Minute, 40 * time.Minute, 60 * time.Minute}, // Source, Pickup, Dropoff, Destination
 			mockDrivingErr:       nil,
-			mockDirectDurations:  []time.Duration{0, 40 * time.Minute}, // Source, Destination (direct route)
-			mockDirectErr:        nil,
 			expected:             false, // Driver arrives at pickup before rider's earliest departure time
 			expectError:          false,
 		},
@@ -250,17 +223,13 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				*model.NewPreference(enums.Female, false, false, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
-				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil),
-				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil),
-				10*time.Minute, // pickupWalkingDuration
-				10*time.Minute, // dropoffWalkingDuration
+				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 10*time.Minute),
+				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil, 10*time.Minute),
 			),
 			mockSelectorErr:      nil,
 			mockDrivingDurations: []time.Duration{0, 20 * time.Minute, 40 * time.Minute, 60 * time.Minute}, // Source, Pickup, Dropoff, Destination
 			mockDrivingErr:       nil,
-			mockDirectDurations:  []time.Duration{0, 40 * time.Minute}, // Source, Destination (direct route)
-			mockDirectErr:        nil,
-			expected:             false,
+			expected:             true,
 			expectError:          false,
 		},
 		{
@@ -286,16 +255,12 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				*model.NewPreference(enums.Female, false, false, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
-				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil),
-				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil),
-				5*time.Minute,  // pickupWalkingDuration
-				10*time.Minute, // dropoffWalkingDuration
+				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
+				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil, 10*time.Minute),
 			),
 			mockSelectorErr:      nil,
 			mockDrivingDurations: []time.Duration{0, 20 * time.Minute, 70 * time.Minute, 90 * time.Minute}, // Source, Pickup, Dropoff, Destination
 			mockDrivingErr:       nil,
-			mockDirectDurations:  []time.Duration{0, 40 * time.Minute}, // Source, Destination (direct route)
-			mockDirectErr:        nil,
 			expected:             false, // Driver arrives at dropoff after rider's latest arrival time
 			expectError:          false,
 		},
@@ -322,16 +287,12 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				*model.NewPreference(enums.Female, false, false, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
-				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil),
-				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil),
-				5*time.Minute,  // pickupWalkingDuration
-				10*time.Minute, // dropoffWalkingDuration
+				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
+				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil, 10*time.Minute),
 			),
 			mockSelectorErr:      nil,
 			mockDrivingDurations: []time.Duration{0, 20 * time.Minute, 55 * time.Minute, 60 * time.Minute}, // Source, Pickup, Dropoff, Destination
 			mockDrivingErr:       nil,
-			mockDirectDurations:  []time.Duration{0, 40 * time.Minute}, // Source, Destination (direct route)
-			mockDirectErr:        nil,
 			expected:             false,
 			expectError:          false,
 		},
@@ -358,16 +319,12 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				*model.NewPreference(enums.Female, false, false, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
-				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil),
-				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil),
-				5*time.Minute,  // pickupWalkingDuration
-				10*time.Minute, // dropoffWalkingDuration
+				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
+				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil, 10*time.Minute),
 			),
 			mockSelectorErr:      nil,
 			mockDrivingDurations: []time.Duration{0, 15 * time.Minute, 50 * time.Minute, 70 * time.Minute}, // Source, Pickup, Dropoff, Destination
 			mockDrivingErr:       nil,
-			mockDirectDurations:  []time.Duration{0, 40 * time.Minute}, // Source, Destination (direct route)
-			mockDirectErr:        nil,
 			expected:             true, // Driver arrives at pickup and dropoff at the exact time of the pickup and dropoff times
 			expectError:          false,
 		},
@@ -397,8 +354,6 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 			mockSelectorErr:      context.DeadlineExceeded,
 			mockDrivingDurations: nil,
 			mockDrivingErr:       nil,
-			mockDirectDurations:  nil,
-			mockDirectErr:        nil,
 			expected:             false,
 			expectError:          true,
 		},
@@ -425,21 +380,19 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				*model.NewPreference(enums.Female, false, false, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
-				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil),
-				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil),
-				5*time.Minute,  // pickupWalkingDuration
-				10*time.Minute, // dropoffWalkingDuration
+				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
+				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil, 10*time.Minute),
 			),
 			mockSelectorErr:      nil,
 			mockDrivingDurations: nil,
 			mockDrivingErr:       context.DeadlineExceeded,
-			mockDirectDurations:  nil,
-			mockDirectErr:        nil,
 			expected:             false,
 			expectError:          true,
 		},
+		// This test case is no longer relevant as the direct route call is no longer made
+		// Keeping it for backward compatibility but updating expectations
 		{
-			name: "Error from routing engine (direct route)",
+			name: "Direct route no longer used",
 			offer: model.NewOffer(
 				"offer1", "user1",
 				sourceCoord, destCoord,
@@ -461,18 +414,14 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				*model.NewPreference(enums.Female, false, false, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
-				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil),
-				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil),
-				5*time.Minute,  // pickupWalkingDuration
-				10*time.Minute, // dropoffWalkingDuration
+				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
+				model.NewPathPoint(dropoffCoord, enums.Dropoff, oneHourLater, nil, 10*time.Minute),
 			),
 			mockSelectorErr:      nil,
 			mockDrivingDurations: []time.Duration{0, 20 * time.Minute, 40 * time.Minute, 60 * time.Minute},
 			mockDrivingErr:       nil,
-			mockDirectDurations:  nil,
-			mockDirectErr:        context.DeadlineExceeded,
-			expected:             false,
-			expectError:          true,
+			expected:             true,  // Should pass as the direct route is no longer checked
+			expectError:          false, // No error expected as the direct route is no longer checked
 		},
 	}
 
@@ -482,12 +431,10 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 			// Create mock selector
 			mockSelector := NewMockPickupDropoffSelector(tc.mockSelectorValue, tc.mockSelectorErr)
 
-			// Create mock routing engine with two different behaviors
+			// Create mock routing engine
 			mockEngine := NewMockEngine(
 				tc.mockDrivingDurations,
 				tc.mockDrivingErr,
-				tc.mockDirectDurations,
-				tc.mockDirectErr,
 			)
 
 			// Create an instance of our test-specific DetourTimeChecker with our mock objects

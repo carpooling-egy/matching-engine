@@ -42,26 +42,16 @@ func (dtc *DetourTimeChecker) Check(offer *model.Offer, request *model.Request) 
 	pickupDuration := durations[1]
 	dropoffDuration := durations[2]
 
-	if offer.DepartureTime().Add(pickupDuration).Before(request.EarliestDepartureTime().Add(value.PickupWalkingDuration())) {
+	if offer.DepartureTime().Add(pickupDuration).Before(request.EarliestDepartureTime()) {
 		return false, nil
 	}
 
-	if offer.DepartureTime().Add(dropoffDuration).After(request.LatestArrivalTime().Add(-value.DropoffWalkingDuration())) {
+	if offer.DepartureTime().Add(dropoffDuration).After(request.LatestArrivalTime().Add(-value.Dropoff().WalkingDuration())) {
 		return false, nil
 	}
 	// Check if the detour time is within the acceptable range
 	totalTripDuration := durations[3]
-	directWaypointParams, err := model.NewRouteParams([]model.Coordinate{*offer.Source(), *offer.Destination()}, offer.DepartureTime())
-	if err != nil {
-		return false, fmt.Errorf("failed to create direct route params: %w", err)
-	}
-
-	directDurations, err := dtc.engine.ComputeDrivingTime(context.Background(), directWaypointParams)
-	if err != nil {
-		return false, fmt.Errorf("failed to compute direct durations: %w", err)
-	}
-	// Check if the detour time is within the acceptable range
-	if totalTripDuration > directDurations[1]+offer.DetourDurationMinutes() {
+	if totalTripDuration > offer.MaxEstimatedArrivalTime().Sub(offer.DepartureTime()) {
 		return false, nil
 	}
 
