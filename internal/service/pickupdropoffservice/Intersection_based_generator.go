@@ -52,7 +52,7 @@ func (g *IntersectionBasedGenerator) GeneratePickupDropoffPoints(request *model.
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to compute closest route point: %w", err)
 	}
-	// Check `the intersection between the route and the destination circle
+	// Check the intersection between the route and the destination circle
 	if dropoffDuration > request.MaxWalkingDurationMinutes() {
 		// If the dropoff point is not within the max walking duration, use the original destination
 		dropoff = model.NewPathPoint(*request.Destination(), enums.Dropoff, request.LatestArrivalTime(), request, noWalkingDuration)
