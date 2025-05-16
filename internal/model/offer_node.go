@@ -73,6 +73,6 @@ func (node *OfferNode) GetAllRequests() []*Request {
 	return append(node.offer.matchedRequests, node.newlyAssignedMatchedRequests...)
 }
 
-func (node *OfferNode) AddMatchedRequest(request *Request) {
+func (node *OfferNode) AddNewlyMatchedRequest(request *Request) {
 	node.newlyAssignedMatchedRequests = append(node.newlyAssignedMatchedRequests, request)
 }
