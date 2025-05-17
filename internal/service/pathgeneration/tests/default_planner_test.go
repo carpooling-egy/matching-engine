@@ -329,7 +329,7 @@ func TestFindFirstFeasiblePath_MultiplePathsFirstInvalid(t *testing.T) {
 	pickup, dropoff := createDefaultPickupDropoff(request)
 
 	// Create paths - first invalid, second valid
-	invalidPath := []model.PathPoint{*pickup, *dropoff}
+	invalidPath := []model.PathPoint{*pickup, *dropoff, *dropoff}
 	validPath := []model.PathPoint{*pickup, *dropoff, *pickup} // Just for testing differentiation
 
 	// We'll have our iterator yield these paths

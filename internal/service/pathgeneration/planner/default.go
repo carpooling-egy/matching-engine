@@ -8,7 +8,7 @@ import (
 	"matching-engine/internal/service/pickupdropoffservice"
 )
 
-// TODO: think if there might be cases when we can get a generation or validation & still want to proceed in path generation
+// TODO: Revisit error handling
 type DefaultPathPlanner struct {
 	pathGenerator         generator.PathGenerator
 	pathValidator         validator.PathValidator
@@ -26,7 +26,7 @@ func (planner *DefaultPathPlanner) FindFirstFeasiblePath(offerNode *model.OfferN
 
 	pickupAndDropOffs, err := planner.pickupDropoffSelector.GetPickupDropoffPointsAndDurations(requestNode.Request(), offerNode.Offer())
 	if err != nil {
-		return nil, false, fmt.Errorf("FindFirstFeasiblePath: error getting dropoff points: %w", err)
+		return nil, false, fmt.Errorf("FindFirstFeasiblePath: error getting pickup & dropoff points: %w", err)
 	}
 
 	pathIter := planner.pathGenerator.GeneratePaths(
