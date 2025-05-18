@@ -7,7 +7,7 @@ import (
 	"matching-engine/internal/model"
 	"matching-engine/internal/service/earlypruning"
 	"matching-engine/internal/service/maximummatching"
-	pathgenerator "matching-engine/internal/service/path-generator"
+	"matching-engine/internal/service/pathgeneration/planner"
 
 	"github.com/rs/zerolog/log"
 )
@@ -17,13 +17,13 @@ type Matcher struct {
 	availableRequests      *collections.SyncMap[string, *model.RequestNode]
 	potentialOfferRequests *collections.SyncMap[string, *collections.Set[string]]
 	results                []model.MatchingResult
-	pathPlanner            pathgenerator.PathPlanner
+	pathPlanner            planner.PathPlanner
 	candidateGenerator     earlypruning.CandidateGenerator
 	maximumMatching        maximummatching.MaximumMatching
 }
 
 // NewMatcher creates and initializes a new Matcher instance.
-func NewMatcher(planner pathgenerator.PathPlanner, generator earlypruning.CandidateGenerator, matching maximummatching.MaximumMatching) *Matcher {
+func NewMatcher(planner planner.PathPlanner, generator earlypruning.CandidateGenerator, matching maximummatching.MaximumMatching) *Matcher {
 	return &Matcher{
 		availableOffers:        collections.NewSyncMap[string, *model.OfferNode](),
 		availableRequests:      collections.NewSyncMap[string, *model.RequestNode](),
