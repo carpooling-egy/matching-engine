@@ -14,7 +14,6 @@ var _ GeospatialProcessor = (*processorImpl)(nil)
 
 type processorImpl struct {
 	route *model.Route
-
 	pruning.RoutePruner
 	downsampling.RouteDownSampler
 	routing.Engine
