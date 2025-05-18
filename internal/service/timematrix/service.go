@@ -7,21 +7,21 @@ import (
 	"time"
 )
 
-type TimeMatrixService struct {
+type Service struct {
 	timeMatrixSelector Selector
 }
 
-func NewTimeMatrixService(selector Selector) *TimeMatrixService {
-	return &TimeMatrixService{
+func NewService(selector Selector) *Service {
+	return &Service{
 		timeMatrixSelector: selector,
 	}
 }
 
-func (s *TimeMatrixService) getTravelDuration(matrix *cache.PathPointMappedTimeMatrix, from, to model.PathPointID) (time.Duration, error) {
-	fromIdx, fromOk := matrix.PointIdToIndex()[from]
-	toIdx, toOk := matrix.PointIdToIndex()[to]
+func (s *Service) getTravelDuration(matrix *cache.PathPointMappedTimeMatrix, from, to model.PathPointID) (time.Duration, error) {
+	fromIdx, fromExist := matrix.PointIdToIndex()[from]
+	toIdx, toExist := matrix.PointIdToIndex()[to]
 
-	if !fromOk || !toOk {
+	if !fromExist || !toExist {
 		return 0, fmt.Errorf("invalid path point ID: from=%v, to=%v", from, to)
 	}
 
@@ -32,7 +32,7 @@ func (s *TimeMatrixService) getTravelDuration(matrix *cache.PathPointMappedTimeM
 	return matrix.TimeMatrix()[fromIdx][toIdx], nil
 }
 
-func (s *TimeMatrixService) GetCumulativeTravelDurations(offer *model.OfferNode, pathPoints []model.PathPoint) ([]time.Duration, error) {
+func (s *Service) GetCumulativeTravelDurations(offer *model.OfferNode, pathPoints []model.PathPoint) ([]time.Duration, error) {
 	if len(pathPoints) < 2 {
 		return nil, fmt.Errorf("pathPointIDs must contain at least two points")
 	}
@@ -55,7 +55,7 @@ func (s *TimeMatrixService) GetCumulativeTravelDurations(offer *model.OfferNode,
 	return cumulativeDuration, nil
 }
 
-func (s *TimeMatrixService) GetCumulativeTravelTimes(offer *model.OfferNode, pathPoints []model.PathPoint) ([]time.Time, error) {
+func (s *Service) GetCumulativeTravelTimes(offer *model.OfferNode, pathPoints []model.PathPoint) ([]time.Time, error) {
 	if len(pathPoints) < 2 {
 		return nil, fmt.Errorf("pathPointIDs must contain at least two points")
 	}
@@ -78,7 +78,7 @@ func (s *TimeMatrixService) GetCumulativeTravelTimes(offer *model.OfferNode, pat
 	return cumulativeTimes, nil
 }
 
-func (s *TimeMatrixService) GetTravelDuration(offer *model.OfferNode, from, to model.PathPointID) (time.Duration, error) {
+func (s *Service) GetTravelDuration(offer *model.OfferNode, from, to model.PathPointID) (time.Duration, error) {
 	matrix, err := s.timeMatrixSelector.GetTimeMatrix(offer)
 
 	if err != nil {

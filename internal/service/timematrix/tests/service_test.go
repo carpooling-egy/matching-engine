@@ -55,7 +55,7 @@ func TestTimeMatrixService_GetTravelDuration_Success(t *testing.T) {
 	mockSelector.On("GetTimeMatrix", offerNode).Return(mappedMatrix, nil)
 
 	// Create service with mock selector
-	service := timematrix.NewTimeMatrixService(mockSelector)
+	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
 	duration, err := service.GetTravelDuration(offerNode, 1, 3)
@@ -81,7 +81,7 @@ func TestTimeMatrixService_GetTravelDuration_SelectorError(t *testing.T) {
 	mockSelector.On("GetTimeMatrix", offerNode).Return(nil, errors.New("failed to get time matrix"))
 
 	// Create service with mock selector
-	service := timematrix.NewTimeMatrixService(mockSelector)
+	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
 	duration, err := service.GetTravelDuration(offerNode, 1, 3)
@@ -123,7 +123,7 @@ func TestTimeMatrixService_GetTravelDuration_InvalidPointID(t *testing.T) {
 	mockSelector.On("GetTimeMatrix", offerNode).Return(mappedMatrix, nil)
 
 	// Create service with mock selector
-	service := timematrix.NewTimeMatrixService(mockSelector)
+	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test with invalid point ID
 	duration, err := service.GetTravelDuration(offerNode, 1, 4)
@@ -163,7 +163,7 @@ func TestTimeMatrixService_GetTravelDuration_IndexOutOfBounds(t *testing.T) {
 	mockSelector.On("GetTimeMatrix", offerNode).Return(mappedMatrix, nil)
 
 	// Create service with mock selector
-	service := timematrix.NewTimeMatrixService(mockSelector)
+	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
 	duration, err := service.GetTravelDuration(offerNode, 1, 2)
@@ -222,7 +222,7 @@ func TestTimeMatrixService_GetCumulativeTravelDurations_Success(t *testing.T) {
 	pathPoints := []model.PathPoint{*p1, *p2, *p3, *p4}
 
 	// Create service with mock selector
-	service := timematrix.NewTimeMatrixService(mockSelector)
+	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
 	cumulativeDurations, err := service.GetCumulativeTravelDurations(offerNode, pathPoints)
@@ -261,7 +261,7 @@ func TestTimeMatrixService_GetCumulativeTravelDurations_SelectorError(t *testing
 	pathPoints := []model.PathPoint{*p1, *p2}
 
 	// Create service with mock selector
-	service := timematrix.NewTimeMatrixService(mockSelector)
+	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
 	cumulativeDurations, err := service.GetCumulativeTravelDurations(offerNode, pathPoints)
@@ -293,7 +293,7 @@ func TestTimeMatrixService_GetCumulativeTravelDurations_TooFewPoints(t *testing.
 	pathPoints := []model.PathPoint{*p1}
 
 	// Create service with mock selector
-	service := timematrix.NewTimeMatrixService(mockSelector)
+	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
 	cumulativeDurations, err := service.GetCumulativeTravelDurations(offerNode, pathPoints)
@@ -342,7 +342,7 @@ func TestTimeMatrixService_GetCumulativeTravelDurations_InvalidPointID(t *testin
 	pathPoints := []model.PathPoint{*p1, *p2, *p3}
 
 	// Create service with mock selector
-	service := timematrix.NewTimeMatrixService(mockSelector)
+	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
 	cumulativeDurations, err := service.GetCumulativeTravelDurations(offerNode, pathPoints)
@@ -416,7 +416,7 @@ func TestTimeMatrixService_GetCumulativeTravelTimes_Success(t *testing.T) {
 	pathPoints := []model.PathPoint{*p1, *p2, *p3, *p4}
 
 	// Create service with mock selector
-	service := timematrix.NewTimeMatrixService(mockSelector)
+	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
 	cumulativeTimes, err := service.GetCumulativeTravelTimes(offerNode, pathPoints)
@@ -455,7 +455,7 @@ func TestTimeMatrixService_GetCumulativeTravelTimes_SelectorError(t *testing.T) 
 	pathPoints := []model.PathPoint{*p1, *p2}
 
 	// Create service with mock selector
-	service := timematrix.NewTimeMatrixService(mockSelector)
+	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
 	cumulativeTimes, err := service.GetCumulativeTravelTimes(offerNode, pathPoints)
@@ -487,7 +487,7 @@ func TestTimeMatrixService_GetCumulativeTravelTimes_TooFewPoints(t *testing.T) {
 	pathPoints := []model.PathPoint{*p1}
 
 	// Create service with mock selector
-	service := timematrix.NewTimeMatrixService(mockSelector)
+	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
 	cumulativeTimes, err := service.GetCumulativeTravelTimes(offerNode, pathPoints)
@@ -539,7 +539,7 @@ func TestTimeMatrixService_GetCumulativeTravelTimes_InvalidPointID(t *testing.T)
 	pathPoints := []model.PathPoint{*p1, *p2, *p3}
 
 	// Create service with mock selector
-	service := timematrix.NewTimeMatrixService(mockSelector)
+	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
 	cumulativeTimes, err := service.GetCumulativeTravelTimes(offerNode, pathPoints)

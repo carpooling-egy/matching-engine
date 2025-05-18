@@ -64,32 +64,25 @@ func generateRandomTimeDistanceMatrices(size int) ([][]time.Duration, [][]model.
 		for j := 0; j < size; j++ {
 			if i == j {
 				timeMatrix[i][j] = 0
-				distanceMatrix[i][j] = must(model.NewDistance(0, model.DistanceUnitKilometer))
+				distanceMatrix[i][j] = *must(model.NewDistance(0, model.DistanceUnitKilometer))
 			} else {
 				// Random duration between 5 and 30 minutes
 				minutes := 5 + rand.Intn(26)
 				timeMatrix[i][j] = time.Duration(minutes) * time.Minute
 				// Random distance between 0.5 and 2.0 kilometers
 				dist := 0.5 + rand.Float32()*1.5
-				distanceMatrix[i][j] = must(model.NewDistance(dist, model.DistanceUnitKilometer))
+				distanceMatrix[i][j] = *must(model.NewDistance(dist, model.DistanceUnitKilometer))
 			}
 		}
 	}
 	return timeMatrix, distanceMatrix
 }
 
-func must(d *model.Distance, err error) model.Distance {
+func must[T any](v T, err error) T {
 	if err != nil {
 		panic(err)
 	}
-	return *d
-}
-
-func mustDistanceTimeMatrix(dt *model.DistanceTimeMatrix, err error) *model.DistanceTimeMatrix {
-	if err != nil {
-		panic(err)
-	}
-	return dt
+	return v
 }
 
 func resetPathPointIDCounter() {
