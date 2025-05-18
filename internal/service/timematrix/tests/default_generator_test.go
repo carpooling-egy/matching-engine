@@ -329,7 +329,7 @@ func TestDefaultGenerator_Generate_MultipleRequests(t *testing.T) {
 	timeMatrix, distanceMatrix := generateRandomTimeDistanceMatrices(6)
 
 	mockEngine.On("ComputeDistanceTimeMatrix", mock.Anything, mock.AnythingOfType("*model.DistanceTimeMatrixParams")).
-		Return(mustDistanceTimeMatrix(model.NewDistanceTimeMatrix(distanceMatrix, timeMatrix)), nil)
+		Return(must(model.NewDistanceTimeMatrix(distanceMatrix, timeMatrix)), nil)
 
 	// Create the generator
 	generator := timematrix.NewDefaultGenerator(
@@ -448,7 +448,7 @@ func TestDefaultGenerator_Generate_RequestNotFound(t *testing.T) {
 	result, err := generator.Generate(model.NewOfferNode(offer))
 
 	// Assertions - since the request ID is in potentialOfferRequests but not in availableRequests,
-	assert.NoError(t, err)
+	assert.Error(t, err)
 	assert.Nil(t, result)
 
 }
