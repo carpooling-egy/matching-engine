@@ -12,16 +12,16 @@ import (
 
 // MockGeospatialProcessor is a mock implementation of the GeospatialProcessor interface
 type MockGeospatialProcessor struct {
-	pickupCoord          *model.Coordinate
-	pickupDuration       time.Duration
-	pickupErr            error
-	dropoffCoord         *model.Coordinate
-	dropoffDuration      time.Duration
-	dropoffErr           error
-	pickupCallCount      int
-	dropoffCallCount     int
-	lastPointRequested   *model.Coordinate
-	lastWalkingRequested time.Duration
+	pickupCoord                  *model.Coordinate
+	pickupDuration               time.Duration
+	pickupErr                    error
+	dropoffCoord                 *model.Coordinate
+	dropoffDuration              time.Duration
+	dropoffErr                   error
+	pickupCallCount              int
+	dropoffCallCount             int
+	lastPointRequested           *model.Coordinate
+	lastWalkingDurationRequested time.Duration
 }
 
 func NewMockGeospatialProcessor(
@@ -44,10 +44,10 @@ func NewMockGeospatialProcessor(
 
 func (m *MockGeospatialProcessor) ComputeClosestRoutePoint(
 	point *model.Coordinate,
-	walkingTime time.Duration,
+	walkingDuration time.Duration,
 ) (*model.Coordinate, time.Duration, error) {
 	m.lastPointRequested = point
-	m.lastWalkingRequested = walkingTime
+	m.lastWalkingDurationRequested = walkingDuration
 
 	// Determine if this is a pickup or dropoff call based on the point
 	// This is a simple heuristic for the test - in real code we'd need a more robust way
@@ -397,7 +397,7 @@ func TestIntersectionBasedGenerator_GeneratePickupDropoffPoints(t *testing.T) {
 			if tc.expectError {
 				if err == nil {
 					t.Errorf("Expected error but got nil")
-				} else if tc.errorContains != "" && !containsString(err.Error(), tc.errorContains) {
+				} else if tc.errorContains != "" && !strings.Contains(err.Error(), tc.errorContains) {
 					t.Errorf("Expected error to contain '%s' but got: %v", tc.errorContains, err)
 				}
 				return
@@ -411,14 +411,14 @@ func TestIntersectionBasedGenerator_GeneratePickupDropoffPoints(t *testing.T) {
 			// Check pickup point
 			if pickup == nil {
 				t.Errorf("Expected pickup point but got nil")
-			} else if !coordinatesEqual(pickup.Coordinate(), tc.expectedPickupCoord) {
+			} else if !pickup.Coordinate().Equal(tc.expectedPickupCoord) {
 				t.Errorf("Expected pickup coordinate %v but got %v", tc.expectedPickupCoord, pickup.Coordinate())
 			}
 
 			// Check dropoff point
 			if dropoff == nil {
 				t.Errorf("Expected dropoff point but got nil")
-			} else if !coordinatesEqual(dropoff.Coordinate(), tc.expectedDropoffCoord) {
+			} else if !dropoff.Coordinate().Equal(tc.expectedDropoffCoord) {
 				t.Errorf("Expected dropoff coordinate %v but got %v", tc.expectedDropoffCoord, dropoff.Coordinate())
 			}
 
@@ -433,20 +433,4 @@ func TestIntersectionBasedGenerator_GeneratePickupDropoffPoints(t *testing.T) {
 			}
 		})
 	}
-}
-
-// Helper function to check if a string contains another string
-func containsString(s, substr string) bool {
-	return strings.Contains(s, substr)
-}
-
-// Helper function to check if two coordinates are equal
-func coordinatesEqual(c1, c2 *model.Coordinate) bool {
-	if c1 == nil && c2 == nil {
-		return true
-	}
-	if c1 == nil || c2 == nil {
-		return false
-	}
-	return c1.Lat() == c2.Lat() && c1.Lng() == c2.Lng()
 }
