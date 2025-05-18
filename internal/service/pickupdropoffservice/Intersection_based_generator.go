@@ -45,8 +45,8 @@ func (g *IntersectionBasedGenerator) GeneratePickupDropoffPoints(request *model.
 	if request == nil || offer == nil {
 		return nil, nil, fmt.Errorf("request or offer is nil")
 	}
-	geospatialProcessor, ok := g.offerProcessorCache.Get(offer.ID())
-	if !ok {
+	geospatialProcessor, exists := g.offerProcessorCache.Get(offer.ID())
+	if !exists {
 		geospatialProcessor, err = g.processorFactory.CreateProcessor(offer)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to create processor: %w", err)
