@@ -85,16 +85,5 @@ func (s *TimeMatrixService) GetTravelDuration(offer *model.OfferNode, from, to m
 		return 0, err
 	}
 
-	fromIdx, fromOk := matrix.PointIdToIndex()[from]
-	toIdx, toOk := matrix.PointIdToIndex()[to]
-
-	if !fromOk || !toOk {
-		return 0, fmt.Errorf("invalid path point ID: from=%v, to=%v", from, to)
-	}
-
-	if fromIdx >= len(matrix.TimeMatrix()) || toIdx >= len(matrix.TimeMatrix()[fromIdx]) {
-		return 0, fmt.Errorf("index out of bounds: fromIdx=%d, toIdx=%d", fromIdx, toIdx)
-	}
-
-	return matrix.TimeMatrix()[fromIdx][toIdx], nil
+	return s.getTravelDuration(matrix, from, to)
 }
