@@ -1,39 +1,34 @@
 package model
 
-import "matching-engine/internal/collections"
-
 type Graph struct {
-	offerNodes *collections.Set[*OfferNode]
+	offerNodes []*OfferNode
 }
 
-func NewGraph() *Graph {
+func NewGraph(offerNodes []*OfferNode) *Graph {
 	return &Graph{
-		offerNodes: collections.NewSet[*OfferNode](),
+		offerNodes: offerNodes,
 	}
 }
 
 // OfferNodes returns the offer nodes
-func (g *Graph) OfferNodes() *collections.Set[*OfferNode] {
+func (g *Graph) OfferNodes() []*OfferNode {
 	return g.offerNodes
 }
 
 // SetOfferNodes sets the offer nodes
-func (g *Graph) SetOfferNodes(offerNodes *collections.Set[*OfferNode]) {
+func (g *Graph) SetOfferNodes(offerNodes []*OfferNode) {
 	g.offerNodes = offerNodes
-
 }
 
 func (g *Graph) AddOfferNode(offerNode *OfferNode) {
-	g.offerNodes.Add(offerNode)
+	g.offerNodes = append(g.offerNodes, offerNode)
 }
 
 func (g *Graph) RemoveOfferNode(offerNode *OfferNode) {
-	g.offerNodes.Remove(offerNode)
-}
-
-func (g *Graph) Clear() {
-	g.OfferNodes().ForEach(func(node *OfferNode) {
-		node.ClearEdges()
-	})
-	g.offerNodes.Clear()
+	for i, node := range g.offerNodes {
+		if node == offerNode {
+			g.offerNodes = append(g.offerNodes[:i], g.offerNodes[i+1:]...)
+			break
+		}
+	}
 }

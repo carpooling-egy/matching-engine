@@ -10,7 +10,7 @@ import (
 type PathPointID int64
 
 // Global atomic counter for thread-safe ID generation
-var NextPointID int64 = 1
+var nextPointID int64 = 1
 
 // PathPoint represents a PathPoint in a driver's path
 type PathPoint struct {
@@ -25,7 +25,7 @@ type PathPoint struct {
 func NewPathPoint(
 	coordinate Coordinate, pointType enums.PointType, expectedArrivalTime time.Time, owner Role, walkingDuration time.Duration) *PathPoint {
 
-	id := atomic.AddInt64(&NextPointID, 1) - 1
+	id := atomic.AddInt64(&nextPointID, 1) - 1
 
 	// TODO: Validate parameters
 	return &PathPoint{

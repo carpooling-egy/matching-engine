@@ -1,8 +1,6 @@
 package model
 
 import (
-	"fmt"
-	"matching-engine/internal/errors"
 	"time"
 )
 
@@ -50,9 +48,9 @@ func NewOffer(
 		detourDurMins:           detourDurMins,
 		departureTime:           departureTime,
 		capacity:                capacity,
-		maxEstimatedArrivalTime: maxEstimatedArrivalTime,
 		matchedRequests:         matchedRequests,
 		preference:              preference,
+		maxEstimatedArrivalTime: maxEstimatedArrivalTime,
 		currentNumberOfRequests: currentNumberOfRequests,
 		path:                    path,
 	}
@@ -66,8 +64,8 @@ func (o *Offer) Destination() *Coordinate             { return &o.destination }
 func (o *Offer) DepartureTime() time.Time             { return o.departureTime }
 func (o *Offer) DetourDurationMinutes() time.Duration { return o.detourDurMins }
 func (o *Offer) Capacity() int                        { return o.capacity }
-func (o *Offer) MaxEstimatedArrivalTime() time.Time   { return o.maxEstimatedArrivalTime }
 func (o *Offer) Preferences() *Preference             { return &o.preference }
+func (o *Offer) MaxEstimatedArrivalTime() time.Time   { return o.maxEstimatedArrivalTime }
 func (o *Offer) CurrentNumberOfRequests() int         { return o.currentNumberOfRequests }
 func (o *Offer) PathPoints() []PathPoint              { return o.path }
 func (o *Offer) MatchedRequests() []*Request {
@@ -89,29 +87,14 @@ func (o *Offer) SetPath(path []PathPoint) {
 	o.path = path
 }
 
-func (o *Offer) Validate() error {
-	if o == nil {
-		return fmt.Errorf(errors.ErrNilOfferInOfferNode)
-	}
-	if o.UserID() == "" {
-		return fmt.Errorf(errors.ErrEmptyUserID)
-	}
-	if o.ID() == "" {
-		return fmt.Errorf(errors.ErrEmptyOfferID)
-	}
-	if o.Path() == nil {
-		return fmt.Errorf(errors.ErrNilPath)
-	}
-	if len(o.Path()) == 0 {
-		return fmt.Errorf(errors.ErrEmptyPath)
-	}
-	return nil
-}
-
 func (o *Offer) AsOffer() (*Offer, bool) {
 	return o, true
 }
 
 func (o *Offer) AsRequest() (*Request, bool) {
 	return nil, false
+}
+
+func (o *Offer) SetCurrentNumberOfRequests(count int) {
+	o.currentNumberOfRequests = count
 }

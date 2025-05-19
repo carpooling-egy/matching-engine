@@ -1,54 +1,26 @@
 // Package collections SyncMap provides a generic, thread-safe syncMap implementation
 package collections
 
-import (
-	"fmt"
-	"sync"
-	"sync/atomic"
-)
+import "sync"
 
 // SyncMap is a generic thread-safe syncMap generic structure
 type SyncMap[K comparable, V any] struct {
 	store sync.Map
-	size  int64
 }
 
-// NewSyncMap creates a new SyncMap instance
+// New creates a new syncMap instance
 func NewSyncMap[K comparable, V any]() *SyncMap[K, V] {
-	return &SyncMap[K, V]{
-		size: 0,
-	}
+	return &SyncMap[K, V]{}
 }
 
 // Set stores a value in the syncMap with the given key
-func (sm *SyncMap[K, V]) Set(key K, value V) {
-	_, loaded := sm.store.LoadOrStore(key, value)
-	if loaded {
-		// If the key already exists, update the value
-		sm.store.Store(key, value)
-	} else {
-		// If the key was newly added, increment the size
-		atomic.AddInt64(&sm.size, 1)
-	}
-}
-
-// Delete removes a value from the syncMap by key
-func (sm *SyncMap[K, V]) Delete(key K) {
-	if _, ok := sm.store.Load(key); ok {
-		sm.store.Delete(key)
-		// Decrement the size only if the key existed
-		atomic.AddInt64(&sm.size, -1)
-	}
-}
-
-// Size returns the number of key-value pairs in the SyncMap
-func (sm *SyncMap[K, V]) Size() int64 {
-	return sm.size
+func (c *SyncMap[K, V]) Set(key K, value V) {
+	c.store.Store(key, value)
 }
 
 // Get retrieves a value from the syncMap by key
-func (sm *SyncMap[K, V]) Get(key K) (V, bool) {
-	val, ok := sm.store.Load(key)
+func (c *SyncMap[K, V]) Get(key K) (V, bool) {
+	val, ok := c.store.Load(key)
 	if !ok {
 		var zero V
 		return zero, false
@@ -64,63 +36,45 @@ func (sm *SyncMap[K, V]) Get(key K) (V, bool) {
 	return value, true
 }
 
-// Range processes key-value pairs, stopping at the first error.
-// Returns the first error encountered, or nil if none.
-// Safely handles type assertions to prevent panics.
-func (sm *SyncMap[K, V]) Range(f func(K, V) error) error {
-	var err error
-	sm.store.Range(func(key, value any) bool {
-		k, ok1 := key.(K)
-		if !ok1 {
-			err = fmt.Errorf("type assertion failed for key: %v", key)
-			return false
-		}
-
-		v, ok2 := value.(V)
-		if !ok2 {
-			err = fmt.Errorf("type assertion failed for value: %v", value)
-			return false
-		}
-
-		err = f(k, v)
-		return err == nil // Stop if error occurs
-	})
-	return err
+// Delete removes a value from the syncMap by key
+func (c *SyncMap[K, V]) Delete(key K) {
+	c.store.Delete(key)
 }
 
-// ForEach processes all key-value pairs, collecting any errors.
-// Returns a slice of all errors encountered, or empty if none.
-// Safely handles type assertions to prevent panics.
-func (sm *SyncMap[K, V]) ForEach(f func(K, V) error) []error {
-	var errors []error
-	sm.store.Range(func(key, value any) bool {
-		k, ok1 := key.(K)
-		if !ok1 {
-			errors = append(errors, fmt.Errorf("type assertion failed for key: %v", key))
-			return true // Continue despite error
-		}
-
-		v, ok2 := value.(V)
-		if !ok2 {
-			errors = append(errors, fmt.Errorf("type assertion failed for value: %v", value))
-			return true // Continue despite error
-		}
-
-		if err := f(k, v); err != nil {
-			errors = append(errors, err)
-		}
-		return true // Always continue
+// Range iterates over the SyncMap and calls the function for each key-value pair.
+// If the function returns false, the iteration stops.
+func (c *SyncMap[K, V]) Range(f func(K, V) bool) {
+	c.store.Range(func(key, value interface{}) bool {
+		return f(key.(K), value.(V))
 	})
-	return errors
+}
+
+// ForEach executes a function for each key-value pair in the SyncMap.
+// Note: The iteration order over the SyncMap is unspecified and may vary.
+func (c *SyncMap[K, V]) ForEach(f func(K, V)) {
+	c.store.Range(func(key, value interface{}) bool {
+		f(key.(K), value.(V))
+		return true
+	})
 }
 
 // Contains checks if a key exists in the SyncMap
-func (sm *SyncMap[K, V]) Contains(key K) bool {
-	_, exists := sm.store.Load(key)
+func (c *SyncMap[K, V]) Contains(key K) bool {
+	_, exists := c.store.Load(key)
 	return exists
 }
 
+// Size returns the number of key-value pairs in the SyncMap
+func (c *SyncMap[K, V]) Size() int {
+	count := 0
+	c.store.Range(func(key, value interface{}) bool {
+		count++
+		return true
+	})
+	return count
+}
+
 // Clear removes all items from the syncMap
-func (sm *SyncMap[K, V]) Clear() {
-	sm.store = sync.Map{}
+func (c *SyncMap[K, V]) Clear() {
+	c.store = sync.Map{}
 }

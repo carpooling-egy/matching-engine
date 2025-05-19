@@ -1,10 +1,5 @@
 package model
 
-import (
-	"fmt"
-	"matching-engine/internal/errors"
-)
-
 // MatchingResult represents the result of a matching operation
 type MatchingResult struct {
 	userID                  string
@@ -29,28 +24,6 @@ func NewMatchingResult(userID, offerID string, assignedMatchedRequests []*Reques
 		newPath:                 newPath,
 		currentNumberOfRequests: currentNumberOfRequests,
 	}
-}
-
-func NewMatchingResultFromOfferNode(node *OfferNode) (*MatchingResult, error) {
-	err := node.Validate()
-	if err != nil {
-		return nil, err
-	}
-
-	if node.NewlyAssignedMatchedRequests() == nil {
-		return nil, fmt.Errorf(errors.ErrNilMatchedRequests)
-	}
-	if len(node.NewlyAssignedMatchedRequests()) == 0 {
-		return nil, fmt.Errorf(errors.ErrEmptyMatchedRequests)
-	}
-	currentNumberOfRequests := len(node.Offer().matchedRequests) + len(node.NewlyAssignedMatchedRequests())
-	return &MatchingResult{
-		userID:                  node.Offer().UserID(),
-		offerID:                 node.Offer().ID(),
-		assignedMatchedRequests: node.NewlyAssignedMatchedRequests(),
-		newPath:                 node.Offer().Path(),
-		currentNumberOfRequests: currentNumberOfRequests,
-	}, nil
 }
 
 // UserID returns the user ID
