@@ -26,7 +26,7 @@ func (ip *InsertionPathGenerator) GeneratePaths(
 
 	return func(yield func([]model.PathPoint, error) bool) {
 
-		// The following upper bounds guarantee that we are not losing any possible path though generating
+		// The following upper bound guarantee that we are not losing any possible path though generating
 		// paths is still expensive, especially that there are some combinations that are infeasible with high probability
 		// Example:
 		// if path times is [1, 5, 10, 15, 20]
@@ -34,15 +34,14 @@ func (ip *InsertionPathGenerator) GeneratePaths(
 		// trying to insert the new points as follows [1, p, d, 5, 10, 15, 20]
 		// might be theoretically feasible but with small probability in practical cases
 
+		// We can also add an upper bound to the pickup position pick up can't be added after a point whose expected
+		// arrival time is greater than the latest pickup time (latest dropoff time - duration from pickup to
+
 		// Calculate upper bounds for insertion positions
-		upperIndexForDropoff := pathLength - 1
-		upperIndexForPickup := pathLength - 1
+		upperIndex := pathLength - 1
 		for i := pathLength - 2; i > 0; i-- {
 			if path[i].ExpectedArrivalTime().After(dropoff.ExpectedArrivalTime()) {
-				upperIndexForDropoff = i - 1
-			}
-			if path[i].ExpectedArrivalTime().After(pickup.ExpectedArrivalTime()) {
-				upperIndexForPickup = i - 1
+				upperIndex = i - 1
 				break
 			}
 		}
@@ -52,8 +51,8 @@ func (ip *InsertionPathGenerator) GeneratePaths(
 		buf := make([]model.PathPoint, newLen)
 
 		// Generate all valid paths
-		for pickupPos := 1; pickupPos <= upperIndexForPickup; pickupPos++ {
-			for dropoffPos := pickupPos; dropoffPos <= upperIndexForDropoff; dropoffPos++ {
+		for pickupPos := 1; pickupPos <= upperIndex; pickupPos++ {
+			for dropoffPos := pickupPos; dropoffPos <= upperIndex; dropoffPos++ {
 				// Generate current path
 				// 1) prefix [0:pickupPos)
 				copy(buf[0:pickupPos], path[0:pickupPos])
