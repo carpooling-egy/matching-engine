@@ -12,6 +12,11 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	// DefaultLimit is the default limit for the number of requests per offer.
+	DefaultLimit = 5
+)
+
 type Matcher struct {
 	availableOffers        *collections.SyncMap[string, *model.OfferNode]
 	availableRequests      *collections.SyncMap[string, *model.RequestNode]
@@ -20,6 +25,7 @@ type Matcher struct {
 	pathPlanner            planner.PathPlanner
 	candidateGenerator     earlypruning.CandidateGenerator
 	maximumMatching        maximummatching.MaximumMatching
+	limit                  int
 }
 
 // NewMatcher creates and initializes a new Matcher instance.
@@ -32,11 +38,12 @@ func NewMatcher(planner planner.PathPlanner, generator earlypruning.CandidateGen
 		pathPlanner:            planner,
 		candidateGenerator:     generator,
 		maximumMatching:        matching,
+		limit:                  DefaultLimit,
 	}
 }
 
 // Match performs the matching process for the input offers and requests with the given limit.
-func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request, limit int) ([]model.MatchingResult, error) {
+func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) ([]model.MatchingResult, error) {
 	if offers == nil || requests == nil || len(offers) == 0 || len(requests) == 0 {
 		return nil, fmt.Errorf(errors.ErrNoOffersOrRequests)
 	}
@@ -67,7 +74,7 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request, 
 		matcher.processUnmatchedOffers(graph)
 
 		// Find Maximum Matching
-		if err = matcher.processMaximumMatching(graph, limit); err != nil {
+		if err = matcher.processMaximumMatching(graph, matcher.limit); err != nil {
 			return nil, fmt.Errorf("failed to process maximum matching: %w", err)
 		}
 		// Clear the graph and edges for the next iteration
