@@ -317,111 +317,123 @@ func TestHopcroftKarp_LargeCase(t *testing.T) {
 	const (
 		nOffers   = 1000
 		nRequests = 1000
+		nRuns     = 10
 	)
 
-	// Get initial memory stats
-	var m runtime.MemStats
-	runtime.ReadMemStats(&m)
-	initialAlloc := m.TotalAlloc
+	var totalMatches int
+	var totalTime time.Duration
 
-	g := model.NewGraph()
-	offerNodes := make([]*model.OfferNode, nOffers)
-	requestNodes := make([]*model.RequestNode, nRequests)
+	for run := 0; run < nRuns; run++ {
+		// Get initial memory stats
+		var m runtime.MemStats
+		runtime.ReadMemStats(&m)
+		initialAlloc := m.TotalAlloc
 
-	// Create all offers and requests first
-	for i := 0; i < nOffers; i++ {
-		offer := minimalOffer(fmt.Sprintf("offer%d", i))
-		offerNode := model.NewOfferNode(offer)
-		g.AddOfferNode(offerNode)
-		offerNodes[i] = offerNode
-	}
+		g := model.NewGraph()
+		offerNodes := make([]*model.OfferNode, nOffers)
+		requestNodes := make([]*model.RequestNode, nRequests)
 
-	for i := 0; i < nRequests; i++ {
-		request := minimalRequest(fmt.Sprintf("request%d", i))
-		requestNode := model.NewRequestNode(request)
-		g.AddRequestNode(requestNode)
-		requestNodes[i] = requestNode
-	}
-
-	// Get memory stats after creating nodes
-	runtime.ReadMemStats(&m)
-	nodesAlloc := m.TotalAlloc
-
-	// Create a complete bipartite graph
-	// Each offer can match with every request
-	for i := 0; i < nOffers; i++ {
-		edges := make([]*model.Edge, nRequests)
-		for j := 0; j < nRequests; j++ {
-			edge := minimalEdge(requestNodes[j])
-			edges[j] = edge
-			g.AddEdge(offerNodes[i].Offer(), requestNodes[j].Request(), edge)
+		// Create all offers and requests first
+		for i := 0; i < nOffers; i++ {
+			offer := minimalOffer(fmt.Sprintf("offer%d", i))
+			offerNode := model.NewOfferNode(offer)
+			g.AddOfferNode(offerNode)
+			offerNodes[i] = offerNode
 		}
-		offerNodes[i].SetEdges(edges)
-	}
 
-	// Get memory stats after creating edges
-	runtime.ReadMemStats(&m)
-	edgesAlloc := m.TotalAlloc
-
-	// Run the matching algorithm
-	hk := NewHopcroftKarp()
-	start := time.Now()
-	result, err := hk.FindMaximumMatching(g)
-	elapsed := time.Since(start)
-
-	// Get final memory stats
-	runtime.ReadMemStats(&m)
-	finalAlloc := m.TotalAlloc
-	finalHeap := m.HeapAlloc
-
-	if err != nil {
-		t.Fatalf("HopcroftKarp.FindMaximumMatching() error: %v", err)
-	}
-
-	// Calculate statistics
-	totalPossibleMatches := nOffers * nRequests // Complete graph
-
-	// Print memory statistics
-	fmt.Printf("\nMemory Statistics:\n")
-	fmt.Printf("- Initial memory allocation: %.2f MB\n", float64(initialAlloc)/1024/1024)
-	fmt.Printf("- Memory after creating nodes: %.2f MB (delta: %.2f MB)\n",
-		float64(nodesAlloc)/1024/1024,
-		float64(nodesAlloc-initialAlloc)/1024/1024)
-	fmt.Printf("- Memory after creating edges: %.2f MB (delta: %.2f MB)\n",
-		float64(edgesAlloc)/1024/1024,
-		float64(edgesAlloc-nodesAlloc)/1024/1024)
-	fmt.Printf("- Final memory allocation: %.2f MB (delta: %.2f MB)\n",
-		float64(finalAlloc)/1024/1024,
-		float64(finalAlloc-edgesAlloc)/1024/1024)
-	fmt.Printf("- Peak heap usage: %.2f MB\n", float64(finalHeap)/1024/1024)
-
-	// Print matching statistics
-	fmt.Printf("\nMatching Statistics:\n")
-	fmt.Printf("- Total offers: %d\n", nOffers)
-	fmt.Printf("- Total requests: %d\n", nRequests)
-	fmt.Printf("- Total possible matches: %d\n", totalPossibleMatches)
-	fmt.Printf("- Actual matches found: %d\n", result.Size())
-	fmt.Printf("- Time taken: %v\n", elapsed)
-
-	// Verify that the matching is valid
-	matchedRequests := make(map[string]bool)
-	result.Range(func(offerNode *model.OfferNode, edge *model.Edge) bool {
-		requestID := edge.RequestNode().Request().ID()
-		if matchedRequests[requestID] {
-			t.Errorf("Request %s is matched multiple times", requestID)
+		for i := 0; i < nRequests; i++ {
+			request := minimalRequest(fmt.Sprintf("request%d", i))
+			requestNode := model.NewRequestNode(request)
+			g.AddRequestNode(requestNode)
+			requestNodes[i] = requestNode
 		}
-		matchedRequests[requestID] = true
-		return true
-	})
 
-	// Verify that we got the maximum possible matching
-	expectedMatches := nOffers // Since nOffers = nRequests
-	if result.Size() != expectedMatches {
-		t.Errorf("Expected %d matches (maximum possible), got %d", expectedMatches, result.Size())
+		// Get memory stats after creating nodes
+		runtime.ReadMemStats(&m)
+		nodesAlloc := m.TotalAlloc
+
+		// Create a complete bipartite graph
+		// Each offer can match with every request
+		for i := 0; i < nOffers; i++ {
+			edges := make([]*model.Edge, nRequests)
+			for j := 0; j < nRequests; j++ {
+				edge := minimalEdge(requestNodes[j])
+				edges[j] = edge
+				g.AddEdge(offerNodes[i].Offer(), requestNodes[j].Request(), edge)
+			}
+			offerNodes[i].SetEdges(edges)
+		}
+
+		// Get memory stats after creating edges
+		runtime.ReadMemStats(&m)
+		edgesAlloc := m.TotalAlloc
+
+		// Run the matching algorithm
+		hk := NewHopcroftKarp()
+		start := time.Now()
+		result, err := hk.FindMaximumMatching(g)
+		elapsed := time.Since(start)
+
+		// Get final memory stats
+		runtime.ReadMemStats(&m)
+		finalAlloc := m.TotalAlloc
+		finalHeap := m.HeapAlloc
+
+		if err != nil {
+			t.Fatalf("HopcroftKarp.FindMaximumMatching() error: %v", err)
+		}
+
+		// Calculate statistics
+		totalPossibleMatches := nOffers * nRequests // Complete graph
+
+		// Print memory statistics
+		fmt.Printf("\nRun %d Memory Statistics:\n", run+1)
+		fmt.Printf("- Initial memory allocation: %.2f MB\n", float64(initialAlloc)/1024/1024)
+		fmt.Printf("- Memory after creating nodes: %.2f MB (delta: %.2f MB)\n",
+			float64(nodesAlloc)/1024/1024,
+			float64(nodesAlloc-initialAlloc)/1024/1024)
+		fmt.Printf("- Memory after creating edges: %.2f MB (delta: %.2f MB)\n",
+			float64(edgesAlloc)/1024/1024,
+			float64(edgesAlloc-nodesAlloc)/1024/1024)
+		fmt.Printf("- Final memory allocation: %.2f MB (delta: %.2f MB)\n",
+			float64(finalAlloc)/1024/1024,
+			float64(finalAlloc-edgesAlloc)/1024/1024)
+		fmt.Printf("- Peak heap usage: %.2f MB\n", float64(finalHeap)/1024/1024)
+
+		// Print matching statistics
+		fmt.Printf("\nRun %d Matching Statistics:\n", run+1)
+		fmt.Printf("- Total offers: %d\n", nOffers)
+		fmt.Printf("- Total requests: %d\n", nRequests)
+		fmt.Printf("- Total possible matches: %d\n", totalPossibleMatches)
+		fmt.Printf("- Actual matches found: %d\n", result.Size())
+		fmt.Printf("- Time taken: %v\n", elapsed)
+
+		// Verify that the matching is valid
+		matchedRequests := make(map[string]bool)
+		result.Range(func(offerNode *model.OfferNode, edge *model.Edge) bool {
+			requestID := edge.RequestNode().Request().ID()
+			if matchedRequests[requestID] {
+				t.Errorf("Request %s is matched multiple times", requestID)
+			}
+			matchedRequests[requestID] = true
+			return true
+		})
+
+		// Verify that we got the maximum possible matching
+		expectedMatches := nOffers // Since nOffers = nRequests
+		if result.Size() != expectedMatches {
+			t.Errorf("Expected %d matches (maximum possible), got %d", expectedMatches, result.Size())
+		}
+
+		// Force garbage collection and get final memory stats
+		runtime.GC()
+		runtime.ReadMemStats(&m)
+		fmt.Printf("\nRun %d Memory after GC: %.2f MB\n", run+1, float64(m.HeapAlloc)/1024/1024)
+
+		totalMatches += result.Size()
+		totalTime += elapsed
 	}
 
-	// Force garbage collection and get final memory stats
-	runtime.GC()
-	runtime.ReadMemStats(&m)
-	fmt.Printf("\nMemory after GC: %.2f MB\n", float64(m.HeapAlloc)/1024/1024)
+	fmt.Printf("\nAverage matches over %d runs: %.2f\n", nRuns, float64(totalMatches)/float64(nRuns))
+	fmt.Printf("Average time over %d runs: %v\n", nRuns, totalTime/time.Duration(nRuns))
 }
