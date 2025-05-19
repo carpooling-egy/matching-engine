@@ -20,7 +20,7 @@ func (matcher *Matcher) processUnmatchedOffers(graph *model.Graph) {
 	})
 }
 
-// processRemainingOffers appends leftover matched offers to results.
+// processRemainingOffers appends leftover matched offers to result.
 func (matcher *Matcher) processRemainingOffers() error {
 	return matcher.availableOffers.Range(func(offerID string, offerNode *model.OfferNode) error {
 		if offerNode.IsMatched() {

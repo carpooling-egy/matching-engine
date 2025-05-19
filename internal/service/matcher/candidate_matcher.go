@@ -24,6 +24,11 @@ func (matcher *Matcher) buildCandidateMatches(offers []*model.Offer, requests []
 			continue
 		}
 
+		if candidate.Offer() == nil || candidate.Request() == nil {
+			log.Error().Msg("Candidate offer or request is nil, skipping")
+			continue
+		}
+
 		offerID := candidate.Offer().ID()
 		requestID := candidate.Request().ID()
 

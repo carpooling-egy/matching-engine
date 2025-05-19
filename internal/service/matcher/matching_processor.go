@@ -22,6 +22,18 @@ func (matcher *Matcher) processMaximumMatching(graph *model.Graph, limit int) er
 
 		offerNode.SetMatched(true)
 		offerNode.AddNewlyMatchedRequest(requestNode.Request())
+		newPath := edge.NewPath()
+		if newPath == nil {
+			return fmt.Errorf("edge with nil path encountered for offer %s and request %s", offerNode.Offer().ID(), requestNode.Request().ID())
+		}
+		offerNode.Offer().SetPath(newPath)
+
+		requestSet, exists := matcher.potentialOfferRequests.Get(offerNode.Offer().ID())
+		if !exists {
+			log.Warn().Msg("Request set not found for offer node")
+			return nil
+		}
+		requestSet.Remove(requestNode.Request().ID())
 
 		if len(offerNode.GetAllRequests()) >= limit {
 			matcher.updateResults(offerNode)
