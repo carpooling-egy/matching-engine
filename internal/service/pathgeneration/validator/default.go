@@ -3,19 +3,16 @@ package validator
 import (
 	"fmt"
 	"matching-engine/internal/model"
-	"matching-engine/internal/service/pickupdropoffservice"
 	"matching-engine/internal/service/timematrix"
 )
 
 type DefaultPathValidator struct {
-	timeMatrixService     timematrix.Service
-	pickupDropoffSelector pickupdropoffservice.PickupDropoffSelectorInterface
+	timeMatrixService timematrix.Service
 }
 
-func NewDefaultPathValidator(timeMatrixService timematrix.Service, selector pickupdropoffservice.PickupDropoffSelectorInterface) *DefaultPathValidator {
+func NewDefaultPathValidator(timeMatrixService timematrix.Service) *DefaultPathValidator {
 	return &DefaultPathValidator{
-		timeMatrixService:     timeMatrixService,
-		pickupDropoffSelector: selector,
+		timeMatrixService: timeMatrixService,
 	}
 }
 

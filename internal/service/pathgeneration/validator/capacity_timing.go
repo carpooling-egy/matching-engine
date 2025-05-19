@@ -1,7 +1,6 @@
 package validator
 
 import (
-	"fmt"
 	"matching-engine/internal/enums"
 	"matching-engine/internal/model"
 	"time"

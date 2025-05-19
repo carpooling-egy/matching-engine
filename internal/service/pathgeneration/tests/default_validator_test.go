@@ -37,8 +37,7 @@ func (m *MockTimeMatrixService) GetTravelDuration(offerNode *model.OfferNode, st
 }
 
 func (m *MockTimeMatrixService) GetCumulativeTravelTimes(offerNode *model.OfferNode, path []model.PathPoint) ([]time.Time, error) {
-	args := m.Called(offerNode, path)
-	return args.Get(0).([]time.Time), args.Error(1)
+	panic("GetCumulativeTravelTimes should not be called in these tests")
 }
 
 // Helper functions
@@ -95,8 +94,7 @@ func createTestPreferences() *model.Preference {
 // Tests
 func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 	mockTimeMatrix := new(MockTimeMatrixService)
-	mockSelector := new(MockPickupDropoffSelector)
-	pathValidator := validator.NewDefaultPathValidator(mockTimeMatrix, mockSelector)
+	pathValidator := validator.NewDefaultPathValidator(mockTimeMatrix)
 
 	timeNow := time.Now()
 
