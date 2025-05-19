@@ -70,6 +70,7 @@ func (g *Graph) ClearRequestNodes() {
 func (g *Graph) Clear() {
 	g.offerNodes.Clear()
 	g.requestNodes.Clear()
+	g.ClearEdges()
 }
 
 // Edges returns the edges
