@@ -8,18 +8,14 @@ import (
 type Preference struct {
 	gender        enums.Gender
 	sameGender    bool
-	allowsSmoking bool
-	allowsPets    bool
 }
 
 // NewPreference Creates a new Preference. No need to validate parameters as they will be read from database
 // This constructor should be only used from database entities
-func NewPreference(gender enums.Gender, sameGender, allowsSmoking, allowsPets bool) *Preference {
+func NewPreference(gender enums.Gender, sameGender bool) *Preference {
 	return &Preference{
 		gender:        gender,
 		sameGender:    sameGender,
-		allowsSmoking: allowsSmoking,
-		allowsPets:    allowsPets,
 	}
 }
 
@@ -29,12 +25,4 @@ func (p *Preference) Gender() enums.Gender {
 
 func (p *Preference) SameGender() bool {
 	return p.sameGender
-}
-
-func (p *Preference) AllowsSmoking() bool {
-	return p.allowsSmoking
-}
-
-func (p *Preference) AllowsPets() bool {
-	return p.allowsPets
 }

@@ -107,7 +107,7 @@ func createTestOffers() []*model.Offer {
 	now := time.Now()
 
 	// Create a preference
-	preference := model.NewPreference(enums.Male, false, false, false)
+	preference := model.NewPreference(enums.Male, false)
 
 	// Create coordinates for source and destination
 	source, _ := model.NewCoordinate(40.7128, -74.0060)       // New York
@@ -152,7 +152,7 @@ func createTestRequests() []*model.Request {
 	now := time.Now()
 
 	// Create a preference
-	preference := model.NewPreference(enums.Female, false, false, false)
+	preference := model.NewPreference(enums.Female, false)
 
 	// Create coordinates for source and destination
 	source, _ := model.NewCoordinate(40.7128, -74.0060)       // New York

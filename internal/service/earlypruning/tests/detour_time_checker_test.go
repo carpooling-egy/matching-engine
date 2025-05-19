@@ -117,7 +117,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				sourceCoord, destCoord,
 				now, 30*time.Minute, // 30 minutes detour allowed
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				twoHoursLater, // maxEstimatedArrivalTime
 				0,
 				nil,
@@ -130,7 +130,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				twoHoursLater, // latestArrivalTime
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
 				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
@@ -149,7 +149,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				sourceCoord, destCoord,
 				now, 10*time.Minute, // Only 10 minutes detour allowed
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				computeMaxEstimatedArrivalTime(now, 10*time.Minute),
 				0,
 				nil,
@@ -162,7 +162,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				twoHoursLater, // latestArrivalTime
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
 				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
@@ -181,7 +181,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				sourceCoord, destCoord,
 				now, 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				twoHoursLater, // maxEstimatedArrivalTime
 				0,
 				nil,
@@ -194,7 +194,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				twoHoursLater, // latestArrivalTime
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
 				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
@@ -213,7 +213,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				sourceCoord, destCoord,
 				now, 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				twoHoursLater, // maxEstimatedArrivalTime
 				0,
 				nil,
@@ -226,7 +226,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				twoHoursLater,    // latestArrivalTime
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
 				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 10*time.Minute),
@@ -245,7 +245,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				sourceCoord, destCoord,
 				now, 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				computeMaxEstimatedArrivalTime(now, 30*time.Minute), // maxEstimatedArrivalTime
 				0,
 				nil,
@@ -258,7 +258,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				oneHourLater, // latestArrivalTime - rider wants to arrive within one hour
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
 				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
@@ -277,7 +277,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				sourceCoord, destCoord,
 				now, 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				computeMaxEstimatedArrivalTime(now, 30*time.Minute), // maxEstimatedArrivalTime
 				0,
 				nil,
@@ -290,7 +290,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				oneHourLater, // latestArrivalTime - rider wants to arrive within one hour
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
 				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
@@ -309,7 +309,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				sourceCoord, destCoord,
 				now, 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				computeMaxEstimatedArrivalTime(now, 30*time.Minute), // maxEstimatedArrivalTime
 				0,
 				nil,
@@ -322,7 +322,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				oneHourLater,            // latestArrivalTime - rider wants to arrive within one hour
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
 				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
@@ -341,7 +341,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				sourceCoord, destCoord,
 				now, 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				computeMaxEstimatedArrivalTime(now, 30*time.Minute), // maxEstimatedArrivalTime
 				0,
 				nil,
@@ -354,7 +354,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				twoHoursLater, // latestArrivalTime
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			mockSelectorValue:    nil,
 			mockSelectorErr:      context.DeadlineExceeded,
@@ -370,7 +370,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				sourceCoord, destCoord,
 				now, 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				computeMaxEstimatedArrivalTime(now, 30*time.Minute), // maxEstimatedArrivalTime
 				0,
 				nil,
@@ -383,7 +383,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				twoHoursLater, // latestArrivalTime
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
 				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),
@@ -404,7 +404,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				sourceCoord, destCoord,
 				now, 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				twoHoursLater, // maxEstimatedArrivalTime
 				0,
 				nil,
@@ -417,7 +417,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 				twoHoursLater, // latestArrivalTime
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			mockSelectorValue: pickupdropoffcache.NewValue(
 				model.NewPathPoint(pickupCoord, enums.Pickup, now, nil, 5*time.Minute),

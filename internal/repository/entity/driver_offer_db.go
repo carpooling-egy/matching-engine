@@ -27,8 +27,6 @@ type DriverOfferDB struct {
 	CurrentNumberOfRequests int `gorm:"not null;default:0"`
 
 	SameGender    bool          `gorm:"not null;default:false"`
-	AllowsSmoking bool          `gorm:"not null;default:true"`
-	AllowsPets    bool          `gorm:"not null;default:true"`
 	UserGender    enums.Gender  `gorm:"type:gender_type;not null"`
 	PathPoints    []PathPointDB `gorm:"foreignKey:DriverOfferID"`
 }
@@ -47,7 +45,7 @@ func (d *DriverOfferDB) ToDriverOffer() *model.Offer {
 	destCoord, _ := model.NewCoordinate(d.DestinationLatitude, d.DestinationLongitude)
 
 	// Create preference using the constructor
-	preferences := model.NewPreference(d.UserGender, d.SameGender, d.AllowsSmoking, d.AllowsPets)
+	preferences := model.NewPreference(d.UserGender, d.SameGender)
 
 	// Pre-allocate pathPoints slice
 	pathPoints := make([]model.PathPoint, 0, len(d.PathPoints)+2) // +2 for source and destination

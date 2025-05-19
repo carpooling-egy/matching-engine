@@ -20,8 +20,6 @@ type RiderRequestDB struct {
 	MaxWalkingDurationMinutes time.Duration `gorm:"column:max_walking_duration_minutes;default:10"`
 	NumberOfRiders            int           `gorm:"not null;default:1;check:number_of_riders > 0"`
 	SameGender                bool          `gorm:"not null;default:false"`
-	AllowsSmoking             bool          `gorm:"not null;default:true"`
-	AllowsPets                bool          `gorm:"not null;default:true"`
 	UserGender                enums.Gender  `gorm:"type:gender_type;not null"`
 }
 
@@ -36,7 +34,7 @@ func (r *RiderRequestDB) ToRiderRequest() *model.Request {
 
 	destCoord, _ := model.NewCoordinate(r.DestinationLatitude, r.DestinationLongitude)
 
-	preferences := model.NewPreference(r.UserGender, r.SameGender, r.AllowsSmoking, r.AllowsPets)
+	preferences := model.NewPreference(r.UserGender, r.SameGender)
 
 	// Call the constructor function properly and handle any potential errors
 	riderRequest := model.NewRequest(

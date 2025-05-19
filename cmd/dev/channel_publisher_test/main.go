@@ -188,8 +188,8 @@ func generatePoints(owner model.Role) (*model.PathPoint, *model.PathPoint) {
 	pickupTime := now.Add(time.Duration(rand.Intn(60)) * time.Minute)
 	dropoffTime := pickupTime.Add(time.Duration(rand.Intn(120)+30) * time.Minute)
 
-	pickupPoint := model.NewPathPoint(*pickupCoord, enums.Pickup, dropoffTime, owner)
-	dropoffPoint := model.NewPathPoint(*dropoffCoord, enums.Dropoff, dropoffTime, owner)
+	pickupPoint := model.NewPathPoint(*pickupCoord, enums.Pickup, dropoffTime, owner,5)
+	dropoffPoint := model.NewPathPoint(*dropoffCoord, enums.Dropoff, dropoffTime, owner,5)
 
 	return pickupPoint, dropoffPoint
 }

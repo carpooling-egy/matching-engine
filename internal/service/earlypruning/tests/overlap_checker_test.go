@@ -33,7 +33,7 @@ func TestOverlapChecker_Check(t *testing.T) {
 				model.Coordinate{}, model.Coordinate{},
 				now, 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				twoHoursLater, // maxEstimatedArrivalTime
 				0,
 				nil,
@@ -46,7 +46,7 @@ func TestOverlapChecker_Check(t *testing.T) {
 				threeHoursLater, // latestArrivalTime
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			expected:    true,
 			expectError: false,
@@ -59,7 +59,7 @@ func TestOverlapChecker_Check(t *testing.T) {
 				twoHoursLater, // departureTime
 				30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				threeHoursLater, // maxEstimatedArrivalTime
 				0,
 				nil,
@@ -72,7 +72,7 @@ func TestOverlapChecker_Check(t *testing.T) {
 				oneHourLater, // latestArrivalTime
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			expected:    false,
 			expectError: false,
@@ -85,7 +85,7 @@ func TestOverlapChecker_Check(t *testing.T) {
 				now, // departureTime
 				30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				oneHourLater, // maxEstimatedArrivalTime
 				0,
 				nil,
@@ -98,7 +98,7 @@ func TestOverlapChecker_Check(t *testing.T) {
 				threeHoursLater, // latestArrivalTime
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			expected:    false,
 			expectError: false,

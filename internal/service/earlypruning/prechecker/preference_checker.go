@@ -46,13 +46,6 @@ func (pc *PreferenceChecker) checkPreferenceMatch(requestPref, otherPref *model.
 	if requestPref == nil || otherPref == nil {
 		return false, fmt.Errorf("either request preference or the other preference to compare is nil")
 	}
-	// Check if the request preference matches the existing preference which is offer or request preference
-	if requestPref.AllowsSmoking() != otherPref.AllowsSmoking() {
-		return false, nil
-	}
-	if requestPref.AllowsPets() != otherPref.AllowsPets() {
-		return false, nil
-	}
 	if requestPref.Gender() != otherPref.Gender() {
 		if requestPref.SameGender() || otherPref.SameGender() {
 			return false, nil

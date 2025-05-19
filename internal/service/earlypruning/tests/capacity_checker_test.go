@@ -27,7 +27,7 @@ func TestCapacityChecker_Check(t *testing.T) {
 				model.Coordinate{}, model.Coordinate{},
 				time.Now(), 30*time.Minute,
 				3, // capacity
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				time.Now().Add(1*time.Hour),
 				0,
 				nil,
@@ -39,7 +39,7 @@ func TestCapacityChecker_Check(t *testing.T) {
 				time.Now(), time.Now().Add(1*time.Hour),
 				10*time.Minute,
 				2, // number of riders
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			expected:    true,
 			expectError: false,
@@ -51,7 +51,7 @@ func TestCapacityChecker_Check(t *testing.T) {
 				model.Coordinate{}, model.Coordinate{},
 				time.Now(), 30*time.Minute,
 				1, // capacity
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				time.Now().Add(1*time.Hour),
 				0,
 				nil,
@@ -63,7 +63,7 @@ func TestCapacityChecker_Check(t *testing.T) {
 				time.Now(), time.Now().Add(1*time.Hour),
 				10*time.Minute,
 				2, // number of riders
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			expected:    false,
 			expectError: false,

@@ -27,7 +27,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				model.Coordinate{}, model.Coordinate{},
 				time.Now(), 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				time.Now().Add(1*time.Hour),
 				0,
 				nil,
@@ -39,7 +39,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				time.Now(), time.Now().Add(1*time.Hour),
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			expected:    true,
 			expectError: false,
@@ -51,7 +51,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				model.Coordinate{}, model.Coordinate{},
 				time.Now(), 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, true, false), // allows smoking
+				*model.NewPreference(enums.Male, false), // allows smoking
 				time.Now().Add(1*time.Hour),
 				0,
 				nil,
@@ -63,7 +63,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				time.Now(), time.Now().Add(1*time.Hour),
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false), // doesn't allow smoking
+				*model.NewPreference(enums.Female, false), // doesn't allow smoking
 			),
 			expected:    false,
 			expectError: false,
@@ -75,7 +75,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				model.Coordinate{}, model.Coordinate{},
 				time.Now(), 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, false, true), // allows pets
+				*model.NewPreference(enums.Male, false), // allows pets
 				time.Now().Add(1*time.Hour),
 				0,
 				nil,
@@ -87,7 +87,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				time.Now(), time.Now().Add(1*time.Hour),
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false), // doesn't allow pets
+				*model.NewPreference(enums.Female, false), // doesn't allow pets
 			),
 			expected:    false,
 			expectError: false,
@@ -99,7 +99,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				model.Coordinate{}, model.Coordinate{},
 				time.Now(), 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, true, false, false), // same gender only
+				*model.NewPreference(enums.Male, true), // same gender only
 				time.Now().Add(1*time.Hour),
 				0,
 				nil,
@@ -111,7 +111,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				time.Now(), time.Now().Add(1*time.Hour),
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false),
+				*model.NewPreference(enums.Female, false),
 			),
 			expected:    false,
 			expectError: false,
@@ -123,7 +123,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				model.Coordinate{}, model.Coordinate{},
 				time.Now(), 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, false, false, false),
+				*model.NewPreference(enums.Male, false),
 				time.Now().Add(1*time.Hour),
 				0,
 				nil,
@@ -135,7 +135,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				time.Now(), time.Now().Add(1*time.Hour),
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, true, false, false), // same gender only
+				*model.NewPreference(enums.Female, true), // same gender only
 			),
 			expected:    false,
 			expectError: false,
@@ -150,7 +150,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 					time.Now(), time.Now().Add(1*time.Hour),
 					10*time.Minute,
 					1,
-					*model.NewPreference(enums.Male, false, true, false), // allows smoking
+					*model.NewPreference(enums.Male, false), // allows smoking
 				)
 
 				offer := model.NewOffer(
@@ -158,7 +158,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 					model.Coordinate{}, model.Coordinate{},
 					time.Now(), 30*time.Minute,
 					3,
-					*model.NewPreference(enums.Male, false, false, false),
+					*model.NewPreference(enums.Male, false),
 					time.Now().Add(1*time.Hour),
 					1,
 					nil,
@@ -173,7 +173,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				time.Now(), time.Now().Add(1*time.Hour),
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false, false, false), // doesn't allow smoking
+				*model.NewPreference(enums.Female, false), // doesn't allow smoking
 			),
 			expected:    false,
 			expectError: false,

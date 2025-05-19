@@ -26,8 +26,6 @@ CREATE TABLE rider_requests (
 
     -- Boolean preferences
     same_gender BOOLEAN NOT NULL DEFAULT FALSE,
-    allows_smoking BOOLEAN NOT NULL DEFAULT TRUE,
-    allows_pets BOOLEAN NOT NULL DEFAULT TRUE,
     user_gender gender_type NOT NULL,
 
     is_matched BOOLEAN DEFAULT FALSE,
@@ -60,8 +58,6 @@ CREATE TABLE driver_offers (
 
     -- Boolean preferences
     same_gender BOOLEAN NOT NULL DEFAULT FALSE,
-    allows_smoking BOOLEAN NOT NULL DEFAULT TRUE,
-    allows_pets BOOLEAN NOT NULL DEFAULT TRUE,
     user_gender gender_type NOT NULL,
 
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
