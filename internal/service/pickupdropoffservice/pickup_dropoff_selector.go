@@ -25,7 +25,7 @@ func NewPickupDropoffSelector(generator PickupDropoffGenerator, walkingTimeCalcu
 
 // GetPickupDropoffPointsAndDurations retrieves the pickup and dropoff points and durations for the given request and offer.
 func (selector *PickupDropoffSelector) GetPickupDropoffPointsAndDurations(request *model.Request, offer *model.Offer) (value *pickupdropoffcache.Value, err error) {
-	cacheKey := pickupdropoffcache.NewKey(
+	cacheKey := model.NewOfferRequestKey(
 		offer.ID(),
 		request.ID())
 	if cachedValue, ok := selector.cache.Get(cacheKey); ok {
