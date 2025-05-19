@@ -6,7 +6,7 @@ import (
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/enums"
 	"matching-engine/internal/model"
-	"matching-engine/internal/service/earlypruning/prechecker"
+	"matching-engine/internal/service/checker"
 	"matching-engine/internal/service/pickupdropoffservice/pickupdropoffcache"
 	"testing"
 	"time"
@@ -444,7 +444,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 			)
 
 			// Create an instance of our test-specific DetourTimeChecker with our mock objects
-			checker := prechecker.NewDetourTimeChecker(mockSelector, mockEngine)
+			checker := checker.NewDetourTimeChecker(mockSelector, mockEngine)
 
 			// Run the check
 			result, err := checker.Check(tc.offer, tc.request)

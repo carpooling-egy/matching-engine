@@ -1,19 +1,19 @@
-package iterator
+package earlypruning
 
 import (
 	"fmt"
 	"iter"
 	"matching-engine/internal/model"
-	"matching-engine/internal/service/earlypruning/prechecker"
+	"matching-engine/internal/service/checker"
 )
 
 type CandidateIterator struct {
 	offers   []*model.Offer
 	requests []*model.Request
-	checker  prechecker.Checker
+	checker  checker.Checker
 }
 
-func NewCandidateIterator(offers []*model.Offer, requests []*model.Request, checker prechecker.Checker) *CandidateIterator {
+func NewCandidateIterator(offers []*model.Offer, requests []*model.Request, checker checker.Checker) *CandidateIterator {
 	return &CandidateIterator{
 		offers:   offers,
 		requests: requests,

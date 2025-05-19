@@ -1,7 +1,6 @@
 package matcher
 
 import (
-	"fmt"
 	"matching-engine/internal/collections"
 	"matching-engine/internal/model"
 )
@@ -23,20 +22,19 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.Graph, potentialRequests
 				continue
 			}
 
-			newPath, isFeasible, err := matcher.pathPlanner.FindFirstFeasiblePath(offerNode, requestNode)
+			path, err := matcher.matchEvaluator.Evaluate(offerNode, requestNode)
+
 			if err != nil {
-				return fmt.Errorf("failed to find feasible path for offer %s and request %s: %w", offerID, requestID, err)
+				requestSet.Remove(requestID)
+				continue
 			}
 
-			if isFeasible && newPath != nil {
-				hasNewEdge = true
-				edge := model.NewEdge(requestNode, newPath)
-				offerNode.AddEdge(edge)
-				graph.AddOfferNode(offerNode)
-				potentialRequests.Set(requestID, requestNode)
-			} else {
-				requestSet.Remove(requestID)
-			}
+			hasNewEdge = true
+			edge := model.NewEdge(requestNode, path)
+			offerNode.AddEdge(edge)
+			graph.AddOfferNode(offerNode)
+			potentialRequests.Set(requestID, requestNode)
+
 		}
 		return nil
 	})

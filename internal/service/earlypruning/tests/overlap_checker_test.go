@@ -3,14 +3,14 @@ package tests
 import (
 	"matching-engine/internal/enums"
 	"matching-engine/internal/model"
-	"matching-engine/internal/service/earlypruning/prechecker"
+	"matching-engine/internal/service/checker"
 	"testing"
 	"time"
 )
 
 func TestOverlapChecker_Check(t *testing.T) {
 	// Create a new OverlapChecker
-	checker := prechecker.NewOverlapChecker()
+	checker := checker.NewOverlapChecker()
 
 	// Define test times for clarity
 	now := time.Now()

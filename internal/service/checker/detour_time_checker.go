@@ -1,4 +1,4 @@
-package prechecker
+package checker
 
 import (
 	"context"

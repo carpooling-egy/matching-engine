@@ -2,14 +2,13 @@ package matcher
 
 import (
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"matching-engine/internal/collections"
 	"matching-engine/internal/errors"
 	"matching-engine/internal/model"
 	"matching-engine/internal/service/earlypruning"
+	"matching-engine/internal/service/matchevaluator"
 	"matching-engine/internal/service/maximummatching"
-	"matching-engine/internal/service/pathgeneration/planner"
-
-	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -22,20 +21,20 @@ type Matcher struct {
 	availableRequests      *collections.SyncMap[string, *model.RequestNode]
 	potentialOfferRequests *collections.SyncMap[string, *collections.Set[string]]
 	results                []model.MatchingResult
-	pathPlanner            planner.PathPlanner
+	matchEvaluator         matchevaluator.Evaluator
 	candidateGenerator     earlypruning.CandidateGenerator
 	maximumMatching        maximummatching.MaximumMatching
 	limit                  int
 }
 
 // NewMatcher creates and initializes a new Matcher instance.
-func NewMatcher(planner planner.PathPlanner, generator earlypruning.CandidateGenerator, matching maximummatching.MaximumMatching) *Matcher {
+func NewMatcher(evaluator matchevaluator.Evaluator, generator earlypruning.CandidateGenerator, matching maximummatching.MaximumMatching) *Matcher {
 	return &Matcher{
 		availableOffers:        collections.NewSyncMap[string, *model.OfferNode](),
 		availableRequests:      collections.NewSyncMap[string, *model.RequestNode](),
 		potentialOfferRequests: collections.NewSyncMap[string, *collections.Set[string]](),
 		results:                make([]model.MatchingResult, 0),
-		pathPlanner:            planner,
+		matchEvaluator:         evaluator,
 		candidateGenerator:     generator,
 		maximumMatching:        matching,
 		limit:                  DefaultLimit,
