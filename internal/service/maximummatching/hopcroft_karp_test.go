@@ -209,15 +209,14 @@ func createSmallTestGraph() *model.Graph {
 	offerNode3.SetEdges([]*model.Edge{minimalEdge(requestNode1), minimalEdge(requestNode4)})
 	offerNode4.SetEdges([]*model.Edge{minimalEdge(requestNode3)})
 	offerNode5.SetEdges([]*model.Edge{minimalEdge(requestNode3), minimalEdge(requestNode4)})
-	offerNode6.SetEdges([]*model.Edge{minimalEdge(requestNode5), minimalEdge(requestNode6)})
+	offerNode6.SetEdges([]*model.Edge{minimalEdge(requestNode6)})
 	g.AddEdge(offer1, request2, offerNode1.Edges()[0])
 	g.AddEdge(offer1, request3, offerNode1.Edges()[1])
 	g.AddEdge(offer3, request1, offerNode3.Edges()[0])
 	g.AddEdge(offer4, request3, offerNode4.Edges()[0])
 	g.AddEdge(offer5, request3, offerNode5.Edges()[0])
 	g.AddEdge(offer5, request4, offerNode5.Edges()[1])
-	g.AddEdge(offer6, request5, offerNode6.Edges()[0])
-	g.AddEdge(offer6, request6, offerNode6.Edges()[1])
+	g.AddEdge(offer6, request6, offerNode6.Edges()[0])
 	return g
 }
 
