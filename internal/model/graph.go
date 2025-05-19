@@ -31,6 +31,9 @@ func (g *Graph) RemoveOfferNode(offerNode *OfferNode) {
 	g.offerNodes.Remove(offerNode)
 }
 
-func (g *Graph) ClearOfferNodes() {
+func (g *Graph) Clear() {
+	g.OfferNodes().ForEach(func(node *OfferNode) {
+		node.ClearEdges()
+	})
 	g.offerNodes.Clear()
 }

@@ -78,8 +78,7 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 			return nil, fmt.Errorf("failed to process maximum matching: %w", err)
 		}
 		// Clear the graph and edges for the next iteration
-		graph.ClearOfferNodes()
-		matcher.clearEdges()
+		graph.Clear()
 	}
 
 	// Handle remaining matched offers
@@ -88,11 +87,4 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 	}
 
 	return matcher.results, nil
-}
-
-func (matcher *Matcher) clearEdges() {
-	matcher.availableOffers.ForEach(func(offerID string, offerNode *model.OfferNode) error {
-		offerNode.ClearEdges()
-		return nil
-	})
 }
