@@ -17,6 +17,8 @@ func (validator *DefaultPathValidator) validateCapacityAndTiming(
 
 	for i := range path {
 
+		// Get a reference to the actual point in the path slice.
+		// This allows us to mutate the point in-place and set the expected arrival time.
 		point := &path[i]
 		// Apply accumulated waiting time to all future points
 		cumulativeDurations[i] += detourInfo.extraAccumulatedDuration
