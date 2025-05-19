@@ -24,31 +24,32 @@ func (ip *InsertionPathGenerator) GeneratePaths(
 		return nil, fmt.Errorf("path must contain at least two points")
 	}
 
-	return func(yield func([]model.PathPoint, error) bool) {
+	// The following upper bound guarantee that we are not losing any possible path though generating
+	// paths is still expensive, especially that there are some combinations that are infeasible with high probability
+	// Example:
+	// if path times is [1, 5, 10, 15, 20]
+	// and we want to insert a pickup at 8 and dropoff at 12
+	// trying to insert the new points as follows [1, p, d, 5, 10, 15, 20]
+	// might be theoretically feasible but with small probability in practical cases
 
-		// The following upper bound guarantee that we are not losing any possible path though generating
-		// paths is still expensive, especially that there are some combinations that are infeasible with high probability
-		// Example:
-		// if path times is [1, 5, 10, 15, 20]
-		// and we want to insert a pickup at 8 and dropoff at 12
-		// trying to insert the new points as follows [1, p, d, 5, 10, 15, 20]
-		// might be theoretically feasible but with small probability in practical cases
+	// We can also add an upper bound to the pickup position pick up can't be added after a point whose expected
+	// arrival time is greater than the latest pickup time (latest dropoff time - duration from pickup to
 
-		// We can also add an upper bound to the pickup position pick up can't be added after a point whose expected
-		// arrival time is greater than the latest pickup time (latest dropoff time - duration from pickup to
-
-		// Calculate upper bounds for insertion positions
-		upperIndex := pathLength - 1
-		for i := pathLength - 2; i > 0; i-- {
-			if path[i].ExpectedArrivalTime().After(dropoff.ExpectedArrivalTime()) {
-				upperIndex = i - 1
-				break
-			}
+	// Calculate upper bounds for insertion positions
+	upperIndex := pathLength - 1
+	for i := pathLength - 2; i > 0; i-- {
+		if path[i].ExpectedArrivalTime().After(dropoff.ExpectedArrivalTime()) {
+			upperIndex = i
+		} else {
+			break
 		}
+	}
 
-		// Buffer for building each new path (length = original + 2)
-		newLen := pathLength + 2
-		buf := make([]model.PathPoint, newLen)
+	// Buffer for building each new path (length = original + 2)
+	newLen := pathLength + 2
+	buf := make([]model.PathPoint, newLen)
+
+	return func(yield func([]model.PathPoint, error) bool) {
 
 		// Generate all valid paths
 		for pickupPos := 1; pickupPos <= upperIndex; pickupPos++ {
