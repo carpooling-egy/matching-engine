@@ -1,8 +1,11 @@
 package maximummatching
 
-import "matching-engine/internal/model"
+import (
+	"matching-engine/internal/collections"
+	"matching-engine/internal/model"
+)
 
 type MaximumMatching interface {
 	// FindMaximumMatching finds the maximum matching in a bipartite graph.
-	FindMaximumMatching(graph *model.Graph) (map[*model.OfferNode][]*model.Edge, error)
+	FindMaximumMatching(graph *model.Graph) ([]collections.Tuple2[*model.OfferNode, *model.Edge], error)
 }

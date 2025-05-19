@@ -1,5 +1,10 @@
 package model
 
+import (
+	"fmt"
+	"matching-engine/internal/errors"
+)
+
 // OfferNode represents a node in the offer graph
 type OfferNode struct {
 	offer                        *Offer
@@ -48,6 +53,16 @@ func (node *OfferNode) SetEdges(edges []*Edge) {
 	node.edges = edges
 }
 
+// AddEdge adds an edge to the node
+func (node *OfferNode) AddEdge(edge *Edge) {
+	node.edges = append(node.edges, edge)
+}
+
+// ClearEdges clears the edges
+func (node *OfferNode) ClearEdges() {
+	node.edges = make([]*Edge, 0)
+}
+
 // IsMatched returns whether the node is matched
 func (node *OfferNode) IsMatched() bool {
 	return node.isMatched
@@ -61,4 +76,15 @@ func (node *OfferNode) SetMatched(isMatched bool) {
 // GetAllRequests returns all matched requests, both existing and newly assigned
 func (node *OfferNode) GetAllRequests() []*Request {
 	return append(node.offer.matchedRequests, node.newlyAssignedMatchedRequests...)
+}
+
+func (node *OfferNode) AddNewlyMatchedRequest(request *Request) {
+	node.newlyAssignedMatchedRequests = append(node.newlyAssignedMatchedRequests, request)
+}
+
+func (node *OfferNode) Validate() error {
+	if node == nil {
+		return fmt.Errorf(errors.ErrNilOfferNode)
+	}
+	return node.Offer().Validate()
 }
