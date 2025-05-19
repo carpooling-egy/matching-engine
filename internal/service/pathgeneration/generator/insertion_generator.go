@@ -47,32 +47,24 @@ func (ip *InsertionPathGenerator) GeneratePaths(
 
 	// Buffer for building each new path (length = original + 2)
 	newLen := pathLength + 2
-	buf := make([]model.PathPoint, newLen)
 
 	return func(yield func([]model.PathPoint, error) bool) {
 
 		// Generate all valid paths
 		for pickupPos := 1; pickupPos <= upperIndex; pickupPos++ {
 			for dropoffPos := pickupPos; dropoffPos <= upperIndex; dropoffPos++ {
-				// Generate current path
-				// 1) prefix [0:pickupPos)
-				copy(buf[0:pickupPos], path[0:pickupPos])
 
-				// 2) insert pickup
-				buf[pickupPos] = *pickup
+				//// Generate current path
+				prefix := path[:pickupPos]
+				middle := path[pickupPos:dropoffPos]
+				suffix := path[dropoffPos:]
 
-				// 3) segment [pickupPos:dropoffPos)
-				copy(buf[pickupPos+1:pickupPos+1+(dropoffPos-pickupPos)], path[pickupPos:dropoffPos])
-
-				// 4) insert dropoff
-				buf[pickupPos+1+(dropoffPos-pickupPos)] = *dropoff
-
-				// 5) suffix [dropoffPos:pathLength)
-				copy(buf[pickupPos+2+(dropoffPos-pickupPos):], path[dropoffPos:])
-
-				// Clone buffer into a fresh slice before yielding
-				newPath := make([]model.PathPoint, newLen)
-				copy(newPath, buf)
+				newPath := make([]model.PathPoint, 0, newLen)
+				newPath = append(newPath, prefix...)
+				newPath = append(newPath, *pickup)
+				newPath = append(newPath, middle...)
+				newPath = append(newPath, *dropoff)
+				newPath = append(newPath, suffix...)
 
 				if !yield(newPath, nil) {
 					// Stop iterating if consumer is done
