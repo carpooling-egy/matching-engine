@@ -1,6 +1,8 @@
 package model
 
 import (
+	"fmt"
+	"matching-engine/internal/errors"
 	"time"
 )
 
@@ -85,6 +87,25 @@ func (o *Offer) Path() []PathPoint {
 // SetPath sets the path
 func (o *Offer) SetPath(path []PathPoint) {
 	o.path = path
+}
+
+func (o *Offer) Validate() error {
+	if o == nil {
+		return fmt.Errorf(errors.ErrNilOfferInOfferNode)
+	}
+	if o.UserID() == "" {
+		return fmt.Errorf(errors.ErrEmptyUserID)
+	}
+	if o.ID() == "" {
+		return fmt.Errorf(errors.ErrEmptyOfferID)
+	}
+	if o.Path() == nil {
+		return fmt.Errorf(errors.ErrNilPath)
+	}
+	if len(o.Path()) == 0 {
+		return fmt.Errorf(errors.ErrEmptyPath)
+	}
+	return nil
 }
 
 func (o *Offer) AsOffer() (*Offer, bool) {

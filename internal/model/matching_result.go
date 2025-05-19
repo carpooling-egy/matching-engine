@@ -32,9 +32,11 @@ func NewMatchingResult(userID, offerID string, assignedMatchedRequests []*Reques
 }
 
 func NewMatchingResultFromOfferNode(node *OfferNode) (*MatchingResult, error) {
-	if node == nil {
-		return nil, fmt.Errorf(errors.ErrNilOfferNode)
+	err := node.Validate()
+	if err != nil {
+		return nil, err
 	}
+
 	if node.NewlyAssignedMatchedRequests() == nil {
 		return nil, fmt.Errorf(errors.ErrNilMatchedRequests)
 	}

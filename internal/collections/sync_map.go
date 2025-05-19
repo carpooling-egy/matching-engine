@@ -4,13 +4,13 @@ package collections
 import (
 	"fmt"
 	"sync"
+	"sync/atomic"
 )
 
 // SyncMap is a generic thread-safe syncMap generic structure
 type SyncMap[K comparable, V any] struct {
 	store sync.Map
-	size  int
-	mu    sync.Mutex
+	size  int64
 }
 
 // NewSyncMap creates a new SyncMap instance
@@ -22,24 +22,27 @@ func NewSyncMap[K comparable, V any]() *SyncMap[K, V] {
 
 // Set stores a value in the syncMap with the given key
 func (sm *SyncMap[K, V]) Set(key K, value V) {
-	sm.store.Store(key, value)
-	sm.mu.Lock()
-	sm.size++
-	sm.mu.Unlock()
+	_, loaded := sm.store.LoadOrStore(key, value)
+	if loaded {
+		// If the key already exists, update the value
+		sm.store.Store(key, value)
+	} else {
+		// If the key was newly added, increment the size
+		atomic.AddInt64(&sm.size, 1)
+	}
 }
 
 // Delete removes a value from the syncMap by key
 func (sm *SyncMap[K, V]) Delete(key K) {
-	sm.store.Delete(key)
-	sm.mu.Lock()
-	sm.size--
-	sm.mu.Unlock()
+	if _, ok := sm.store.Load(key); ok {
+		sm.store.Delete(key)
+		// Decrement the size only if the key existed
+		atomic.AddInt64(&sm.size, -1)
+	}
 }
 
 // Size returns the number of key-value pairs in the SyncMap
-func (sm *SyncMap[K, V]) Size() int {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
+func (sm *SyncMap[K, V]) Size() int64 {
 	return sm.size
 }
 
