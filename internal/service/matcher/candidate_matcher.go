@@ -33,7 +33,7 @@ func (matcher *Matcher) buildCandidateMatches(offers []*model.Offer, requests []
 		requestID := candidate.Request().ID()
 
 		if offerID == "" || requestID == "" {
-			log.Error().Msg(errors.ErrEmptyOfferIDORRequestID)
+			log.Error().Msg(errors.ErrEmptyOfferIDOrRequestID)
 			continue
 		}
 

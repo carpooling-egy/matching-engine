@@ -1,5 +1,10 @@
 package model
 
+import (
+	"fmt"
+	"matching-engine/internal/errors"
+)
+
 // OfferNode represents a node in the offer graph
 type OfferNode struct {
 	offer                        *Offer
@@ -75,4 +80,24 @@ func (node *OfferNode) GetAllRequests() []*Request {
 
 func (node *OfferNode) AddNewlyMatchedRequest(request *Request) {
 	node.newlyAssignedMatchedRequests = append(node.newlyAssignedMatchedRequests, request)
+}
+
+func (node *OfferNode) ValidateOffer() error {
+	offer := node.Offer()
+	if offer == nil {
+		return fmt.Errorf(errors.ErrNilOfferInOfferNode)
+	}
+	if offer.UserID() == "" {
+		return fmt.Errorf(errors.ErrEmptyUserID)
+	}
+	if offer.ID() == "" {
+		return fmt.Errorf(errors.ErrEmptyOfferID)
+	}
+	if offer.Path() == nil {
+		return fmt.Errorf(errors.ErrNilPath)
+	}
+	if len(offer.Path()) == 0 {
+		return fmt.Errorf(errors.ErrEmptyPath)
+	}
+	return nil
 }

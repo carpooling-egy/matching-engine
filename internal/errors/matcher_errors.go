@@ -2,10 +2,10 @@ package errors
 
 const (
 	ErrNilOfferNode            = "offer node is nil"
-	ErrNilOffer                = "offer node has nil offer"
+	ErrNilOfferInOfferNode     = "offer node has nil offer"
 	ErrEmptyUserID             = "user ID is empty"
 	ErrEmptyOfferID            = "offer ID is empty"
-	ErrEmptyOfferIDORRequestID = "offer ID or request ID is empty"
+	ErrEmptyOfferIDOrRequestID = "offer ID or request ID is empty"
 	ErrNilPath                 = "offer node has nil path"
 	ErrEmptyPath               = "offer node has empty path"
 	ErrNilMatchedRequests      = "offer node has nil newly assigned matched requests"

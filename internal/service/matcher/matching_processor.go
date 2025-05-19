@@ -8,18 +8,20 @@ import (
 
 // processMaximumMatching finds maximum matches and updates results.
 func (matcher *Matcher) processMaximumMatching(graph *model.Graph, limit int) error {
-	maxEdges, err := matcher.maximumMatching.FindMaximumMatching(graph)
+	maxPairs, err := matcher.maximumMatching.FindMaximumMatching(graph)
 	if err != nil {
 		return fmt.Errorf("failed to find maximum matching: %w", err)
 	}
 
-	return maxEdges.Range(func(offerNode *model.OfferNode, edge *model.Edge) error {
-		requestNode := edge.RequestNode()
-		if requestNode == nil {
-			log.Warn().Msg("Nil request node in maximum matching")
-			return nil
-		}
+	if len(maxPairs) == 0 {
+		log.Info().Msg("No maximum matching found")
+		return nil
+	}
 
+	for _, pair := range maxPairs {
+		offerNode := pair.First
+		edge := pair.Second
+		requestNode := edge.RequestNode()
 		offerNode.SetMatched(true)
 		offerNode.AddNewlyMatchedRequest(requestNode.Request())
 		newPath := edge.NewPath()
@@ -29,11 +31,9 @@ func (matcher *Matcher) processMaximumMatching(graph *model.Graph, limit int) er
 		offerNode.Offer().SetPath(newPath)
 
 		requestSet, exists := matcher.potentialOfferRequests.Get(offerNode.Offer().ID())
-		if !exists {
-			log.Warn().Msg("Request set not found for offer node")
-			return nil
+		if exists {
+			requestSet.Remove(requestNode.Request().ID())
 		}
-		requestSet.Remove(requestNode.Request().ID())
 
 		if len(offerNode.GetAllRequests()) >= limit {
 			matcher.updateResults(offerNode)
@@ -42,6 +42,6 @@ func (matcher *Matcher) processMaximumMatching(graph *model.Graph, limit int) er
 		}
 
 		matcher.availableRequests.Delete(requestNode.Request().ID())
-		return nil
-	})
+	}
+	return nil
 }

@@ -12,23 +12,7 @@ func validateOfferNode(offerNode *model.OfferNode) error {
 	if offerNode == nil {
 		return fmt.Errorf(errors.ErrNilOfferNode)
 	}
-	offer := offerNode.Offer()
-	if offer == nil {
-		return fmt.Errorf(errors.ErrNilOffer)
-	}
-	if offer.UserID() == "" {
-		return fmt.Errorf(errors.ErrEmptyUserID)
-	}
-	if offer.ID() == "" {
-		return fmt.Errorf(errors.ErrEmptyOfferID)
-	}
-	if offer.Path() == nil {
-		return fmt.Errorf(errors.ErrNilPath)
-	}
-	if len(offer.Path()) == 0 {
-		return fmt.Errorf(errors.ErrEmptyPath)
-	}
-	return nil
+	return offerNode.ValidateOffer()
 }
 
 // createMatchingResult generates a matching result for the given offer node.
@@ -36,27 +20,11 @@ func createMatchingResult(offerNode *model.OfferNode) (*model.MatchingResult, er
 	if err := validateOfferNode(offerNode); err != nil {
 		return nil, err
 	}
-
-	newlyMatchedRequests := offerNode.NewlyAssignedMatchedRequests()
-	if newlyMatchedRequests == nil {
-		return nil, fmt.Errorf(errors.ErrNilMatchedRequests)
+	matchingResult, err := model.NewMatchingResultFromOfferNode(offerNode)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create matching result: %w", err)
 	}
-	if len(newlyMatchedRequests) == 0 {
-		return nil, fmt.Errorf(errors.ErrEmptyMatchedRequests)
-	}
-
-	allRequestsCount := 0
-	if allRequests := offerNode.GetAllRequests(); allRequests != nil {
-		allRequestsCount = len(allRequests)
-	}
-
-	return model.NewMatchingResult(
-		offerNode.Offer().UserID(),
-		offerNode.Offer().ID(),
-		newlyMatchedRequests,
-		offerNode.Offer().Path(),
-		allRequestsCount,
-	), nil
+	return matchingResult, nil
 }
 
 func (matcher *Matcher) updateResults(offerNode *model.OfferNode) {
