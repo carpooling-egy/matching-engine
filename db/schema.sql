@@ -22,6 +22,7 @@ CREATE TABLE rider_requests (
 
     earliest_departure_time TIMESTAMP WITH TIME ZONE NOT NULL,
     latest_arrival_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    
     max_walking_duration_minutes INTEGER DEFAULT 5,
     number_of_riders INTEGER NOT NULL DEFAULT 1 CHECK (number_of_riders > 0),
 
