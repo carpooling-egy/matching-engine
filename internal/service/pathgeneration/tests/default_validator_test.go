@@ -12,13 +12,6 @@ import (
 	"matching-engine/internal/service/pathgeneration/validator"
 )
 
-func must[T any](v T, err error) T {
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
-
 // Mock dependencies
 type MockTimeMatrixService struct {
 	mock.Mock
@@ -88,7 +81,7 @@ func createTestRequest(latestDeparture time.Time, earliestArrival time.Time, num
 }
 
 func createTestPreferences() *model.Preference {
-	return model.NewPreference(enums.Male, false, false, false)
+	return model.NewPreference(enums.Male, false)
 }
 
 // Tests
@@ -124,6 +117,7 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 		assert.Equal(t, path[2].ExpectedArrivalTime(), timeNow.Add(10*time.Minute))
 		assert.Equal(t, path[3].ExpectedArrivalTime(), timeNow.Add(15*time.Minute))
 		assert.Equal(t, path[4].ExpectedArrivalTime(), timeNow.Add(20*time.Minute))
+		assert.Equal(t, path[5].ExpectedArrivalTime(), timeNow.Add(25*time.Minute))
 
 	})
 
