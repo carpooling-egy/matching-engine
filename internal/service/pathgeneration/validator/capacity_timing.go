@@ -48,6 +48,9 @@ func (validator *DefaultPathValidator) validateCapacityAndTiming(
 			if !valid || err != nil {
 				return valid, err
 			}
+
+		case enums.Destination:
+			point.SetExpectedArrivalTime(offer.DepartureTime().Add(cumulativeDurations[i]))
 		}
 	}
 
