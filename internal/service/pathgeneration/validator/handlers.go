@@ -2,8 +2,9 @@ package validator
 
 import (
 	"fmt"
-	"matching-engine/internal/model"
 	"time"
+
+	"matching-engine/internal/model"
 )
 
 // handlePickupPoint processes a pickup point and checks capacity and timing constraints, and updates pickup time

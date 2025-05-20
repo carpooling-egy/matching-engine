@@ -1,9 +1,10 @@
 package validator
 
 import (
+	"time"
+
 	"matching-engine/internal/enums"
 	"matching-engine/internal/model"
-	"time"
 )
 
 // validateCapacityAndTiming checks if the path satisfies capacity and timing constraints

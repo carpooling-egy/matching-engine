@@ -2,8 +2,9 @@ package validator
 
 import (
 	"fmt"
-	"matching-engine/internal/model"
 	"time"
+	
+	"matching-engine/internal/model"
 )
 
 // calculateDetourInfo determines if the path is within detour constraints

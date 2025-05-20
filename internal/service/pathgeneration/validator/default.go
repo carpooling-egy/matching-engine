@@ -2,6 +2,7 @@ package validator
 
 import (
 	"fmt"
+
 	"matching-engine/internal/model"
 	"matching-engine/internal/service/timematrix"
 )
