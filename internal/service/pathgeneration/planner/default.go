@@ -29,11 +29,15 @@ func (planner *DefaultPathPlanner) FindFirstFeasiblePath(offerNode *model.OfferN
 		return nil, false, fmt.Errorf("FindFirstFeasiblePath: error getting pickup & dropoff points: %w", err)
 	}
 
-	pathIter := planner.pathGenerator.GeneratePaths(
+	pathIter, err := planner.pathGenerator.GeneratePaths(
 		offerNode.Offer().Path(),
 		pickupAndDropOffs.Pickup(),
 		pickupAndDropOffs.Dropoff(),
 	)
+
+	if err != nil {
+		return nil, false, fmt.Errorf("FindFirstFeasiblePath: error getting path iterator: %w", err)
+	}
 
 	// Iterate through candidate paths
 	for candidatePath, pathErr := range pathIter {

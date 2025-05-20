@@ -46,6 +46,13 @@ func (selector *PickupDropoffSelector) GetPickupDropoffPointsAndDurations(reques
 	pickup.SetWalkingDuration(pickupWalkingDuration)
 	dropoff.SetWalkingDuration(dropoffWalkingDuration)
 
+	// Set the expected arrival times:
+	// - For the pickup point: earliest pickup time (departure time + walking duration)
+	// - For the dropoff point: latest dropoff time (latest arrival time - walking duration)
+	// NOTE: Be careful when changing these as some path generation logic depend on it
+	pickup.SetExpectedArrivalTime(request.EarliestDepartureTime().Add(pickupWalkingDuration))
+	dropoff.SetExpectedArrivalTime(request.LatestArrivalTime().Add(-dropoffWalkingDuration))
+
 	// Store the pickup and dropoff points in the cache
 	cacheValue := pickupdropoffcache.NewValue(pickup, dropoff)
 	selector.cache.Set(cacheKey, cacheValue)

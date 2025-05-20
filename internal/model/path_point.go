@@ -18,7 +18,7 @@ type PathPoint struct {
 	owner               Role
 	coordinate          Coordinate
 	pointType           enums.PointType
-	expectedArrivalTime time.Time
+	expectedArrivalTime time.Time // When the point doesn't yet belong to a path, this represents the earliest pickup or latest dropoff time possible for a request
 	walkingDuration     time.Duration
 }
 

@@ -14,6 +14,19 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// MockPickupDropoffSelector implements the PickupDropoffSelectorInterface interface for testing
+type MockPickupDropoffSelector struct {
+	mock.Mock
+}
+
+func (m *MockPickupDropoffSelector) GetPickupDropoffPointsAndDurations(request *model.Request, offer *model.Offer) (*pickupdropoffcache.Value, error) {
+	args := m.Called(request, offer)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*pickupdropoffcache.Value), args.Error(1)
+}
+
 // Default helper functions
 func createDefaultCoordinate() *model.Coordinate {
 	coord, _ := model.NewCoordinate(0.0, 0.0)
@@ -56,30 +69,23 @@ type MockPathGenerator struct {
 	mock.Mock
 }
 
-func (m *MockPathGenerator) GeneratePaths(path []model.PathPoint, pickup, dropoff *model.PathPoint) iter.Seq2[[]model.PathPoint, error] {
+func (m *MockPathGenerator) GeneratePaths(path []model.PathPoint, pickup, dropoff *model.PathPoint) (iter.Seq2[[]model.PathPoint, error], error) {
 	args := m.Called(path, pickup, dropoff)
-	err := args.Error(1) // Get the error we want to return
 
-	if err != nil {
-		return func(yield func([]model.PathPoint, error) bool) {
-			// Just yield the error and no paths
-			yield(nil, err)
-		}
+	// Handle error case
+	if err := args.Error(1); err != nil {
+		return nil, err
 	}
 
-	// The paths we want to yield from our mock iterator
 	paths := args.Get(0).([][]model.PathPoint)
-
-	// Return an iterator that will yield each path with nil error
-	return func(yield func([]model.PathPoint, error) bool) {
-		// Yield each path with nil error
+	iterFunc := func(yield func([]model.PathPoint, error) bool) {
 		for _, p := range paths {
-			// If yield returns false, stop iteration
 			if !yield(p, nil) {
 				break
 			}
 		}
 	}
+	return iterFunc, nil
 }
 
 // MockPathValidator implements the PathValidator interface for testing
@@ -90,19 +96,6 @@ type MockPathValidator struct {
 func (m *MockPathValidator) ValidatePath(offerNode *model.OfferNode, path []model.PathPoint) (bool, error) {
 	args := m.Called(offerNode, path)
 	return args.Bool(0), args.Error(1)
-}
-
-// MockPickupDropoffSelector implements the PickupDropoffSelectorInterface interface for testing
-type MockPickupDropoffSelector struct {
-	mock.Mock
-}
-
-func (m *MockPickupDropoffSelector) GetPickupDropoffPointsAndDurations(request *model.Request, offer *model.Offer) (*pickupdropoffcache.Value, error) {
-	args := m.Called(request, offer)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*pickupdropoffcache.Value), args.Error(1)
 }
 
 // TestFindFirstFeasiblePath_SimpleSuccess tests the happy path where a valid path is found
