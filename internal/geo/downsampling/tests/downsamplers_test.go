@@ -56,8 +56,8 @@ func TestGenerateGeoJSON(t *testing.T) {
 	coords := generateHugePolyline(1_000_000)
 
 	samplers := []downsampling.RouteDownSampler{
-		downsampling.NewTimeThresholdDownSampler(30 * time.Minute),
-		downsampling.NewRDPDownSampler(10),
+		downsampling.NewTimeThresholdDownSampler(downsampling.WithInterval(30 * time.Minute)),
+		downsampling.NewRDPDownSampler(downsampling.WithEpsilonMeters(10)),
 	}
 
 	names := []string{
