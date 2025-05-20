@@ -24,8 +24,7 @@ func (m *MatchEvaluator) Evaluate(offerNode *model.OfferNode, requestNode *model
 	offer := offerNode.Offer()
 	request := requestNode.Request()
 
-	preferenceChecker := checker.NewPreferenceChecker()
-	valid, err := preferenceChecker.Check(offerNode.Offer(), requestNode.Request())
+	valid, err := m.preferenceChecker.Check(offerNode.Offer(), requestNode.Request())
 	if err != nil {
 		return nil, false, fmt.Errorf("preference check failed for offer %s and request %s: %w", offer.ID(), request.ID(), err)
 	}
