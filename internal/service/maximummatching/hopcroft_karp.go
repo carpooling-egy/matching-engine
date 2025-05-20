@@ -40,10 +40,8 @@ func (hk *HopcroftKarp) FindMaximumMatching(
 		return []collections.Tuple2[*model.OfferNode, *model.Edge]{}, nil
 	}
 
-	// Pre-allocate slices
-	hk.offerMatches = make([]int, offerCount+1)
-	hk.requestMatches = make([]int, requestCount+1)
-	hk.distances = make([]int, offerCount+1)
+	// Pre-allocate slices and queue
+	hk.preAllocate(offerCount, requestCount)
 	queue := collections.NewQueueWithCapacity[int](offerCount)
 
 	adj := buildAdjacencyList(offers, requestIndex, offerCount)
@@ -82,6 +80,12 @@ func initialize(graph *model.Graph) ([]*model.OfferNode, []*model.RequestNode, *
 		return nil
 	})
 	return offers, requests, requestIndexMap
+}
+
+func (hk *HopcroftKarp) preAllocate(offerCount, requestCount int) {
+	hk.offerMatches = make([]int, offerCount+1)
+	hk.requestMatches = make([]int, requestCount+1)
+	hk.distances = make([]int, offerCount+1)
 }
 
 func buildAdjacencyList(offers []*model.OfferNode, requestIndex *collections.SyncMap[*model.RequestNode, int], n int) [][]int {
