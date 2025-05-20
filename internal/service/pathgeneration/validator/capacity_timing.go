@@ -11,17 +11,17 @@ func (validator *DefaultPathValidator) validateCapacityAndTiming(
 	offer *model.Offer,
 	path []model.PathPoint,
 	cumulativeDurations []time.Duration,
-	detourInfo *detourInfo,
+	availableExtraDetour *time.Duration,
 ) (bool, error) {
 	currentCapacity := 0
-
+	extraAccumulatedDuration := time.Duration(0)
 	for i := range path {
 
 		// Get a reference to the actual point in the path slice.
 		// This allows us to mutate the point in-place and set the expected arrival time.
 		point := &path[i]
 		// Apply accumulated waiting time to all future points
-		cumulativeDurations[i] += detourInfo.extraAccumulatedDuration
+		cumulativeDurations[i] += extraAccumulatedDuration
 
 		switch point.PointType() {
 		case enums.Pickup:
@@ -30,7 +30,8 @@ func (validator *DefaultPathValidator) validateCapacityAndTiming(
 				point,
 				cumulativeDurations[i],
 				&currentCapacity,
-				detourInfo,
+				availableExtraDetour,
+				&extraAccumulatedDuration,
 			)
 			if !valid || err != nil {
 				return valid, err

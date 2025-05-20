@@ -6,19 +6,12 @@ import (
 	"time"
 )
 
-// detourInfo contains information about the detour calculations
-type detourInfo struct {
-	isWithinDetourLimit      bool
-	availableExtraDuration   time.Duration
-	extraAccumulatedDuration time.Duration
-}
-
 // calculateDetourInfo determines if the path is within detour constraints
 func (validator *DefaultPathValidator) calculateDetourInfo(
 	offerNode *model.OfferNode,
 	path []model.PathPoint,
 	cumulativeDurations []time.Duration,
-) (*detourInfo, error) {
+) (bool, time.Duration, error) {
 	offer := offerNode.Offer()
 
 	totalTripDuration := cumulativeDurations[len(cumulativeDurations)-1]
@@ -27,15 +20,15 @@ func (validator *DefaultPathValidator) calculateDetourInfo(
 	)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to calculate direct trip duration: %w", err)
+		return false,
+			0,
+			fmt.Errorf("failed to calculate direct trip duration: %w", err)
 	}
 
 	tripDetour := totalTripDuration - directTripDuration
 	isWithinDetourLimit := tripDetour <= offer.DetourDurationMinutes()
 
-	return &detourInfo{
-		isWithinDetourLimit:      isWithinDetourLimit,
-		availableExtraDuration:   offer.DetourDurationMinutes() - tripDetour,
-		extraAccumulatedDuration: time.Duration(0),
-	}, nil
+	return isWithinDetourLimit,
+		offer.DetourDurationMinutes() - tripDetour,
+		nil
 }
