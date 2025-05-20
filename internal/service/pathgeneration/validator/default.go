@@ -21,7 +21,7 @@ func NewDefaultPathValidator(timeMatrixService timematrix.Service) *DefaultPathV
 // It returns true if the path is valid, false otherwise.
 // An error is returned only for system errors, not for validation failures.
 //
-// Note: This method modifies the provided path by setting expected arrival times.
+// NOTE: THIS FUNCTION MODIFIES THE PATH POINTS TO SET EXPECTED ARRIVAL TIMES
 func (validator *DefaultPathValidator) ValidatePath(
 	offerNode *model.OfferNode,
 	path []model.PathPoint,
@@ -49,5 +49,7 @@ func (validator *DefaultPathValidator) ValidatePath(
 	}
 
 	// Check capacity and timing constraints
+	// NOTE: THIS FUNCTION MODIFIES THE PATH POINTS TO SET EXPECTED ARRIVAL TIMES
+	// AND UPDATES THE AVAILABLE EXTRA DETOUR.
 	return validator.validateCapacityAndTiming(offer, path, cumulativeDurations, &availableExtraDetour)
 }

@@ -28,11 +28,11 @@ func (validator *DefaultPathValidator) validateCapacityAndTiming(
 		case enums.Pickup:
 			valid, err := validator.handlePickupPoint(
 				offer,
-				point,
+				point, // point.expectedArrivalTime IS BEING MODIFIED BY THE HANDLER
 				cumulativeDurations[i],
-				&currentCapacity,
+				&currentCapacity, // THIS VALUE IS BEING MODIFIED BY THE HANDLER
 				availableExtraDetour,
-				&extraAccumulatedDuration,
+				&extraAccumulatedDuration, // THIS VALUE IS BEING MODIFIED BY THE HANDLER
 			)
 			if !valid || err != nil {
 				return valid, err
@@ -41,9 +41,9 @@ func (validator *DefaultPathValidator) validateCapacityAndTiming(
 		case enums.Dropoff:
 			valid, err := validator.handleDropoffPoint(
 				offer,
-				point,
+				point, // point.expectedArrivalTime IS BEING MODIFIED BY THE HANDLER
 				cumulativeDurations[i],
-				&currentCapacity,
+				&currentCapacity, // THIS VALUE IS BEING MODIFIED BY THE HANDLER
 			)
 			if !valid || err != nil {
 				return valid, err
