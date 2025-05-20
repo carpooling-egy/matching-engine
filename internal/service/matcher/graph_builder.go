@@ -36,7 +36,6 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.Graph) (bool, error) {
 
 			hasNewEdge = true
 			edge := model.NewEdge(requestNode, path)
-			offerNode.AddEdge(edge)
 			graph.AddOfferNode(offerNode)
 			graph.AddRequestNode(requestNode)
 			graph.AddEdge(offerNode, requestNode, edge)

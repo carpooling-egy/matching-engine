@@ -21,5 +21,5 @@ func (k OfferRequestKey) RequestID() string {
 }
 
 func (k OfferRequestKey) String() string {
-	return "CacheKey{OfferID: " + k.offerID + ", RequestID: " + k.requestID + "}"
+	return "OfferRequestKey{OfferID: " + k.offerID + ", RequestID: " + k.requestID + "}"
 }

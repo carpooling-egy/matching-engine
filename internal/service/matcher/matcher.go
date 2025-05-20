@@ -65,11 +65,15 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 			log.Info().Msg("No new edges found, stopping matching process")
 			break
 		}
-		// Update the graph with potential requests
-		matcher.availableRequests = graph.RequestNodes()
 
 		// Process unmatched offers
 		matcher.processUnmatchedOffers(graph)
+
+		// Update the graph with potential requests
+		matcher.availableRequests = graph.RequestNodes()
+
+		// Update the graph with potential requests
+		matcher.availableRequests = graph.RequestNodes()
 
 		// Find Maximum Matching
 		if err = matcher.processMaximumMatching(graph, matcher.limit); err != nil {

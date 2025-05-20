@@ -17,7 +17,6 @@ func (matcher *Matcher) processUnmatchedOffers(graph *model.Graph) {
 		matcher.potentialOfferRequests.Delete(offerID)
 		return nil // continue
 	})
-	matcher.availableOffers = potentialOffers
 }
 
 // processRemainingOffers appends leftover matched offers to result.

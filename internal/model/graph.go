@@ -30,11 +30,7 @@ func (g *Graph) SetOfferNodes(offerNodes *collections.SyncMap[string, *OfferNode
 }
 
 func (g *Graph) AddOfferNode(offerNode *OfferNode) {
-	g.offerNodes.Set(offerNode.offer.id, offerNode)
-}
-
-func (g *Graph) RemoveOfferNode(offerNode *OfferNode) {
-	g.offerNodes.Delete(offerNode.offer.id)
+	g.offerNodes.Set(offerNode.Offer().ID(), offerNode)
 }
 
 // RequestNodes returns the request nodes
@@ -49,14 +45,6 @@ func (g *Graph) SetRequestNodes(requestNodes *collections.SyncMap[string, *Reque
 
 func (g *Graph) AddRequestNode(requestNode *RequestNode) {
 	g.requestNodes.Set(requestNode.request.id, requestNode)
-}
-
-func (g *Graph) RemoveRequestNode(requestNode *RequestNode) {
-	g.requestNodes.Delete(requestNode.request.id)
-}
-
-func (g *Graph) ClearRequestNodes() {
-	g.requestNodes.Clear()
 }
 
 // Clear clears the graph
@@ -81,19 +69,14 @@ func (g *Graph) SetEdges(edges *collections.SyncMap[OfferRequestKey, *Edge]) {
 }
 
 func (g *Graph) AddEdge(offerNode *OfferNode, requestNode *RequestNode, edge *Edge) {
+	// Set the edge in the offer node
+	offerNode.AddEdge(edge)
+
 	key := NewOfferRequestKey(
 		offerNode.Offer().ID(),
 		requestNode.Request().ID(),
 	)
 	g.edges.Set(key, edge)
-}
-
-func (g *Graph) RemoveEdge(offerNode *OfferNode, requestNode *RequestNode) {
-	key := NewOfferRequestKey(
-		offerNode.Offer().ID(),
-		requestNode.Request().ID(),
-	)
-	g.edges.Delete(key)
 }
 
 func (g *Graph) GetEdge(offer *Offer, request *Request) (*Edge, bool) {

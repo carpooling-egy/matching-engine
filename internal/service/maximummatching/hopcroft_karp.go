@@ -8,12 +8,17 @@ import (
 	"math"
 )
 
+const (
+	// NIL is a constant used to represent a null value in the matching algorithm.
+	NIL = 0
+	INF = math.MaxInt32
+)
+
 // HopcroftKarp implements MaximumMatching.
 type HopcroftKarp struct {
-	pairU []int
-	pairV []int
-	dist  []int
-	queue []int
+	offerMatches   []int
+	requestMatches []int
+	distances      []int
 }
 
 // NewHopcroftKarp returns a hopcroftKarp using the Hopcroft–Karp algorithm.
@@ -30,36 +35,35 @@ func (hk *HopcroftKarp) FindMaximumMatching(
 	}
 
 	offers, requests, requestIndex := initialize(graph)
-	n, m := len(offers), len(requests)
-	if n == 0 || m == 0 {
+	offerCount, requestCount := len(offers), len(requests)
+	if offerCount == 0 || requestCount == 0 {
 		return []collections.Tuple2[*model.OfferNode, *model.Edge]{}, nil
 	}
 
 	// Pre-allocate slices
-	hk.pairU = make([]int, n+1)
-	hk.pairV = make([]int, m+1)
-	hk.dist = make([]int, n+1)
-	hk.queue = make([]int, 0, n)
+	hk.offerMatches = make([]int, offerCount+1)
+	hk.requestMatches = make([]int, requestCount+1)
+	hk.distances = make([]int, offerCount+1)
+	queue := collections.NewQueueWithCapacity[int](offerCount)
 
-	adj := buildAdjacencyList(offers, requestIndex, n)
+	adj := buildAdjacencyList(offers, requestIndex, offerCount)
 
-	const NIL = 0
-	matching := 0
+	matchingCount := 0
 
 	// Main matching loop
-	for hk.bfs(adj, n, NIL) {
-		for u := 1; u <= n; u++ {
-			if hk.pairU[u] == NIL && hk.dfs(u, adj, NIL) {
-				matching++
+	for hk.bfs(adj, queue, offerCount) {
+		for offerIndex := 1; offerIndex <= offerCount; offerIndex++ {
+			if hk.offerMatches[offerIndex] == NIL && hk.dfs(offerIndex, adj) {
+				matchingCount++
 			}
 		}
 	}
 	// Check if we found a matching
-	if matching == 0 {
+	if matchingCount == 0 {
 		return []collections.Tuple2[*model.OfferNode, *model.Edge]{}, nil
 	}
 
-	return buildResultMap(graph, offers, requests, hk.pairU)
+	return buildMatchingResult(graph, offers, requests, hk.offerMatches)
 }
 
 func initialize(graph *model.Graph) ([]*model.OfferNode, []*model.RequestNode, *collections.SyncMap[*model.RequestNode, int]) {
@@ -69,92 +73,90 @@ func initialize(graph *model.Graph) ([]*model.OfferNode, []*model.RequestNode, *
 		return nil
 	})
 	requests := make([]*model.RequestNode, 0, graph.RequestNodes().Size())
-	requestIndex := collections.NewSyncMap[*model.RequestNode, int]()
-	counter := 0
+	requestIndexMap := collections.NewSyncMap[*model.RequestNode, int]()
+	index := 0
 	graph.RequestNodes().Range(func(_ string, node *model.RequestNode) error {
 		requests = append(requests, node)
-		counter++
-		requestIndex.Set(node, counter)
+		index++
+		requestIndexMap.Set(node, index)
 		return nil
 	})
-	return offers, requests, requestIndex
+	return offers, requests, requestIndexMap
 }
 
 func buildAdjacencyList(offers []*model.OfferNode, requestIndex *collections.SyncMap[*model.RequestNode, int], n int) [][]int {
 	adj := make([][]int, n+1)
-	for i, u := range offers {
-		edges := u.Edges()
-		adj[i+1] = make([]int, 0, len(edges))
+	for offerIndex, offer := range offers {
+		edges := offer.Edges()
+		adj[offerIndex+1] = make([]int, 0, len(edges))
 		for _, edge := range edges {
-			if idx, ok := requestIndex.Get(edge.RequestNode()); ok {
-				adj[i+1] = append(adj[i+1], idx)
+			if requestIdx, exists := requestIndex.Get(edge.RequestNode()); exists {
+				adj[offerIndex+1] = append(adj[offerIndex+1], requestIdx)
 			}
 		}
 	}
 	return adj
 }
 
-func (hk *HopcroftKarp) bfs(adj [][]int, n, NIL int) bool {
-	// Reset queue and distances
-	hk.queue = hk.queue[:0]
-	distNIL := math.MaxInt32
+func (hk *HopcroftKarp) bfs(adj [][]int, queue *collections.Queue[int], n int) bool {
+	// Reset distances
+	distNIL := INF
 
 	// Initialize distances
 	for u := 1; u <= n; u++ {
-		if hk.pairU[u] == NIL {
-			hk.dist[u] = 0
-			hk.queue = append(hk.queue, u)
+		if hk.offerMatches[u] == NIL {
+			hk.distances[u] = 0
+			queue.Enqueue(u)
 		} else {
-			hk.dist[u] = math.MaxInt32
+			hk.distances[u] = INF
 		}
 	}
 
 	// BFS loop
-	for len(hk.queue) > 0 {
-		u := hk.queue[0]
-		hk.queue = hk.queue[1:]
+	for queue.Size() > 0 {
+		u, _ := queue.Dequeue()
 
-		if hk.dist[u] < distNIL {
+		if hk.distances[u] < distNIL {
 			for _, v := range adj[u] {
-				if hk.pairV[v] == NIL {
-					distNIL = hk.dist[u] + 1
-				} else if hk.dist[hk.pairV[v]] == math.MaxInt32 {
-					hk.dist[hk.pairV[v]] = hk.dist[u] + 1
-					hk.queue = append(hk.queue, hk.pairV[v])
+				if hk.requestMatches[v] == NIL {
+					distNIL = hk.distances[u] + 1
+				} else if hk.distances[hk.requestMatches[v]] == INF {
+					hk.distances[hk.requestMatches[v]] = hk.distances[u] + 1
+					queue.Enqueue(hk.requestMatches[v])
 				}
 			}
 		}
 	}
 
-	return distNIL != math.MaxInt32
+	return distNIL != INF
 }
 
-func (hk *HopcroftKarp) dfs(u int, adj [][]int, NIL int) bool {
+func (hk *HopcroftKarp) dfs(offer int, adj [][]int) bool {
 
 	// Try to find an augmenting path
-	for _, v := range adj[u] {
-		if hk.pairV[v] == NIL || (hk.dist[hk.pairV[v]] == hk.dist[u]+1 && hk.dfs(hk.pairV[v], adj, NIL)) {
-			hk.pairU[u] = v
-			hk.pairV[v] = u
+	for _, request := range adj[offer] {
+		if hk.requestMatches[request] == NIL || (hk.distances[hk.requestMatches[request]] == hk.distances[offer]+1 && hk.dfs(hk.requestMatches[request], adj)) {
+			hk.offerMatches[offer] = request
+			hk.requestMatches[request] = offer
 			return true
 		}
 	}
 
-	hk.dist[u] = math.MaxInt32
+	hk.distances[offer] = INF
 	return false
 }
 
-func buildResultMap(graph *model.Graph, offers []*model.OfferNode, requests []*model.RequestNode, pairU []int) ([]collections.Tuple2[*model.OfferNode, *model.Edge], error) {
-	result := make([]collections.Tuple2[*model.OfferNode, *model.Edge], len(pairU)-1)
-	for uIdx, vIdx := range pairU {
-		if uIdx > 0 && vIdx > 0 {
-			offer := offers[uIdx-1]
-			reqNode := requests[vIdx-1]
+func buildMatchingResult(graph *model.Graph, offers []*model.OfferNode, requests []*model.RequestNode, offerMatches []int) ([]collections.Tuple2[*model.OfferNode, *model.Edge], error) {
+	result := make([]collections.Tuple2[*model.OfferNode, *model.Edge], len(offerMatches)-1)
+	for offerIndex, requestIndex := range offerMatches {
+		if offerIndex > 0 && requestIndex > 0 {
+			offer := offers[offerIndex-1]
+			reqNode := requests[requestIndex-1]
 			chosen, exists := graph.GetEdge(offer.Offer(), reqNode.Request())
 			if !exists || chosen == nil {
-				return nil, fmt.Errorf("edge not found for match Offer[%d] -> Request[%d]", uIdx-1, vIdx-1)
+				return nil, fmt.Errorf("edge not found for match Offer[%d] -> Request[%d]", offerIndex-1, requestIndex-1)
 			}
-			result[uIdx-1] = collections.NewTuple2(offer, chosen)
+			result[offerIndex-1] = collections.NewTuple2(offer, chosen)
 		}
 	}
 	return result, nil
