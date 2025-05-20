@@ -6,7 +6,7 @@ import "matching-engine/internal/model"
 func (matcher *Matcher) processUnmatchedOffers(graph *model.Graph) {
 	potentialOffers := graph.OfferNodes()
 	matcher.availableOffers.ForEach(func(offerID string, offerNode *model.OfferNode) error {
-		if potentialOffers.Contains(offerNode) {
+		if potentialOffers.Contains(offerNode.Offer().ID()) {
 			return nil // continue
 		}
 
@@ -15,9 +15,9 @@ func (matcher *Matcher) processUnmatchedOffers(graph *model.Graph) {
 		}
 
 		matcher.potentialOfferRequests.Delete(offerID)
-		matcher.availableOffers.Delete(offerID)
 		return nil // continue
 	})
+	matcher.availableOffers = potentialOffers
 }
 
 // processRemainingOffers appends leftover matched offers to result.

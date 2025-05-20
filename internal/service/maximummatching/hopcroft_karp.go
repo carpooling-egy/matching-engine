@@ -24,7 +24,7 @@ func NewHopcroftKarp() *HopcroftKarp {
 // FindMaximumMatching finds maximum bipartite matching between offer and request nodes.
 func (hk *HopcroftKarp) FindMaximumMatching(
 	graph *model.Graph,
-) (*collections.SyncMap[*model.OfferNode, *model.Edge], error) {
+) ([]collections.Tuple2[*model.OfferNode, *model.Edge], error) {
 	if graph == nil {
 		return nil, fmt.Errorf("graph cannot be nil")
 	}
@@ -32,7 +32,7 @@ func (hk *HopcroftKarp) FindMaximumMatching(
 	offers, requests, requestIndex := initialize(graph)
 	n, m := len(offers), len(requests)
 	if n == 0 || m == 0 {
-		return collections.NewSyncMap[*model.OfferNode, *model.Edge](), nil
+		return []collections.Tuple2[*model.OfferNode, *model.Edge]{}, nil
 	}
 
 	// Pre-allocate slices
@@ -54,25 +54,28 @@ func (hk *HopcroftKarp) FindMaximumMatching(
 			}
 		}
 	}
+	// Check if we found a matching
+	if matching == 0 {
+		return []collections.Tuple2[*model.OfferNode, *model.Edge]{}, nil
+	}
 
 	return buildResultMap(graph, offers, requests, hk.pairU)
 }
 
 func initialize(graph *model.Graph) ([]*model.OfferNode, []*model.RequestNode, *collections.SyncMap[*model.RequestNode, int]) {
 	offers := make([]*model.OfferNode, 0, graph.OfferNodes().Size())
-	graph.OfferNodes().Range(func(_ string, node *model.OfferNode) bool {
+	graph.OfferNodes().Range(func(_ string, node *model.OfferNode) error {
 		offers = append(offers, node)
-		return true
+		return nil
 	})
-
 	requests := make([]*model.RequestNode, 0, graph.RequestNodes().Size())
 	requestIndex := collections.NewSyncMap[*model.RequestNode, int]()
 	counter := 0
-	graph.RequestNodes().Range(func(_ string, node *model.RequestNode) bool {
+	graph.RequestNodes().Range(func(_ string, node *model.RequestNode) error {
 		requests = append(requests, node)
 		counter++
 		requestIndex.Set(node, counter)
-		return true
+		return nil
 	})
 	return offers, requests, requestIndex
 }
@@ -141,8 +144,8 @@ func (hk *HopcroftKarp) dfs(u int, adj [][]int, NIL int) bool {
 	return false
 }
 
-func buildResultMap(graph *model.Graph, offers []*model.OfferNode, requests []*model.RequestNode, pairU []int) (*collections.SyncMap[*model.OfferNode, *model.Edge], error) {
-	result := collections.NewSyncMap[*model.OfferNode, *model.Edge]()
+func buildResultMap(graph *model.Graph, offers []*model.OfferNode, requests []*model.RequestNode, pairU []int) ([]collections.Tuple2[*model.OfferNode, *model.Edge], error) {
+	result := make([]collections.Tuple2[*model.OfferNode, *model.Edge], len(pairU)-1)
 	for uIdx, vIdx := range pairU {
 		if uIdx > 0 && vIdx > 0 {
 			offer := offers[uIdx-1]
@@ -151,7 +154,7 @@ func buildResultMap(graph *model.Graph, offers []*model.OfferNode, requests []*m
 			if !exists || chosen == nil {
 				return nil, fmt.Errorf("edge not found for match Offer[%d] -> Request[%d]", uIdx-1, vIdx-1)
 			}
-			result.Set(offer, chosen)
+			result[uIdx-1] = collections.NewTuple2(offer, chosen)
 		}
 	}
 	return result, nil

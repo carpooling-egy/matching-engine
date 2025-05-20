@@ -20,7 +20,7 @@ func minimalOffer(id string) *model.Offer {
 		time.Now(),
 		0,
 		1,
-		*model.NewPreference(enums.Male, false, false, false),
+		*model.NewPreference(enums.Male, false),
 		time.Now().Add(time.Hour),
 		0,
 		[]model.PathPoint{*model.NewPathPoint(*coord, enums.Source, time.Now(), nil, 0), *model.NewPathPoint(*coord, enums.Destination, time.Now().Add(time.Hour), nil, 0)},
@@ -39,7 +39,7 @@ func minimalRequest(id string) *model.Request {
 		time.Now().Add(time.Hour),
 		0,
 		1,
-		*model.NewPreference(enums.Female, false, false, false),
+		*model.NewPreference(enums.Female, false),
 	)
 }
 
@@ -71,7 +71,7 @@ func TestHopcroftKarp_FindMaximumMatching(t *testing.T) {
 				offerNode.SetEdges([]*model.Edge{minimalEdge(requestNode)})
 				g.AddOfferNode(offerNode)
 				g.AddRequestNode(requestNode)
-				g.AddEdge(offer, request, offerNode.Edges()[0])
+				g.AddEdge(offerNode, requestNode, offerNode.Edges()[0])
 				return g
 			}(),
 			wantSize: 1,
@@ -110,10 +110,10 @@ func TestHopcroftKarp_FindMaximumMatching(t *testing.T) {
 				g.AddOfferNode(offerNode2)
 				g.AddRequestNode(requestNode1)
 				g.AddRequestNode(requestNode2)
-				g.AddEdge(offer1, request1, offerNode1.Edges()[0])
-				g.AddEdge(offer1, request2, offerNode1.Edges()[1])
-				g.AddEdge(offer2, request1, offerNode2.Edges()[0])
-				g.AddEdge(offer2, request2, offerNode2.Edges()[1])
+				g.AddEdge(offerNode1, requestNode1, offerNode1.Edges()[0])
+				g.AddEdge(offerNode1, requestNode2, offerNode1.Edges()[1])
+				g.AddEdge(offerNode2, requestNode1, offerNode2.Edges()[0])
+				g.AddEdge(offerNode2, requestNode2, offerNode2.Edges()[1])
 				return g
 			}(),
 			wantSize: 2,
@@ -137,8 +137,8 @@ func TestHopcroftKarp_FindMaximumMatching(t *testing.T) {
 				g.AddOfferNode(offerNode2)
 				g.AddRequestNode(requestNode1)
 				g.AddRequestNode(requestNode2)
-				g.AddEdge(offer1, request1, offerNode1.Edges()[0])
-				g.AddEdge(offer2, request2, offerNode2.Edges()[0])
+				g.AddEdge(offerNode1, requestNode1, offerNode1.Edges()[0])
+				g.AddEdge(offerNode2, requestNode2, offerNode2.Edges()[0])
 				return g
 			}(),
 			wantSize: 2,
@@ -160,8 +160,8 @@ func TestHopcroftKarp_FindMaximumMatching(t *testing.T) {
 				}
 				return
 			}
-			if got.Size() != tt.wantSize {
-				t.Errorf("HopcroftKarp.FindMaximumMatching() got size = %v, want %v", got.Size(), tt.wantSize)
+			if len(got) != tt.wantSize {
+				t.Errorf("HopcroftKarp.FindMaximumMatching() got size = %v, want %v", len(got), tt.wantSize)
 			}
 		})
 	}
@@ -210,13 +210,13 @@ func createSmallTestGraph() *model.Graph {
 	offerNode4.SetEdges([]*model.Edge{minimalEdge(requestNode3)})
 	offerNode5.SetEdges([]*model.Edge{minimalEdge(requestNode3), minimalEdge(requestNode4)})
 	offerNode6.SetEdges([]*model.Edge{minimalEdge(requestNode6)})
-	g.AddEdge(offer1, request2, offerNode1.Edges()[0])
-	g.AddEdge(offer1, request3, offerNode1.Edges()[1])
-	g.AddEdge(offer3, request1, offerNode3.Edges()[0])
-	g.AddEdge(offer4, request3, offerNode4.Edges()[0])
-	g.AddEdge(offer5, request3, offerNode5.Edges()[0])
-	g.AddEdge(offer5, request4, offerNode5.Edges()[1])
-	g.AddEdge(offer6, request6, offerNode6.Edges()[0])
+	g.AddEdge(offerNode1, requestNode2, offerNode1.Edges()[0])
+	g.AddEdge(offerNode1, requestNode3, offerNode1.Edges()[1])
+	g.AddEdge(offerNode3, requestNode1, offerNode3.Edges()[0])
+	g.AddEdge(offerNode4, requestNode3, offerNode4.Edges()[0])
+	g.AddEdge(offerNode5, requestNode3, offerNode5.Edges()[0])
+	g.AddEdge(offerNode5, requestNode4, offerNode5.Edges()[1])
+	g.AddEdge(offerNode6, requestNode6, offerNode6.Edges()[0])
 	return g
 }
 
@@ -230,14 +230,13 @@ func TestHopcroftKarp_FindMaximumMatching_SmallCase(t *testing.T) {
 	if got == nil {
 		t.Fatalf("HopcroftKarp.FindMaximumMatching() got nil result")
 	}
-	if got.Size() != 5 {
-		t.Errorf("HopcroftKarp.FindMaximumMatching() got size = %v, want 5", got.Size())
+	if len(got) != 5 {
+		t.Errorf("HopcroftKarp.FindMaximumMatching() got size = %v, want 5", len(got))
 	}
-	got.Range(func(offerNode *model.OfferNode, edge *model.Edge) bool {
-		requestID := edge.RequestNode().Request().ID()
-		t.Logf("Offer %s matched with request %s", offerNode.Offer().ID(), requestID)
-		return true
-	})
+	for _, pair := range got {
+		requestID := pair.Second.RequestNode().Request().ID()
+		t.Logf("Offer %s matched with request %s", pair.First.Offer().ID(), requestID)
+	}
 }
 
 func TestHopcroftKarp_FindMaximumMatching_EdgeCases(t *testing.T) {
@@ -305,8 +304,8 @@ func TestHopcroftKarp_FindMaximumMatching_EdgeCases(t *testing.T) {
 				}
 				return
 			}
-			if got.Size() != tt.wantSize {
-				t.Errorf("HopcroftKarp.FindMaximumMatching() got size = %v, want %v", got.Size(), tt.wantSize)
+			if len(got) != tt.wantSize {
+				t.Errorf("HopcroftKarp.FindMaximumMatching() got size = %v, want %v", len(got), tt.wantSize)
 			}
 		})
 	}
@@ -358,7 +357,7 @@ func TestHopcroftKarp_LargeCase(t *testing.T) {
 			for j := 0; j < nRequests; j++ {
 				edge := minimalEdge(requestNodes[j])
 				edges[j] = edge
-				g.AddEdge(offerNodes[i].Offer(), requestNodes[j].Request(), edge)
+				g.AddEdge(offerNodes[i], requestNodes[j], edge)
 			}
 			offerNodes[i].SetEdges(edges)
 		}
@@ -404,24 +403,23 @@ func TestHopcroftKarp_LargeCase(t *testing.T) {
 		fmt.Printf("- Total offers: %d\n", nOffers)
 		fmt.Printf("- Total requests: %d\n", nRequests)
 		fmt.Printf("- Total possible matches: %d\n", totalPossibleMatches)
-		fmt.Printf("- Actual matches found: %d\n", result.Size())
+		fmt.Printf("- Actual matches found: %d\n", len(result))
 		fmt.Printf("- Time taken: %v\n", elapsed)
 
 		// Verify that the matching is valid
 		matchedRequests := make(map[string]bool)
-		result.Range(func(offerNode *model.OfferNode, edge *model.Edge) bool {
-			requestID := edge.RequestNode().Request().ID()
+		for _, pair := range result {
+			requestID := pair.Second.RequestNode().Request().ID()
 			if matchedRequests[requestID] {
 				t.Errorf("Request %s is matched multiple times", requestID)
 			}
 			matchedRequests[requestID] = true
-			return true
-		})
+		}
 
 		// Verify that we got the maximum possible matching
 		expectedMatches := nOffers // Since nOffers = nRequests
-		if result.Size() != expectedMatches {
-			t.Errorf("Expected %d matches (maximum possible), got %d", expectedMatches, result.Size())
+		if len(result) != expectedMatches {
+			t.Errorf("Expected %d matches (maximum possible), got %d", expectedMatches, len(result))
 		}
 
 		// Force garbage collection and get final memory stats
@@ -429,7 +427,7 @@ func TestHopcroftKarp_LargeCase(t *testing.T) {
 		runtime.ReadMemStats(&m)
 		fmt.Printf("\nRun %d Memory after GC: %.2f MB\n", run+1, float64(m.HeapAlloc)/1024/1024)
 
-		totalMatches += result.Size()
+		totalMatches += len(result)
 		totalTime += elapsed
 	}
 
