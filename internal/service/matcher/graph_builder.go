@@ -23,20 +23,23 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.Graph, potentialRequests
 				continue
 			}
 
-			newPath, isFeasible, err := matcher.pathPlanner.FindFirstFeasiblePath(offerNode, requestNode)
+			path, valid, err := matcher.matchEvaluator.Evaluate(offerNode, requestNode)
+
 			if err != nil {
-				return fmt.Errorf("failed to find feasible path for offer %s and request %s: %w", offerID, requestID, err)
+				return fmt.Errorf("error evaluating the match %v", err)
 			}
 
-			if isFeasible && newPath != nil {
-				hasNewEdge = true
-				edge := model.NewEdge(requestNode, newPath)
-				offerNode.AddEdge(edge)
-				graph.AddOfferNode(offerNode)
-				potentialRequests.Set(requestID, requestNode)
-			} else {
+			if !valid {
 				requestSet.Remove(requestID)
+				continue
 			}
+
+			hasNewEdge = true
+			edge := model.NewEdge(requestNode, path)
+			offerNode.AddEdge(edge)
+			graph.AddOfferNode(offerNode)
+			potentialRequests.Set(requestID, requestNode)
+
 		}
 		return nil
 	})

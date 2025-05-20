@@ -3,14 +3,14 @@ package tests
 import (
 	"matching-engine/internal/enums"
 	"matching-engine/internal/model"
-	"matching-engine/internal/service/earlypruning/prechecker"
+	"matching-engine/internal/service/checker"
 	"testing"
 	"time"
 )
 
 func TestCapacityChecker_Check(t *testing.T) {
 	// Create a new CapacityChecker
-	checker := prechecker.NewCapacityChecker()
+	checker := checker.NewCapacityChecker()
 
 	// Define test cases
 	tests := []struct {

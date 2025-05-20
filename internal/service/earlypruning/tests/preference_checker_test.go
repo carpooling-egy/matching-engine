@@ -3,14 +3,14 @@ package tests
 import (
 	"matching-engine/internal/enums"
 	"matching-engine/internal/model"
-	"matching-engine/internal/service/earlypruning/prechecker"
+	"matching-engine/internal/service/checker"
 	"testing"
 	"time"
 )
 
 func TestPreferenceChecker_Check(t *testing.T) {
 	// Create a new PreferenceChecker
-	checker := prechecker.NewPreferenceChecker()
+	checker := checker.NewPreferenceChecker()
 
 	// Define test cases
 	tests := []struct {

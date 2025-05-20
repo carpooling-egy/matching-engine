@@ -3,7 +3,7 @@ package tests
 import (
 	"fmt"
 	"matching-engine/internal/model"
-	"matching-engine/internal/service/earlypruning/prechecker"
+	"matching-engine/internal/service/checker"
 	"testing"
 )
 
@@ -28,13 +28,13 @@ func TestCompositeChecker_Check(t *testing.T) {
 	// Define test cases
 	tests := []struct {
 		name        string
-		checkers    []prechecker.Checker
+		checkers    []checker.Checker
 		expected    bool
 		expectError bool
 	}{
 		{
 			name: "All checkers return true",
-			checkers: []prechecker.Checker{
+			checkers: []checker.Checker{
 				NewMockChecker(true, nil),
 				NewMockChecker(true, nil),
 				NewMockChecker(true, nil),
@@ -44,7 +44,7 @@ func TestCompositeChecker_Check(t *testing.T) {
 		},
 		{
 			name: "One checker returns false",
-			checkers: []prechecker.Checker{
+			checkers: []checker.Checker{
 				NewMockChecker(true, nil),
 				NewMockChecker(false, nil),
 				NewMockChecker(true, nil),
@@ -54,7 +54,7 @@ func TestCompositeChecker_Check(t *testing.T) {
 		},
 		{
 			name: "One checker returns error",
-			checkers: []prechecker.Checker{
+			checkers: []checker.Checker{
 				NewMockChecker(true, nil),
 				NewMockChecker(true, fmt.Errorf("test error")),
 				NewMockChecker(true, nil),
@@ -64,7 +64,7 @@ func TestCompositeChecker_Check(t *testing.T) {
 		},
 		{
 			name:        "Empty list of checkers",
-			checkers:    []prechecker.Checker{},
+			checkers:    []checker.Checker{},
 			expected:    true,
 			expectError: false,
 		},
@@ -74,7 +74,7 @@ func TestCompositeChecker_Check(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create a composite checker with the test checkers
-			checker := prechecker.NewCompositePreChecker(tc.checkers...)
+			checker := checker.NewCompositePreChecker(tc.checkers...)
 
 			// Run the check with nil offer and request (not used by mock checkers)
 			result, err := checker.Check(nil, nil)
