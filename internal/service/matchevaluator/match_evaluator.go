@@ -19,21 +19,27 @@ func NewMatchEvaluator(pathPlanner planner.PathPlanner, preferenceChecker checke
 	}
 }
 
-func (m *MatchEvaluator) Evaluate(offerNode *model.OfferNode, requestNode *model.RequestNode) ([]model.PathPoint, error) {
+func (m *MatchEvaluator) Evaluate(offerNode *model.OfferNode, requestNode *model.RequestNode) ([]model.PathPoint, bool, error) {
 
 	offer := offerNode.Offer()
 	request := requestNode.Request()
 
 	preferenceChecker := checker.NewPreferenceChecker()
 	valid, err := preferenceChecker.Check(offerNode.Offer(), requestNode.Request())
-	if err != nil || !valid {
-		return nil, fmt.Errorf("preference check failed for offer %s and request %s: %w", offer.ID(), request.ID(), err)
+	if err != nil {
+		return nil, false, fmt.Errorf("preference check failed for offer %s and request %s: %w", offer.ID(), request.ID(), err)
+	}
+	if !valid {
+		return nil, false, nil
 	}
 
 	path, isFeasible, err := m.pathPlanner.FindFirstFeasiblePath(offerNode, requestNode)
-	if err != nil || !isFeasible || len(path) < 2 || path == nil {
-		return nil, fmt.Errorf("failed to find feasible path for offer %s and request %s: %w", offer.ID(), request.ID(), err)
+	if err != nil || len(path) < 2 || path == nil {
+		return nil, false, fmt.Errorf("failed to find feasible path for offer %s and request %s: %w", offer.ID(), request.ID(), err)
+	}
+	if !isFeasible {
+		return nil, false, nil
 	}
 
-	return path, nil
+	return path, true, nil
 }

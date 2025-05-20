@@ -12,5 +12,5 @@ type Evaluator interface {
 	Evaluate(
 		offerNode *model.OfferNode,
 		requestNode *model.RequestNode,
-	) ([]model.PathPoint, error)
+	) ([]model.PathPoint, bool, error)
 }

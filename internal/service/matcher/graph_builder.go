@@ -1,6 +1,7 @@
 package matcher
 
 import (
+	"fmt"
 	"matching-engine/internal/collections"
 	"matching-engine/internal/model"
 )
@@ -22,9 +23,13 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.Graph, potentialRequests
 				continue
 			}
 
-			path, err := matcher.matchEvaluator.Evaluate(offerNode, requestNode)
+			path, valid, err := matcher.matchEvaluator.Evaluate(offerNode, requestNode)
 
 			if err != nil {
+				return fmt.Errorf("error evaluating the match %v", err)
+			}
+
+			if !valid {
 				requestSet.Remove(requestID)
 				continue
 			}
