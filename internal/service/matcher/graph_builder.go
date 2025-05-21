@@ -7,7 +7,7 @@ import (
 )
 
 // buildMatchingGraph constructs the graph by finding feasible paths and connecting offers with requests.
-func (matcher *Matcher) buildMatchingGraph(graph *model.Graph, potentialRequests *collections.SyncMap[string, *model.RequestNode]) (bool, error) {
+func (matcher *Matcher) buildMatchingGraph(graph *model.Graph) (bool, error) {
 	hasNewEdge := false
 	err := matcher.potentialOfferRequests.Range(func(offerID string, requestSet *collections.Set[string]) error {
 		offerNode, exists := matcher.availableOffers.Get(offerID)
@@ -36,9 +36,9 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.Graph, potentialRequests
 
 			hasNewEdge = true
 			edge := model.NewEdge(requestNode, path)
-			offerNode.AddEdge(edge)
 			graph.AddOfferNode(offerNode)
-			potentialRequests.Set(requestID, requestNode)
+			graph.AddRequestNode(requestNode)
+			graph.AddEdge(offerNode, requestNode, edge)
 
 		}
 		return nil

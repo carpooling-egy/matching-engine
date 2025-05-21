@@ -56,8 +56,7 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 
 	for matcher.availableOffers.Size() > 0 && matcher.availableRequests.Size() > 0 {
 		// Build Matching Graph
-		potentialRequests := collections.NewSyncMap[string, *model.RequestNode]()
-		hasNewEdge, err := matcher.buildMatchingGraph(graph, potentialRequests)
+		hasNewEdge, err := matcher.buildMatchingGraph(graph)
 		if err != nil {
 			return nil, fmt.Errorf("failed to build matching graph: %w", err)
 		}
@@ -66,11 +65,15 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 			log.Info().Msg("No new edges found, stopping matching process")
 			break
 		}
-		// Update the graph with potential requests
-		matcher.availableRequests = potentialRequests
 
 		// Process unmatched offers
 		matcher.processUnmatchedOffers(graph)
+
+		// Update the graph with potential requests
+		matcher.availableRequests = graph.RequestNodes()
+
+		// Update the graph with potential requests
+		matcher.availableRequests = graph.RequestNodes()
 
 		// Find Maximum Matching
 		if err = matcher.processMaximumMatching(graph, matcher.limit); err != nil {

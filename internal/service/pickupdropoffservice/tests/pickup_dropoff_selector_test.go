@@ -203,7 +203,7 @@ func TestPickupDropoffSelector_GetPickupDropoffPointsAndDurations(t *testing.T) 
 		t.Run(tc.name, func(t *testing.T) {
 			// Pre-populate cache if needed
 			if tc.prePopulateCache {
-				cacheKey := pickupdropoffcache.NewKey(tc.offer.ID(), tc.request.ID())
+				cacheKey := model.NewOfferRequestKey(tc.offer.ID(), tc.request.ID())
 				tc.expectedPickup.SetWalkingDuration(tc.expectedPickupWalking)
 				tc.expectedDropoff.SetWalkingDuration(tc.expectedDropoffWalking)
 				cacheValue := pickupdropoffcache.NewValue(tc.expectedPickup, tc.expectedDropoff)
