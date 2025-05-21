@@ -6,8 +6,10 @@ import (
 	"matching-engine/internal/service/checker"
 )
 
-// registerCheckers registers checking services
-func registerCheckers(c *dig.Container) {
+// The fn is exported to be call them from tests, until we build a cleaner approach
+
+// RegisterCheckers registers checking services
+func RegisterCheckers(c *dig.Container) {
 	must(c.Provide(checker.NewCapacityChecker, dig.Name("capacity_checker")))
 	must(c.Provide(checker.NewOverlapChecker, dig.Name("overlap_checker")))
 	must(c.Provide(checker.NewDetourTimeChecker, dig.Name("detour_checker")))

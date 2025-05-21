@@ -7,8 +7,10 @@ import (
 	"matching-engine/internal/service/pickupdropoffservice/pickupdropoffcache"
 )
 
-// registerPickupDropoffServices registers pickup/dropoff services
-func registerPickupDropoffServices(c *dig.Container) {
+// The fn is exported to be call them from tests, until we build a cleaner approach
+
+// RegisterPickupDropoffServices registers pickup/dropoff services
+func RegisterPickupDropoffServices(c *dig.Container) {
 	must(c.Provide(pickupdropoffservice.NewWalkingTimeCalculator))
 	must(c.Provide(pickupdropoffservice.NewIntersectionBasedGenerator))
 	must(c.Provide(pickupdropoffcache.NewPickupDropoffCache))

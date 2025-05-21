@@ -11,8 +11,10 @@ import (
 	"matching-engine/internal/service/pathgeneration/planner"
 )
 
-// registerMatchingServices registers matching algorithm services
-func registerMatchingServices(c *dig.Container) {
+// The fn is exported to be call them from tests, until we build a cleaner approach
+
+// RegisterMatchingServices registers matching algorithm services
+func RegisterMatchingServices(c *dig.Container) {
 	must(c.Provide(provideMatchEvaluator))
 	must(c.Provide(earlypruning.NewPreChecksCandidateGenerator))
 	must(c.Provide(maximummatching.NewHopcroftKarp))

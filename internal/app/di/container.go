@@ -10,17 +10,19 @@ func BuildContainer() *dig.Container {
 	c := dig.New()
 
 	// Register modules by groups
+	// Some of the functions are exported to call them from tests, until we build a cleaner approach
 	registerAdapters(c)
-	registerGeoServices(c)
-	registerPickupDropoffServices(c)
-	registerTimeMatrixServices(c)
-	registerPathServices(c)
-	registerCheckers(c)
-	registerMatchingServices(c)
-	registerDatabaseServices(c)
+	RegisterGeoServices(c)
+	RegisterPickupDropoffServices(c)
+	RegisterTimeMatrixServices(c)
+	RegisterPathServices(c)
+	RegisterCheckers(c)
+	RegisterMatchingServices(c)
+	registerDatabase(c)
+	RegisterDatabaseRepositoriesAndServices(c)
 
 	// Register starter service
-	registerStarterService(c)
+	RegisterStarterService(c)
 
 	return c
 }

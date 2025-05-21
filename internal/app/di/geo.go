@@ -8,8 +8,10 @@ import (
 	"matching-engine/internal/geo/pruning"
 )
 
-// registerGeoServices registers geo-related services
-func registerGeoServices(c *dig.Container) {
+// The fn is exported to be call them from tests, until we build a cleaner approach
+
+// RegisterGeoServices registers geo-related services
+func RegisterGeoServices(c *dig.Container) {
 	must(c.Provide(pruning.NewRTreePrunerFactory))
 	must(c.Provide(downsampling.NewRDPDownSampler))
 	must(c.Provide(processor.NewProcessorFactory))

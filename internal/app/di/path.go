@@ -8,8 +8,10 @@ import (
 	"matching-engine/internal/service/pathgeneration/validator"
 )
 
-// registerPathServices registers path generation services
-func registerPathServices(c *dig.Container) {
+// The fn is exported to be call them from tests, until we build a cleaner approach
+
+// RegisterPathServices registers path generation services
+func RegisterPathServices(c *dig.Container) {
 	must(c.Provide(generator.NewInsertionPathGenerator))
 	must(c.Provide(validator.NewDefaultPathValidator))
 	must(c.Provide(planner.NewDefaultPathPlanner))
