@@ -1,9 +1,11 @@
 package pruning
+
 import (
-	"math"
-	"matching-engine/internal/model"
 	"github.com/dhconnelly/rtreego"
+	"matching-engine/internal/model"
+	"math"
 )
+
 type Segment struct {
 	A, B model.Coordinate
 	rect rtreego.Rect
@@ -24,5 +26,5 @@ func NewSegment(a, b model.Coordinate) *Segment {
 	)
 
 	return &Segment{A: a, B: b, rect: rect}
-	
+
 }
