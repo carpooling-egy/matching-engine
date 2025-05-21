@@ -36,7 +36,6 @@ func (hk *HopcroftKarp) FindMaximumMatching(
 
 	offers, requests, requestIndex := initialize(graph)
 	offerCount, requestCount := len(offers), len(requests)
-	println(offerCount, requestCount)
 	if offerCount == 0 || requestCount == 0 {
 		return []collections.Tuple2[*model.OfferNode, *model.Edge]{}, nil
 	}
@@ -45,8 +44,6 @@ func (hk *HopcroftKarp) FindMaximumMatching(
 	hk.preAllocate(offerCount, requestCount)
 
 	adj := buildAdjacencyList(offers, requestIndex, offerCount)
-
-	fmt.Println(adj)
 
 	matchingCount := 0
 
@@ -155,7 +152,7 @@ func (hk *HopcroftKarp) findAugmentingPath(offer int, adj [][]int) bool {
 }
 
 func buildMatchingResult(graph *model.Graph, offers []*model.OfferNode, requests []*model.RequestNode, offerMatches []int) ([]collections.Tuple2[*model.OfferNode, *model.Edge], error) {
-	result := make([]collections.Tuple2[*model.OfferNode, *model.Edge], len(offerMatches)-1)
+	var result []collections.Tuple2[*model.OfferNode, *model.Edge]
 	for offerIndex, requestIndex := range offerMatches {
 		if offerIndex > 0 && requestIndex > 0 {
 			offer := offers[offerIndex-1]
@@ -164,7 +161,7 @@ func buildMatchingResult(graph *model.Graph, offers []*model.OfferNode, requests
 			if !exists || chosen == nil {
 				return nil, fmt.Errorf("edge not found for match Offer[%d] -> Request[%d]", offerIndex-1, requestIndex-1)
 			}
-			result[offerIndex-1] = collections.NewTuple2(offer, chosen)
+			result = append(result, collections.NewTuple2(offer, chosen))
 		}
 	}
 	return result, nil
