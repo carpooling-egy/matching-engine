@@ -26,7 +26,7 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.Graph) (bool, error) {
 			}
 		}
 
-		err := matcher.timeMatrixCachePopulator.Populate(offerNode, requestNodes, false)
+		err := matcher.timeMatrixCachePopulator.Populate(offerNode, requestNodes)
 		if err != nil {
 			return err
 		}
