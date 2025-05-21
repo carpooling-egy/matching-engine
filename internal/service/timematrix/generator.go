@@ -8,5 +8,5 @@ import (
 // Generator generates travel time matrices between points
 type Generator interface {
 	// Generate creates a time matrix for an offer and its potential requests in the system
-	Generate(offer *model.OfferNode) (*cache.PathPointMappedTimeMatrix, error)
+	Generate(offer *model.OfferNode, requestNodes []*model.RequestNode) (*cache.PathPointMappedTimeMatrix, error)
 }

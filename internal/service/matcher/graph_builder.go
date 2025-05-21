@@ -16,12 +16,22 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.Graph) (bool, error) {
 			return nil
 		}
 
-		for _, requestID := range requestSet.ToSlice() {
-			requestNode, exists := matcher.availableRequests.Get(requestID)
-			if !exists || requestNode == nil {
+		requestNodes := make([]*model.RequestNode, 0, requestSet.Size())
+		requestSetSlice := requestSet.ToSlice()
+		for _, requestID := range requestSetSlice {
+			if requestNode, ok := matcher.availableRequests.Get(requestID); ok && requestNode != nil {
+				requestNodes = append(requestNodes, requestNode)
+			} else {
 				requestSet.Remove(requestID)
-				continue
 			}
+		}
+
+		err := matcher.timeMatrixCachePopulator.Populate(offerNode, requestNodes)
+		if err != nil {
+			return err
+		}
+
+		for _, requestNode := range requestNodes {
 
 			path, valid, err := matcher.matchEvaluator.Evaluate(offerNode, requestNode)
 
@@ -30,7 +40,7 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.Graph) (bool, error) {
 			}
 
 			if !valid {
-				requestSet.Remove(requestID)
+				requestSet.Remove(requestNode.Request().ID())
 				continue
 			}
 
