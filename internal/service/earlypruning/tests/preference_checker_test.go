@@ -51,7 +51,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				model.Coordinate{}, model.Coordinate{},
 				time.Now(), 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, true), // same gender only
+				*model.NewPreference(enums.Male, true),
 				time.Now().Add(1*time.Hour),
 				0,
 				nil,
@@ -87,7 +87,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				time.Now(), time.Now().Add(1*time.Hour),
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, true), // same gender only
+				*model.NewPreference(enums.Female, true),
 			),
 			expected:    false,
 			expectError: false,
@@ -102,7 +102,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 					time.Now(), time.Now().Add(1*time.Hour),
 					10*time.Minute,
 					1,
-					*model.NewPreference(enums.Male, false), // allows smoking
+					*model.NewPreference(enums.Male, false),
 				)
 
 				offer := model.NewOffer(
