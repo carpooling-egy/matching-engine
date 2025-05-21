@@ -16,12 +16,23 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.Graph) (bool, error) {
 			return nil
 		}
 
-		for _, requestID := range requestSet.ToSlice() {
-			requestNode, exists := matcher.availableRequests.Get(requestID)
-			if !exists || requestNode == nil {
+		var requestNodes []*model.RequestNode
+		requestSetSlice := requestSet.ToSlice()
+		for _, requestID := range requestSetSlice {
+			if requestNode, ok := matcher.availableRequests.Get(requestID); ok && requestNode != nil {
+				requestNodes = append(requestNodes, requestNode)
+			} else {
 				requestSet.Remove(requestID)
-				continue
 			}
+		}
+
+		err := matcher.timeMatrixCachePopulator.Populate(offerNode, requestNodes, false)
+		if err != nil {
+			return err
+		}
+
+		for _, requestID := range requestSetSlice {
+			requestNode, _ := matcher.availableRequests.Get(requestID)
 
 			path, valid, err := matcher.matchEvaluator.Evaluate(offerNode, requestNode)
 

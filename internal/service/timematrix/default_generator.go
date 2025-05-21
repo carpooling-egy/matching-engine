@@ -3,37 +3,30 @@ package timematrix
 import (
 	"fmt"
 	"matching-engine/internal/adapter/routing"
-	"matching-engine/internal/collections"
 	"matching-engine/internal/model"
 	"matching-engine/internal/service/pickupdropoffservice"
 	"matching-engine/internal/service/timematrix/cache"
 )
 
 type DefaultGenerator struct {
-	engine                 routing.Engine
-	pickupDropoffSelector  pickupdropoffservice.PickupDropoffSelectorInterface
-	potentialOfferRequests *collections.SyncMap[string, *collections.Set[string]]
-	availableRequests      *collections.SyncMap[string, *model.RequestNode]
+	engine                routing.Engine
+	pickupDropoffSelector pickupdropoffservice.PickupDropoffSelectorInterface
 }
 
-func NewDefaultGenerator(engine routing.Engine, pickupDropoffSelector pickupdropoffservice.PickupDropoffSelectorInterface, potentialOfferRequests *collections.SyncMap[string, *collections.Set[string]], availableRequests *collections.SyncMap[string, *model.RequestNode]) *DefaultGenerator {
+func NewDefaultGenerator(engine routing.Engine, pickupDropoffSelector pickupdropoffservice.PickupDropoffSelectorInterface) *DefaultGenerator {
 	return &DefaultGenerator{
-		engine:                 engine,
-		pickupDropoffSelector:  pickupDropoffSelector,
-		potentialOfferRequests: potentialOfferRequests,
-		availableRequests:      availableRequests,
+		engine:                engine,
+		pickupDropoffSelector: pickupDropoffSelector,
 	}
 }
-func (ds *DefaultGenerator) Generate(offerNode *model.OfferNode) (*cache.PathPointMappedTimeMatrix, error) {
+func (ds *DefaultGenerator) Generate(offerNode *model.OfferNode, requestNodes []*model.RequestNode) (*cache.PathPointMappedTimeMatrix, error) {
+	if requestNodes == nil || len(requestNodes) == 0 {
+		return nil, fmt.Errorf("requestNodes cannot be nil or empty")
+	}
+
 	pointToIdMap := make(map[model.PathPointID]int)
 
 	var matrixPoints []model.Coordinate
-
-	requests, exists := ds.potentialOfferRequests.Get(offerNode.Offer().ID())
-
-	if !exists {
-		return nil, fmt.Errorf("offer %s has no potential requests", offerNode.Offer().ID())
-	}
 
 	for _, point := range offerNode.Offer().PathPoints() {
 		matrixPoints = append(matrixPoints, *point.Coordinate())
@@ -41,13 +34,7 @@ func (ds *DefaultGenerator) Generate(offerNode *model.OfferNode) (*cache.PathPoi
 	}
 
 	// Add request pickup and dropoff points
-	// ToSlice is used instead of ForEach to ensure we can early break out of the loop if needed
-	for _, request := range requests.ToSlice() {
-		requestNode, exists := ds.availableRequests.Get(request)
-		if !exists {
-			requests.Remove(request)
-			continue
-		}
+	for _, requestNode := range requestNodes {
 		pickupDropoff, err := ds.pickupDropoffSelector.GetPickupDropoffPointsAndDurations(requestNode.Request(), offerNode.Offer())
 		if err != nil {
 			// TODO: check if error is related to API calls before returning an error from the generator

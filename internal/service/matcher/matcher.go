@@ -9,6 +9,7 @@ import (
 	"matching-engine/internal/service/earlypruning"
 	"matching-engine/internal/service/matchevaluator"
 	"matching-engine/internal/service/maximummatching"
+	"matching-engine/internal/service/timematrix"
 )
 
 const (
@@ -17,27 +18,29 @@ const (
 )
 
 type Matcher struct {
-	availableOffers        *collections.SyncMap[string, *model.OfferNode]
-	availableRequests      *collections.SyncMap[string, *model.RequestNode]
-	potentialOfferRequests *collections.SyncMap[string, *collections.Set[string]]
-	results                []model.MatchingResult
-	matchEvaluator         matchevaluator.Evaluator
-	candidateGenerator     earlypruning.CandidateGenerator
-	maximumMatching        maximummatching.MaximumMatching
-	limit                  int
+	availableOffers          *collections.SyncMap[string, *model.OfferNode]
+	availableRequests        *collections.SyncMap[string, *model.RequestNode]
+	potentialOfferRequests   *collections.SyncMap[string, *collections.Set[string]]
+	results                  []model.MatchingResult
+	matchEvaluator           matchevaluator.Evaluator
+	candidateGenerator       earlypruning.CandidateGenerator
+	maximumMatching          maximummatching.MaximumMatching
+	timeMatrixCachePopulator timematrix.Populator
+	limit                    int
 }
 
 // NewMatcher creates and initializes a new Matcher instance.
-func NewMatcher(evaluator matchevaluator.Evaluator, generator earlypruning.CandidateGenerator, matching maximummatching.MaximumMatching) *Matcher {
+func NewMatcher(evaluator matchevaluator.Evaluator, generator earlypruning.CandidateGenerator, matching maximummatching.MaximumMatching, cachePopulator timematrix.Populator) *Matcher {
 	return &Matcher{
-		availableOffers:        collections.NewSyncMap[string, *model.OfferNode](),
-		availableRequests:      collections.NewSyncMap[string, *model.RequestNode](),
-		potentialOfferRequests: collections.NewSyncMap[string, *collections.Set[string]](),
-		results:                make([]model.MatchingResult, 0),
-		matchEvaluator:         evaluator,
-		candidateGenerator:     generator,
-		maximumMatching:        matching,
-		limit:                  DefaultLimit,
+		availableOffers:          collections.NewSyncMap[string, *model.OfferNode](),
+		availableRequests:        collections.NewSyncMap[string, *model.RequestNode](),
+		potentialOfferRequests:   collections.NewSyncMap[string, *collections.Set[string]](),
+		results:                  make([]model.MatchingResult, 0),
+		matchEvaluator:           evaluator,
+		candidateGenerator:       generator,
+		maximumMatching:          matching,
+		limit:                    DefaultLimit,
+		timeMatrixCachePopulator: cachePopulator,
 	}
 }
 
