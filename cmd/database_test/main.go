@@ -50,9 +50,8 @@ func testRiderRequestRepo(ctx context.Context, repo repository.RiderRequestRepo)
 		fmt.Printf("  walking: %v\n", rider.MaxWalkingDurationMinutes())
 		fmt.Print("  Preferences: ")
 		fmt.Printf("gender %s\n", rider.Preferences().Gender().String())
-		fmt.Printf("  %v\n", rider.Preferences().AllowsPets())
 		fmt.Printf("  %v\n", rider.Preferences().SameGender())
-		fmt.Printf("  %v\n", rider.Preferences().AllowsSmoking())
+	
 
 		fmt.Printf("  Latest Arrival: %v\n", rider.LatestArrivalTime())
 		fmt.Printf("  Number of Riders: %d\n", rider.NumberOfRiders())
@@ -126,8 +125,6 @@ func printOfferDetails(driver *model.Offer) {
 	pref := driver.Preferences()
 	fmt.Println("\n--- Preferences ---")
 	fmt.Printf("Same Gender: %t\n", pref.SameGender())
-	fmt.Printf("Allows Smoking: %t\n", pref.AllowsSmoking())
-	fmt.Printf("Allows Pets: %t\n", pref.AllowsPets())
 	fmt.Printf("Gender: %v\n", pref.Gender())
 
 	// Path points
