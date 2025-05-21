@@ -3,7 +3,7 @@ package validator
 import (
 	"fmt"
 	"time"
-	
+
 	"matching-engine/internal/model"
 )
 
@@ -12,7 +12,7 @@ func (validator *DefaultPathValidator) calculateDetourInfo(
 	offerNode *model.OfferNode,
 	path []model.PathPoint,
 	cumulativeDurations []time.Duration,
-) (bool, time.Duration, error) {
+) (bool, error) {
 	offer := offerNode.Offer()
 
 	totalTripDuration := cumulativeDurations[len(cumulativeDurations)-1]
@@ -22,7 +22,6 @@ func (validator *DefaultPathValidator) calculateDetourInfo(
 
 	if err != nil {
 		return false,
-			0,
 			fmt.Errorf("failed to calculate direct trip duration: %w", err)
 	}
 
@@ -30,6 +29,5 @@ func (validator *DefaultPathValidator) calculateDetourInfo(
 	isWithinDetourLimit := tripDetour <= offer.DetourDurationMinutes()
 
 	return isWithinDetourLimit,
-		offer.DetourDurationMinutes() - tripDetour,
 		nil
 }

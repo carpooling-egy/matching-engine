@@ -12,7 +12,6 @@ func (validator *DefaultPathValidator) validateCapacityAndTiming(
 	offer *model.Offer,
 	path []model.PathPoint,
 	cumulativeDurations []time.Duration,
-	availableExtraDetour *time.Duration,
 ) (bool, error) {
 	currentCapacity := 0
 	extraAccumulatedDuration := time.Duration(0)

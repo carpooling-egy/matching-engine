@@ -39,7 +39,7 @@ func (validator *DefaultPathValidator) ValidatePath(
 	}
 
 	// Check if path satisfies detour constraints
-	isWithinDetourLimit, availableExtraDetour, err := validator.calculateDetourInfo(offerNode, path, cumulativeDurations)
+	isWithinDetourLimit, err := validator.calculateDetourInfo(offerNode, path, cumulativeDurations)
 	if err != nil {
 		return false, err
 	}
@@ -51,5 +51,5 @@ func (validator *DefaultPathValidator) ValidatePath(
 	// Check capacity and timing constraints
 	// NOTE: THIS FUNCTION MODIFIES THE PATH POINTS TO SET EXPECTED ARRIVAL TIMES
 	// AND UPDATES THE AVAILABLE EXTRA DETOUR.
-	return validator.validateCapacityAndTiming(offer, path, cumulativeDurations, &availableExtraDetour)
+	return validator.validateCapacityAndTiming(offer, path, cumulativeDurations)
 }
