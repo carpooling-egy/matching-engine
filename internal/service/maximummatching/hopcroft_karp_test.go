@@ -68,10 +68,9 @@ func TestHopcroftKarp_FindMaximumMatching(t *testing.T) {
 				request := minimalRequest("request1")
 				offerNode := model.NewOfferNode(offer)
 				requestNode := model.NewRequestNode(request)
-				offerNode.SetEdges([]*model.Edge{minimalEdge(requestNode)})
 				g.AddOfferNode(offerNode)
 				g.AddRequestNode(requestNode)
-				g.AddEdge(offerNode, requestNode, offerNode.Edges()[0])
+				g.AddEdge(offerNode, requestNode, minimalEdge(requestNode))
 				return g
 			}(),
 			wantSize: 1,
@@ -104,16 +103,14 @@ func TestHopcroftKarp_FindMaximumMatching(t *testing.T) {
 				offerNode2 := model.NewOfferNode(offer2)
 				requestNode1 := model.NewRequestNode(request1)
 				requestNode2 := model.NewRequestNode(request2)
-				offerNode1.SetEdges([]*model.Edge{minimalEdge(requestNode1), minimalEdge(requestNode2)})
-				offerNode2.SetEdges([]*model.Edge{minimalEdge(requestNode1), minimalEdge(requestNode2)})
 				g.AddOfferNode(offerNode1)
 				g.AddOfferNode(offerNode2)
 				g.AddRequestNode(requestNode1)
 				g.AddRequestNode(requestNode2)
-				g.AddEdge(offerNode1, requestNode1, offerNode1.Edges()[0])
-				g.AddEdge(offerNode1, requestNode2, offerNode1.Edges()[1])
-				g.AddEdge(offerNode2, requestNode1, offerNode2.Edges()[0])
-				g.AddEdge(offerNode2, requestNode2, offerNode2.Edges()[1])
+				g.AddEdge(offerNode1, requestNode1, minimalEdge(requestNode1))
+				g.AddEdge(offerNode1, requestNode2, minimalEdge(requestNode2))
+				g.AddEdge(offerNode2, requestNode1, minimalEdge(requestNode1))
+				g.AddEdge(offerNode2, requestNode2, minimalEdge(requestNode2))
 				return g
 			}(),
 			wantSize: 2,
@@ -131,14 +128,12 @@ func TestHopcroftKarp_FindMaximumMatching(t *testing.T) {
 				offerNode2 := model.NewOfferNode(offer2)
 				requestNode1 := model.NewRequestNode(request1)
 				requestNode2 := model.NewRequestNode(request2)
-				offerNode1.SetEdges([]*model.Edge{minimalEdge(requestNode1)})
-				offerNode2.SetEdges([]*model.Edge{minimalEdge(requestNode2)})
 				g.AddOfferNode(offerNode1)
 				g.AddOfferNode(offerNode2)
 				g.AddRequestNode(requestNode1)
 				g.AddRequestNode(requestNode2)
-				g.AddEdge(offerNode1, requestNode1, offerNode1.Edges()[0])
-				g.AddEdge(offerNode2, requestNode2, offerNode2.Edges()[0])
+				g.AddEdge(offerNode1, requestNode1, minimalEdge(requestNode1))
+				g.AddEdge(offerNode2, requestNode2, minimalEdge(requestNode2))
 				return g
 			}(),
 			wantSize: 2,
@@ -205,18 +200,13 @@ func createSmallTestGraph() *model.Graph {
 	g.AddRequestNode(requestNode4)
 	g.AddRequestNode(requestNode5)
 	g.AddRequestNode(requestNode6)
-	offerNode1.SetEdges([]*model.Edge{minimalEdge(requestNode2), minimalEdge(requestNode3)})
-	offerNode3.SetEdges([]*model.Edge{minimalEdge(requestNode1), minimalEdge(requestNode4)})
-	offerNode4.SetEdges([]*model.Edge{minimalEdge(requestNode3)})
-	offerNode5.SetEdges([]*model.Edge{minimalEdge(requestNode3), minimalEdge(requestNode4)})
-	offerNode6.SetEdges([]*model.Edge{minimalEdge(requestNode6)})
-	g.AddEdge(offerNode1, requestNode2, offerNode1.Edges()[0])
-	g.AddEdge(offerNode1, requestNode3, offerNode1.Edges()[1])
-	g.AddEdge(offerNode3, requestNode1, offerNode3.Edges()[0])
-	g.AddEdge(offerNode4, requestNode3, offerNode4.Edges()[0])
-	g.AddEdge(offerNode5, requestNode3, offerNode5.Edges()[0])
-	g.AddEdge(offerNode5, requestNode4, offerNode5.Edges()[1])
-	g.AddEdge(offerNode6, requestNode6, offerNode6.Edges()[0])
+	g.AddEdge(offerNode1, requestNode2, minimalEdge(requestNode2))
+	g.AddEdge(offerNode1, requestNode3, minimalEdge(requestNode3))
+	g.AddEdge(offerNode3, requestNode1, minimalEdge(requestNode1))
+	g.AddEdge(offerNode4, requestNode3, minimalEdge(requestNode3))
+	g.AddEdge(offerNode5, requestNode3, minimalEdge(requestNode3))
+	g.AddEdge(offerNode5, requestNode4, minimalEdge(requestNode4))
+	g.AddEdge(offerNode6, requestNode6, minimalEdge(requestNode6))
 	return g
 }
 
@@ -353,13 +343,10 @@ func TestHopcroftKarp_LargeCase(t *testing.T) {
 		// Create a complete bipartite graph
 		// Each offer can match with every request
 		for i := 0; i < nOffers; i++ {
-			edges := make([]*model.Edge, nRequests)
 			for j := 0; j < nRequests; j++ {
 				edge := minimalEdge(requestNodes[j])
-				edges[j] = edge
 				g.AddEdge(offerNodes[i], requestNodes[j], edge)
 			}
-			offerNodes[i].SetEdges(edges)
 		}
 
 		// Get memory stats after creating edges

@@ -36,22 +36,24 @@ func (hk *HopcroftKarp) FindMaximumMatching(
 
 	offers, requests, requestIndex := initialize(graph)
 	offerCount, requestCount := len(offers), len(requests)
+	println(offerCount, requestCount)
 	if offerCount == 0 || requestCount == 0 {
 		return []collections.Tuple2[*model.OfferNode, *model.Edge]{}, nil
 	}
 
 	// Pre-allocate slices and queue
 	hk.preAllocate(offerCount, requestCount)
-	queue := collections.NewQueueWithCapacity[int](offerCount)
 
 	adj := buildAdjacencyList(offers, requestIndex, offerCount)
+
+	fmt.Println(adj)
 
 	matchingCount := 0
 
 	// Main matching loop
-	for hk.bfs(adj, queue, offerCount) {
+	for hk.computeLayerDistances(adj, offerCount) {
 		for offerIndex := 1; offerIndex <= offerCount; offerIndex++ {
-			if hk.offerMatches[offerIndex] == NIL && hk.dfs(offerIndex, adj) {
+			if hk.offerMatches[offerIndex] == NIL && hk.findAugmentingPath(offerIndex, adj) {
 				matchingCount++
 			}
 		}
@@ -88,45 +90,47 @@ func (hk *HopcroftKarp) preAllocate(offerCount, requestCount int) {
 	hk.distances = make([]int, offerCount+1)
 }
 
-func buildAdjacencyList(offers []*model.OfferNode, requestIndex *collections.SyncMap[*model.RequestNode, int], n int) [][]int {
+func buildAdjacencyList(offers []*model.OfferNode, requestIndexMap *collections.SyncMap[*model.RequestNode, int], n int) [][]int {
 	adj := make([][]int, n+1)
-	for offerIndex, offer := range offers {
+	for idx, offer := range offers {
+		offerIndex := idx + 1
 		edges := offer.Edges()
-		adj[offerIndex+1] = make([]int, 0, len(edges))
+		adj[offerIndex] = make([]int, 0, len(edges))
 		for _, edge := range edges {
-			if requestIdx, exists := requestIndex.Get(edge.RequestNode()); exists {
-				adj[offerIndex+1] = append(adj[offerIndex+1], requestIdx)
+			if requestIdx, exists := requestIndexMap.Get(edge.RequestNode()); exists {
+				adj[offerIndex] = append(adj[offerIndex], requestIdx)
 			}
 		}
 	}
 	return adj
 }
 
-func (hk *HopcroftKarp) bfs(adj [][]int, queue *collections.Queue[int], n int) bool {
+func (hk *HopcroftKarp) computeLayerDistances(adj [][]int, offerCount int) bool {
 	// Reset distances
 	distNIL := INF
+	queue := collections.NewQueueWithCapacity[int](offerCount)
 
 	// Initialize distances
-	for u := 1; u <= n; u++ {
-		if hk.offerMatches[u] == NIL {
-			hk.distances[u] = 0
-			queue.Enqueue(u)
+	for offerIndex := 1; offerIndex <= offerCount; offerIndex++ {
+		if hk.offerMatches[offerIndex] == NIL {
+			hk.distances[offerIndex] = 0
+			queue.Enqueue(offerIndex)
 		} else {
-			hk.distances[u] = INF
+			hk.distances[offerIndex] = INF
 		}
 	}
 
 	// BFS loop
 	for queue.Size() > 0 {
-		u, _ := queue.Dequeue()
+		currentOffer, _ := queue.Dequeue()
 
-		if hk.distances[u] < distNIL {
-			for _, v := range adj[u] {
-				if hk.requestMatches[v] == NIL {
-					distNIL = hk.distances[u] + 1
-				} else if hk.distances[hk.requestMatches[v]] == INF {
-					hk.distances[hk.requestMatches[v]] = hk.distances[u] + 1
-					queue.Enqueue(hk.requestMatches[v])
+		if hk.distances[currentOffer] < distNIL {
+			for _, requestIndex := range adj[currentOffer] {
+				if hk.requestMatches[requestIndex] == NIL {
+					distNIL = hk.distances[currentOffer] + 1
+				} else if hk.distances[hk.requestMatches[requestIndex]] == INF {
+					hk.distances[hk.requestMatches[requestIndex]] = hk.distances[currentOffer] + 1
+					queue.Enqueue(hk.requestMatches[requestIndex])
 				}
 			}
 		}
@@ -135,11 +139,11 @@ func (hk *HopcroftKarp) bfs(adj [][]int, queue *collections.Queue[int], n int) b
 	return distNIL != INF
 }
 
-func (hk *HopcroftKarp) dfs(offer int, adj [][]int) bool {
+func (hk *HopcroftKarp) findAugmentingPath(offer int, adj [][]int) bool {
 
 	// Try to find an augmenting path
 	for _, request := range adj[offer] {
-		if hk.requestMatches[request] == NIL || (hk.distances[hk.requestMatches[request]] == hk.distances[offer]+1 && hk.dfs(hk.requestMatches[request], adj)) {
+		if hk.requestMatches[request] == NIL || (hk.distances[hk.requestMatches[request]] == hk.distances[offer]+1 && hk.findAugmentingPath(hk.requestMatches[request], adj)) {
 			hk.offerMatches[offer] = request
 			hk.requestMatches[request] = offer
 			return true
