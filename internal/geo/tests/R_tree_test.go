@@ -73,7 +73,7 @@ func TestBuildTreeAndSearch(t *testing.T) {
 		t.Fatalf("Failed to create polyline: %v", err)
 	}
 	coords, _ := polyline.Coordinates()
-	factory := pruning.CreateRTreePrunerFactory()
+	factory := pruning.NewRTreePrunerFactory()
 	pruner, err := factory.NewRoutePruner(coords)
 	if err != nil {
 		t.Fatalf("Failed to create pruner: %v", err)

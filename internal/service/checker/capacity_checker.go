@@ -9,7 +9,7 @@ type CapacityChecker struct {
 }
 
 // NewCapacityChecker creates a new CapacityChecker
-func NewCapacityChecker() *CapacityChecker {
+func NewCapacityChecker() Checker {
 	return &CapacityChecker{}
 }
 

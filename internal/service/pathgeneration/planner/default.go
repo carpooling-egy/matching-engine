@@ -15,7 +15,7 @@ type DefaultPathPlanner struct {
 	pickupDropoffSelector pickupdropoffservice.PickupDropoffSelectorInterface
 }
 
-func NewDefaultPathPlanner(pathGenerator generator.PathGenerator, pathValidator validator.PathValidator, selector pickupdropoffservice.PickupDropoffSelectorInterface) *DefaultPathPlanner {
+func NewDefaultPathPlanner(pathGenerator generator.PathGenerator, pathValidator validator.PathValidator, selector pickupdropoffservice.PickupDropoffSelectorInterface) PathPlanner {
 	return &DefaultPathPlanner{
 		pathGenerator:         pathGenerator,
 		pathValidator:         pathValidator,

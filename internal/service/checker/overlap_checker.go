@@ -8,7 +8,7 @@ import (
 type OverlapChecker struct{}
 
 // NewOverlapChecker creates a new OverlapChecker
-func NewOverlapChecker() *OverlapChecker {
+func NewOverlapChecker() Checker {
 	return &OverlapChecker{}
 }
 

@@ -15,7 +15,7 @@ type PickupDropoffSelector struct {
 	cache *pickupdropoffcache.PickupDropoffCache
 }
 
-func NewPickupDropoffSelector(generator PickupDropoffGenerator, walkingTimeCalculator *WalkingTimeCalculator, cache *pickupdropoffcache.PickupDropoffCache) *PickupDropoffSelector {
+func NewPickupDropoffSelector(generator PickupDropoffGenerator, walkingTimeCalculator *WalkingTimeCalculator, cache *pickupdropoffcache.PickupDropoffCache) PickupDropoffSelectorInterface {
 	return &PickupDropoffSelector{
 		generator:             generator,
 		walkingTimeCalculator: walkingTimeCalculator,

@@ -26,8 +26,8 @@ func main() {
 	log.Println("Successfully connected to database")
 
 	// Create repositories
-	riderRepo := postgres.NewPostgresRiderRequestRepo(db.DB)
-	driverRepo := postgres.NewPostgresDriverOfferRepository(db.DB)
+	riderRepo := postgres.NewPostgresRiderRequestRepo(db)
+	driverRepo := postgres.NewPostgresDriverOfferRepository(db)
 
 	fmt.Println("=== TESTING RIDER REQUEST REPOSITORY ===")
 	testRiderRequestRepo(ctx, riderRepo)

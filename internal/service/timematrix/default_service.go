@@ -11,7 +11,7 @@ type DefaultService struct {
 	timeMatrixSelector Selector
 }
 
-func NewService(selector Selector) *DefaultService {
+func NewService(selector Selector) Service {
 	return &DefaultService{
 		timeMatrixSelector: selector,
 	}

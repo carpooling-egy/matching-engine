@@ -19,11 +19,11 @@ type PostgresDriverOfferRepo struct {
 }
 
 // NewDriverOfferRepository creates a new driver offer repository
-func NewPostgresDriverOfferRepository(db *gorm.DB) repository.DriverOfferRepo {
+func NewPostgresDriverOfferRepository(db *Database) repository.DriverOfferRepo {
 	if db == nil {
 		panic("db cannot be nil")
 	}
-	return &PostgresDriverOfferRepo{db: db}
+	return &PostgresDriverOfferRepo{db: db.DB}
 }
 
 // GetByID fetches a driver offer by ID

@@ -17,7 +17,7 @@ type Factory struct {
 }
 
 // NewProcessorFactory creates a new ProcessorFactory instance.
-func NewProcessorFactory(prunerFactory pruning.RoutePrunerFactory, downSampler downsampling.RouteDownSampler, engine routing.Engine) *Factory {
+func NewProcessorFactory(prunerFactory pruning.RoutePrunerFactory, downSampler downsampling.RouteDownSampler, engine routing.Engine) ProcessorFactory {
 	return &Factory{
 		prunerFactory: prunerFactory,
 		downSampler:   downSampler,

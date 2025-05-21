@@ -16,8 +16,8 @@ const (
 // RTreePrunerFactory implements the RoutePrunerFactory interface
 type RTreePrunerFactory struct{}
 
-// CreateRTreePrunerFactory creates a new factory instance
-func CreateRTreePrunerFactory() RoutePrunerFactory {
+// NewRTreePrunerFactory creates a new factory instance
+func NewRTreePrunerFactory() RoutePrunerFactory {
 	return &RTreePrunerFactory{}
 }
 

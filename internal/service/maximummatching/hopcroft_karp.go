@@ -22,7 +22,7 @@ type HopcroftKarp struct {
 }
 
 // NewHopcroftKarp returns a hopcroftKarp using the Hopcroft–Karp algorithm.
-func NewHopcroftKarp() *HopcroftKarp {
+func NewHopcroftKarp() MaximumMatching {
 	return &HopcroftKarp{}
 }
 

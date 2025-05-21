@@ -13,7 +13,7 @@ type DetourTimeChecker struct {
 	engine   routing.Engine
 }
 
-func NewDetourTimeChecker(selector pickupdropoffservice.PickupDropoffSelectorInterface, engine routing.Engine) *DetourTimeChecker {
+func NewDetourTimeChecker(selector pickupdropoffservice.PickupDropoffSelectorInterface, engine routing.Engine) Checker {
 	return &DetourTimeChecker{
 		selector: selector,
 		engine:   engine,

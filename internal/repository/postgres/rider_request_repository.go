@@ -18,11 +18,11 @@ type PostgresRiderRequestRepo struct {
 }
 
 // NewPostgresRiderRequestRepo creates a new rider request repository
-func NewPostgresRiderRequestRepo(db *gorm.DB) repository.RiderRequestRepo {
+func NewPostgresRiderRequestRepo(db *Database) repository.RiderRequestRepo {
 	if db == nil {
 		panic("db cannot be nil")
 	}
-	return &PostgresRiderRequestRepo{db: db}
+	return &PostgresRiderRequestRepo{db: db.DB}
 }
 
 // GetByID fetches a rider request by ID

@@ -1,0 +1,33 @@
+package di
+
+import (
+	"go.uber.org/dig"
+
+	"matching-engine/internal/service/checker"
+	"matching-engine/internal/service/earlypruning"
+	"matching-engine/internal/service/matcher"
+	"matching-engine/internal/service/matchevaluator"
+	"matching-engine/internal/service/maximummatching"
+	"matching-engine/internal/service/pathgeneration/planner"
+)
+
+// registerMatchingServices registers matching algorithm services
+func registerMatchingServices(c *dig.Container) {
+	must(c.Provide(provideMatchEvaluator))
+	must(c.Provide(earlypruning.NewPreChecksCandidateGenerator))
+	must(c.Provide(maximummatching.NewHopcroftKarp))
+	must(c.Provide(matcher.NewMatcher))
+}
+
+// MatchEvaluatorParams contains the dependencies for the match evaluator
+type MatchEvaluatorParams struct {
+	dig.In
+
+	PathPlanner       planner.PathPlanner
+	PreferenceChecker checker.Checker `name:"preference_checker"`
+}
+
+// provideMatchEvaluator provides a match evaluator
+func provideMatchEvaluator(params MatchEvaluatorParams) matchevaluator.Evaluator {
+	return matchevaluator.NewMatchEvaluator(params.PathPlanner, params.PreferenceChecker)
+}
