@@ -113,11 +113,11 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, valid)
 		mockTimeMatrix.AssertExpectations(t)
-		assert.Equal(t, path[1].ExpectedArrivalTime(), timeNow.Add(5*time.Minute))
-		assert.Equal(t, path[2].ExpectedArrivalTime(), timeNow.Add(10*time.Minute))
-		assert.Equal(t, path[3].ExpectedArrivalTime(), timeNow.Add(15*time.Minute))
-		assert.Equal(t, path[4].ExpectedArrivalTime(), timeNow.Add(20*time.Minute))
-		assert.Equal(t, path[5].ExpectedArrivalTime(), timeNow.Add(25*time.Minute))
+		assert.Equal(t, timeNow.Add(5*time.Minute), path[1].ExpectedArrivalTime())
+		assert.Equal(t, timeNow.Add(10*time.Minute), path[2].ExpectedArrivalTime())
+		assert.Equal(t, timeNow.Add(15*time.Minute), path[3].ExpectedArrivalTime())
+		assert.Equal(t, timeNow.Add(20*time.Minute), path[4].ExpectedArrivalTime())
+		assert.Equal(t, timeNow.Add(25*time.Minute), path[5].ExpectedArrivalTime())
 
 	})
 
@@ -167,7 +167,7 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 		valid, err := pathValidator.ValidatePath(offerNode, path)
 
 		assert.NoError(t, err)
-		assert.True(t, valid)
+		assert.False(t, valid)
 		mockTimeMatrix.AssertExpectations(t)
 	})
 

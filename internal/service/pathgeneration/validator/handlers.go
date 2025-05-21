@@ -13,8 +13,6 @@ func (validator *DefaultPathValidator) handlePickupPoint(
 	point *model.PathPoint,
 	cumulativeDuration time.Duration,
 	currentCapacity *int,
-	availableExtraDuration *time.Duration,
-	extraAccumulatedDuration *time.Duration,
 ) (bool, error) {
 	request, ok := point.Owner().AsRequest()
 	if !ok {
@@ -32,24 +30,11 @@ func (validator *DefaultPathValidator) handlePickupPoint(
 	riderEarliestPickupTime := request.EarliestDepartureTime().Add(point.WalkingDuration()) // also equivalent to point.ExpectedArrivalTime()
 
 	if driverArrivalTime.Before(riderEarliestPickupTime) {
-		// Driver needs to wait for the rider
-		waitingTime := riderEarliestPickupTime.Sub(driverArrivalTime)
-
-		// Check if waiting is possible within detour constraints
-		if waitingTime > *availableExtraDuration {
-			return false, nil
-		}
-
-		// Update detour budget and accumulated waiting time
-		*availableExtraDuration -= waitingTime
-		*extraAccumulatedDuration += waitingTime
-
-		// Update expected arrival time in the path point
-		point.SetExpectedArrivalTime(riderEarliestPickupTime)
-	} else {
-		// Driver arrives after rider's earliest pickup time, no waiting needed
-		point.SetExpectedArrivalTime(driverArrivalTime)
+		return false, nil
 	}
+
+	// Set expected arrival time for pickup
+	point.SetExpectedArrivalTime(driverArrivalTime)
 
 	return true, nil
 }
