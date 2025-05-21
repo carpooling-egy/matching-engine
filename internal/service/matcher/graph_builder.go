@@ -16,7 +16,7 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.Graph) (bool, error) {
 			return nil
 		}
 
-		var requestNodes []*model.RequestNode
+		requestNodes := make([]*model.RequestNode, 0, requestSet.Size())
 		requestSetSlice := requestSet.ToSlice()
 		for _, requestID := range requestSetSlice {
 			if requestNode, ok := matcher.availableRequests.Get(requestID); ok && requestNode != nil {
@@ -31,8 +31,7 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.Graph) (bool, error) {
 			return err
 		}
 
-		for _, requestID := range requestSetSlice {
-			requestNode, _ := matcher.availableRequests.Get(requestID)
+		for _, requestNode := range requestNodes {
 
 			path, valid, err := matcher.matchEvaluator.Evaluate(offerNode, requestNode)
 
@@ -41,7 +40,7 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.Graph) (bool, error) {
 			}
 
 			if !valid {
-				requestSet.Remove(requestID)
+				requestSet.Remove(requestNode.Request().ID())
 				continue
 			}
 

@@ -18,14 +18,12 @@ func NewDefaultPopulator(generator Generator, cache *cache.TimeMatrixCache) *Def
 	}
 }
 
-func (p *DefaultPopulator) Populate(offer *model.OfferNode, requestNodes []*model.RequestNode, invalidate bool) error {
+func (p *DefaultPopulator) Populate(offer *model.OfferNode, requestNodes []*model.RequestNode) error {
 
 	// Check if the time matrix is already cached
-	if !invalidate {
-		_, exists := p.cache.Get(offer.Offer().ID())
-		if exists {
-			return nil
-		}
+	_, exists := p.cache.Get(offer.Offer().ID())
+	if exists {
+		return nil
 	}
 
 	// Create a new time matrix
