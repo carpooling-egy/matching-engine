@@ -235,7 +235,7 @@ func TestDetourTimeChecker_Check(t *testing.T) {
 			mockSelectorErr:      nil,
 			mockDrivingDurations: []time.Duration{0, 20 * time.Minute, 40 * time.Minute, 60 * time.Minute}, // Source, Pickup, Dropoff, Destination
 			mockDrivingErr:       nil,
-			expected:             true,
+			expected:             false,
 			expectError:          false,
 		},
 		{
