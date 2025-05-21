@@ -5,9 +5,9 @@ import (
 	"matching-engine/internal/app/starter"
 )
 
-// The fn is exported to be call them from tests, until we build a cleaner approach
+// This function is exported to be called from tests until a cleaner approach is implemented.
 
-// RegisterStarterService registers path generation services
+// RegisterStarterService registers the starter service
 func RegisterStarterService(c *dig.Container) {
 	must(c.Provide(starter.NewStarterService))
 }

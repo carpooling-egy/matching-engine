@@ -7,7 +7,7 @@ import (
 	"matching-engine/internal/adapter/valhalla"
 )
 
-// The fn is exported to be call them from tests, until we build a cleaner approach
+// This function is exported to be called from tests until a cleaner approach is implemented.
 
 // registerAdapters registers external adapters
 func registerAdapters(c *dig.Container) {
