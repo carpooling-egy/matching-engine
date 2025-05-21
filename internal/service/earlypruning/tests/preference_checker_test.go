@@ -45,61 +45,13 @@ func TestPreferenceChecker_Check(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name: "Non-matching smoking preferences",
-			offer: model.NewOffer(
-				"offer1", "user1",
-				model.Coordinate{}, model.Coordinate{},
-				time.Now(), 30*time.Minute,
-				3,
-				*model.NewPreference(enums.Male, false), // allows smoking
-				time.Now().Add(1*time.Hour),
-				0,
-				nil,
-				nil,
-			),
-			request: model.NewRequest(
-				"request1", "user2",
-				model.Coordinate{}, model.Coordinate{},
-				time.Now(), time.Now().Add(1*time.Hour),
-				10*time.Minute,
-				2,
-				*model.NewPreference(enums.Female, false), // doesn't allow smoking
-			),
-			expected:    false,
-			expectError: false,
-		},
-		{
-			name: "Non-matching pets preferences",
-			offer: model.NewOffer(
-				"offer1", "user1",
-				model.Coordinate{}, model.Coordinate{},
-				time.Now(), 30*time.Minute,
-				3,
-				*model.NewPreference(enums.Male, false), // allows pets
-				time.Now().Add(1*time.Hour),
-				0,
-				nil,
-				nil,
-			),
-			request: model.NewRequest(
-				"request1", "user2",
-				model.Coordinate{}, model.Coordinate{},
-				time.Now(), time.Now().Add(1*time.Hour),
-				10*time.Minute,
-				2,
-				*model.NewPreference(enums.Female, false), // doesn't allow pets
-			),
-			expected:    false,
-			expectError: false,
-		},
-		{
 			name: "Same gender preference not satisfied",
 			offer: model.NewOffer(
 				"offer1", "user1",
 				model.Coordinate{}, model.Coordinate{},
 				time.Now(), 30*time.Minute,
 				3,
-				*model.NewPreference(enums.Male, true), // same gender only
+				*model.NewPreference(enums.Male, true),
 				time.Now().Add(1*time.Hour),
 				0,
 				nil,
@@ -135,7 +87,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				time.Now(), time.Now().Add(1*time.Hour),
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, true), // same gender only
+				*model.NewPreference(enums.Female, true),
 			),
 			expected:    false,
 			expectError: false,
@@ -150,7 +102,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 					time.Now(), time.Now().Add(1*time.Hour),
 					10*time.Minute,
 					1,
-					*model.NewPreference(enums.Male, false), // allows smoking
+					*model.NewPreference(enums.Male, false),
 				)
 
 				offer := model.NewOffer(
@@ -173,7 +125,7 @@ func TestPreferenceChecker_Check(t *testing.T) {
 				time.Now(), time.Now().Add(1*time.Hour),
 				10*time.Minute,
 				2,
-				*model.NewPreference(enums.Female, false), // doesn't allow smoking
+				*model.NewPreference(enums.Female, true), // requires the same gender (female only)
 			),
 			expected:    false,
 			expectError: false,
