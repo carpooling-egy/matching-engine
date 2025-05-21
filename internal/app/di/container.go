@@ -3,16 +3,11 @@ package di
 import (
 	"github.com/rs/zerolog/log"
 	"go.uber.org/dig"
-
-	"matching-engine/internal/service/matcher"
 )
 
 // BuildContainer creates and configures the dependency injection container
 func BuildContainer() *dig.Container {
 	c := dig.New()
-
-	// Register application services
-	must(c.Provide(NewStarterService))
 
 	// Register modules by groups
 	registerAdapters(c)
@@ -27,19 +22,7 @@ func BuildContainer() *dig.Container {
 	// Register starter service
 	registerStarterService(c)
 
-	// Validate container
-	if err := validateContainer(c); err != nil {
-		log.Fatal().Err(err).Msg("Container validation failed")
-	}
-
 	return c
-}
-
-// validateContainer checks if the container is configured correctly
-func validateContainer(c *dig.Container) error {
-	return c.Invoke(func(matcher *matcher.Matcher) {
-		log.Info().Msg("Container validation successful")
-	})
 }
 
 // must is a helper function to handle errors during initialization
