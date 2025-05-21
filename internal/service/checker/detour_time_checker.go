@@ -42,7 +42,7 @@ func (dtc *DetourTimeChecker) Check(offer *model.Offer, request *model.Request) 
 	pickupDuration := durations[1]
 	dropoffDuration := durations[2]
 
-	if offer.DepartureTime().Add(pickupDuration).Before(request.EarliestDepartureTime()) {
+	if offer.DepartureTime().Add(pickupDuration).Before(request.EarliestDepartureTime().Add(value.Pickup().WalkingDuration())) {
 		return false, nil
 	}
 
