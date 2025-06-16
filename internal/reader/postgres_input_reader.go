@@ -28,7 +28,7 @@ func NewPostgresInputReader(db *postgres.Database, requestsRepo repository.Rider
 func (r *PostgresInputReader) GetOffersAndRequests(ctx context.Context) ([]*model.Request, []*model.Offer, bool, error) {
 
 	// TODO - check if we need to add a timeout to the context
-
+	// TODO - Read start and end time from config
 	requests, err := r.requestsRepository.FindUnmatched(ctx, time.Now(), time.Now().Add(24*time.Hour))
 
 	if err != nil {
