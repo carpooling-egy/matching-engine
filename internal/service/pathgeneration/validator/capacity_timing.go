@@ -31,8 +31,6 @@ func (validator *DefaultPathValidator) validateCapacityAndTiming(
 				point, // point.expectedArrivalTime IS BEING MODIFIED BY THE HANDLER
 				cumulativeDurations[i],
 				&currentCapacity, // THIS VALUE IS BEING MODIFIED BY THE HANDLER
-				availableExtraDetour,
-				&extraAccumulatedDuration, // THIS VALUE IS BEING MODIFIED BY THE HANDLER
 			)
 			if !valid || err != nil {
 				return valid, err
