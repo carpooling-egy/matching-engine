@@ -59,6 +59,8 @@ func NewDistanceTimeMatrixParams(
 
 	if !dtm.departureTime.IsZero() && dtm.departureTime.Before(time.Now()) {
 		return nil, errors.New("departure time is in the past")
+	} else if dtm.departureTime.IsZero() {
+		dtm.departureTime = time.Now().Add(1 * time.Hour)
 	}
 
 	return dtm, nil
