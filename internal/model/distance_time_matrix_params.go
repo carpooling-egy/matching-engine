@@ -43,9 +43,10 @@ func NewDistanceTimeMatrixParams(
 	}
 
 	dtm := &DistanceTimeMatrixParams{
-		sources: sources,
-		targets: sources,
-		profile: profile,
+		sources:       sources,
+		targets:       sources,
+		profile:       profile,
+		departureTime: time.Now().Add(1 * time.Hour),
 	}
 
 	for _, opt := range opts {
@@ -56,7 +57,7 @@ func NewDistanceTimeMatrixParams(
 		return nil, errors.New("targets cannot be empty")
 	}
 
-	if dtm.departureTime.Before(time.Now()) {
+	if !dtm.departureTime.IsZero() && dtm.departureTime.Before(time.Now()) {
 		return nil, errors.New("departure time is in the past")
 	}
 

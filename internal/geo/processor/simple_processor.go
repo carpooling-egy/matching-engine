@@ -3,7 +3,9 @@ package processor
 import (
 	"context"
 	"errors"
+	"fmt"
 	"matching-engine/internal/adapter/routing"
+	"matching-engine/internal/geo"
 	"matching-engine/internal/geo/downsampling"
 	"matching-engine/internal/geo/pruning"
 	"matching-engine/internal/model"
@@ -68,16 +70,26 @@ func (p *processorImpl) ComputeClosestRoutePoint(
 ) (*model.Coordinate, time.Duration, error) {
 	ctx := context.Background()
 
-	prunedRoute, err := p.Prune(point, walkingTime)
-
+	routeCoords, err := p.route.Polyline().Coordinates()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	closestPoint, closestTime, err := p.findClosestPointOnRoute(ctx, *point, prunedRoute)
+	geo.Output, _ = geo.AddRouteToGeoJSON(geo.Output, p.route, "#FF0000")
+
+	downSampledRoute, err := p.DownSample(routeCoords)
 	if err != nil {
 		return nil, 0, err
 	}
+
+	geo.Output, _ = geo.AddLineStringToGeoJSON(geo.Output, downSampledRoute, "#00FF00")
+
+	closestPoint, closestTime, err := p.findClosestPointOnRoute(ctx, *point, downSampledRoute)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	geo.Output, _ = geo.AddPointToGeoJSON(geo.Output, *closestPoint, "#FFFF00")
 
 	return closestPoint, closestTime, nil
 }
@@ -100,6 +112,8 @@ func (p *processorImpl) findClosestPointOnRoute(
 	if err != nil {
 		return nil, 0, err
 	}
+
+	fmt.Println(matrix)
 
 	times := matrix.Times()[0]
 	closestPointIndex, minTime := 0, times[0]

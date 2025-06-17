@@ -9,12 +9,13 @@ type DistanceUnit string
 
 const (
 	DistanceUnitKilometer DistanceUnit = "kilometer"
+	DistanceUnitMeter     DistanceUnit = "meter"
 	DistanceUnitMile      DistanceUnit = "mile"
 )
 
 func (du DistanceUnit) IsValid() bool {
 	switch du {
-	case DistanceUnitKilometer, DistanceUnitMile:
+	case DistanceUnitKilometer, DistanceUnitMile, DistanceUnitMeter:
 		return true
 	}
 	return false
