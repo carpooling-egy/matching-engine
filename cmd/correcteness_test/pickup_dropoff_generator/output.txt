@@ -1,0 +1,5 @@
+Pickup Point: (42.506365, 1.533654)
+Pickup Duration: 386 minutes
+
+Dropoff Point: (42.506365, 1.533654)
+Dropoff Duration: 386 minutes

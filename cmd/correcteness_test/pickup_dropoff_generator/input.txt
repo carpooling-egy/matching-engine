@@ -1,0 +1,12 @@
+# Offer coordinates
+42.43 1.42
+42.6 1.7
+
+# Source coordinate
+42.50828 1.53210
+
+# Destination coordinate
+42.50828 1.53210
+
+# Walking duration (in minutes)
+5
