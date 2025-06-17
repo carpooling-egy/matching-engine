@@ -36,7 +36,6 @@ func (MatrixMapper) ToTransport(params *model.DistanceTimeMatrixParams) (*pb.Api
 			Action:      pb.Options_sources_to_targets,
 			Sources:     sources,
 			Targets:     targets,
-			Units:       common.DefaultUnit,
 			Format:      common.DefaultResponseFormat,
 			CostingType: costingType,
 			Costings: map[int32]*pb.Costing{
@@ -80,11 +79,6 @@ func (MatrixMapper) FromTransport(response *pb.Api) (*model.DistanceTimeMatrix, 
 	distanceMatrix := make([][]model.Distance, numOfRows)
 	timeMatrix := make([][]time.Duration, numOfRows)
 
-	distanceUnit, err := common.ToDomainDistanceUnit(common.DefaultUnit)
-	if err != nil {
-		return nil, err
-	}
-
 	for i := 0; i < numOfRows; i++ {
 		distanceMatrix[i] = make([]model.Distance, numOfCols)
 		timeMatrix[i] = make([]time.Duration, numOfCols)
@@ -92,12 +86,12 @@ func (MatrixMapper) FromTransport(response *pb.Api) (*model.DistanceTimeMatrix, 
 		for j := 0; j < numOfCols; j++ {
 			index := i*numOfCols + j
 
-			distance, err := model.NewDistance(float32(flattenedDistanceMatrix[index]), distanceUnit)
+			distance, err := model.NewDistance(float32(flattenedDistanceMatrix[index]), model.DistanceUnitMeter)
 			if err != nil {
 				return nil, err
 			}
 			distanceMatrix[i][j] = *distance
-			timeMatrix[i][j] = time.Duration(float64(flattenedTimeMatrix[index]) * float64(time.Minute))
+			timeMatrix[i][j] = time.Duration(float64(flattenedTimeMatrix[index]) * float64(time.Second))
 		}
 	}
 
