@@ -23,11 +23,7 @@ func (DrivingTimeMapper) ToTransport(params *model.RouteParams) (*pb.Api, error)
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	wps := params.Waypoints()
-	locations := make([]*pb.Location, len(wps))
-	for i, wp := range wps {
-		locations[i] = common.CreateLocation(wp.Lat(), wp.Lng())
-	}
+	locations := common.WayPointsToLocations(params.Waypoints())
 
 	return &pb.Api{
 		Options: &pb.Options{

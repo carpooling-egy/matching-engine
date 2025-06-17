@@ -9,7 +9,6 @@ const (
 	DefaultResponseFormat        = pb2.Options_pbf
 	DefaultShapeFormat           = pb2.ShapeFormat_polyline6
 	DefaultTimeFormat            = "2006-01-02T15:04"
-	DefaultLocationType          = pb2.Location_kBreak
 	DefaultPedestrianMaxDistance = 100_000
 	DefaultSearchRadiusInMeters  = 100
 )

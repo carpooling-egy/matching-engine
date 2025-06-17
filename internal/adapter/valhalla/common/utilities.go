@@ -6,9 +6,9 @@ import (
 	"matching-engine/internal/model"
 )
 
-func CreateLocation(lat, lng float64) *pb.Location {
+func CreateLocation(lat, lng float64, locationType pb.Location_Type) *pb.Location {
 	return &pb.Location{
-		Type: DefaultLocationType,
+		Type: locationType,
 		Ll: &pb.LatLng{
 			HasLat: &pb.LatLng_Lat{Lat: lat},
 			HasLng: &pb.LatLng_Lng{Lng: lng},
@@ -36,4 +36,14 @@ func MapProfileToCosting(profile model.Profile) (pb.Costing_Type, *pb.Costing, e
 		return pb.Costing_auto_, DefaultAutoCosting, nil
 	}
 	return 0, nil, fmt.Errorf("unsupported profile: %s", profile)
+}
+
+func WayPointsToLocations(wayPoints []model.Coordinate) []*pb.Location {
+	locations := make([]*pb.Location, len(wayPoints))
+	for i, wp := range wayPoints {
+		locations[i] = CreateLocation(wp.Lat(), wp.Lng(), pb.Location_kThrough)
+	}
+	locations[0].Type = pb.Location_kBreak
+	locations[len(locations)-1].Type = pb.Location_kBreak
+	return locations
 }

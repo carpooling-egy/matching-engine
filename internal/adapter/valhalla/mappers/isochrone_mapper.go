@@ -22,7 +22,7 @@ func (IsochroneMapper) ToTransport(params *model.IsochroneParams) (*pb.Api, erro
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	origin := common.CreateLocation(params.Origin().Lat(), params.Origin().Lng())
+	origin := common.CreateLocation(params.Origin().Lat(), params.Origin().Lng(), pb.Location_kBreak)
 
 	costingType, costing, err := common.MapProfileToCosting(params.Profile())
 	if err != nil {
