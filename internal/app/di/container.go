@@ -33,10 +33,3 @@ func must(err error) {
 		log.Fatal().Err(err).Msg("Failed to configure dependency injection")
 	}
 }
-
-// NewStarterService is a placeholder to make the compiler happy until we build the real StarterService
-// in the app package. This function will be overridden by the actual implementation.
-func NewStarterService() interface{} {
-	// This is just a placeholder
-	return nil
-}
