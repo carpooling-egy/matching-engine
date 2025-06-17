@@ -46,16 +46,16 @@ func readNextDuration(scanner *bufio.Scanner) (time.Duration, error) {
 	return 0, fmt.Errorf("unexpected end of input while reading duration")
 }
 
-func buildOffer(source, destination *model.Coordinate, offerPath []model.PathPoint) *model.Offer {
+func buildOffer(offerPath []model.PathPoint) *model.Offer {
 	preference := model.NewPreference(enums.Female, true)
 	return model.NewOffer(
 		"offer-id",
 		"user-id",
-		*source,
-		*destination,
-		time.Now().Add(1*time.Hour), // departure
-		10*time.Minute,              // waiting time
-		2,                           // capacity
+		*offerPath[0].Coordinate(), // source
+		*offerPath[len(offerPath)-1].Coordinate(), // destination
+		time.Now().Add(1*time.Hour),               // departure
+		10*time.Minute,                            // waiting time
+		2,                                         // capacity
 		*preference,
 		time.Now().Add(2*time.Hour), // arrival
 		0,
@@ -113,7 +113,7 @@ func main() {
 	}
 
 	// Create offer
-	offer := buildOffer(source, destination, offerPath)
+	offer := buildOffer(offerPath)
 
 	// Setup processor
 	engine, err := valhalla.NewValhalla()
