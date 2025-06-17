@@ -2,6 +2,7 @@ package di
 
 import (
 	"go.uber.org/dig"
+	"matching-engine/internal/app/di/utils"
 
 	"matching-engine/internal/geo/downsampling"
 	"matching-engine/internal/geo/processor"
@@ -12,7 +13,7 @@ import (
 
 // RegisterGeoServices registers geo-related services
 func RegisterGeoServices(c *dig.Container) {
-	must(c.Provide(pruning.NewRTreePrunerFactory))
-	must(c.Provide(downsampling.NewRDPDownSampler))
-	must(c.Provide(processor.NewProcessorFactory))
+	utils.Must(c.Provide(pruning.NewRTreePrunerFactory))
+	utils.Must(c.Provide(downsampling.NewRDPDownSampler))
+	utils.Must(c.Provide(processor.NewProcessorFactory))
 }

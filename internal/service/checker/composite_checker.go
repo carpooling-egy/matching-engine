@@ -9,9 +9,9 @@ type CompositeChecker struct {
 	checkers []Checker
 }
 
-func NewCompositePreChecker(preCheckers ...Checker) Checker {
+func NewCompositeChecker(checkers ...Checker) Checker {
 	return &CompositeChecker{
-		checkers: preCheckers,
+		checkers: checkers,
 	}
 }
 

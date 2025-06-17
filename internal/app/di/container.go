@@ -1,7 +1,6 @@
 package di
 
 import (
-	"github.com/rs/zerolog/log"
 	"go.uber.org/dig"
 )
 
@@ -25,11 +24,4 @@ func BuildContainer() *dig.Container {
 	RegisterStarterService(c)
 
 	return c
-}
-
-// must is a helper function to handle errors during initialization
-func must(err error) {
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to configure dependency injection")
-	}
 }

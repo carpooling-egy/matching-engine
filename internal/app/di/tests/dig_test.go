@@ -8,6 +8,7 @@ import (
 	"go.uber.org/dig"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/app/di"
+	"matching-engine/internal/app/di/utils"
 	"matching-engine/internal/app/starter"
 	"matching-engine/internal/model"
 	"matching-engine/internal/publisher"
@@ -48,9 +49,9 @@ func TestDIWithMocks(t *testing.T) {
 	c := dig.New()
 
 	// Register mock database and adapters
-	must(c.Provide(NewMockDatabase))
-	must(c.Provide(NewMockChannel))
-	must(c.Provide(NewMockRoutingEngine))
+	utils.Must(c.Provide(NewMockDatabase))
+	utils.Must(c.Provide(NewMockChannel))
+	utils.Must(c.Provide(NewMockRoutingEngine))
 	// Register other real services as needed, or more mocks
 
 	// Register the rest of the modules, skipping the real DB/adapters
@@ -125,11 +126,4 @@ func NewMockChannel() publisher.Publisher {
 func NewMockRoutingEngine() routing.Engine {
 	// Return a mock adapter
 	return &MockRoutingEngine{} // Replace with actual mock
-}
-
-// must is a helper function to handle errors during initialization
-func must(err error) {
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to configure dependency injection")
-	}
 }

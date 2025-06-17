@@ -74,7 +74,7 @@ func TestCompositeChecker_Check(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create a composite checker with the test checkers
-			checker := checker.NewCompositePreChecker(tc.checkers...)
+			checker := checker.NewCompositeChecker(tc.checkers...)
 
 			// Run the check with nil offer and request (not used by mock checkers)
 			result, err := checker.Check(nil, nil)

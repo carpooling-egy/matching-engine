@@ -3,6 +3,7 @@ package di
 import (
 	"context"
 	"go.uber.org/dig"
+	"matching-engine/internal/app/di/utils"
 
 	"matching-engine/internal/reader"
 	"matching-engine/internal/repository/postgres"
@@ -10,7 +11,7 @@ import (
 
 // registerDatabase registers the database service
 func registerDatabase(c *dig.Container) {
-	must(c.Provide(func() (*postgres.Database, error) {
+	utils.Must(c.Provide(func() (*postgres.Database, error) {
 		return postgres.NewDatabase(context.Background())
 	}))
 }
@@ -19,7 +20,7 @@ func registerDatabase(c *dig.Container) {
 
 // RegisterDatabaseRepositoriesAndServices registers repositories and readers that depend on the database
 func RegisterDatabaseRepositoriesAndServices(c *dig.Container) {
-	must(c.Provide(postgres.NewPostgresDriverOfferRepository))
-	must(c.Provide(postgres.NewPostgresRiderRequestRepo))
-	must(c.Provide(reader.NewPostgresInputReader))
+	utils.Must(c.Provide(postgres.NewPostgresDriverOfferRepository))
+	utils.Must(c.Provide(postgres.NewPostgresRiderRequestRepo))
+	utils.Must(c.Provide(reader.NewPostgresInputReader))
 }

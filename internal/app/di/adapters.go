@@ -2,6 +2,7 @@ package di
 
 import (
 	"go.uber.org/dig"
+	"matching-engine/internal/app/di/utils"
 
 	"matching-engine/internal/adapter/messaging/natsjetstream"
 	"matching-engine/internal/adapter/valhalla"
@@ -11,6 +12,6 @@ import (
 
 // registerAdapters registers external adapters
 func registerAdapters(c *dig.Container) {
-	must(c.Provide(valhalla.NewValhalla))
-	must(c.Provide(natsjetstream.NewNATSPublisher))
+	utils.Must(c.Provide(valhalla.NewValhalla))
+	utils.Must(c.Provide(natsjetstream.NewNATSPublisher))
 }

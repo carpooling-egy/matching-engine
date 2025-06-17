@@ -2,6 +2,7 @@ package di
 
 import (
 	"go.uber.org/dig"
+	"matching-engine/internal/app/di/utils"
 
 	"matching-engine/internal/service/pathgeneration/generator"
 	"matching-engine/internal/service/pathgeneration/planner"
@@ -12,7 +13,7 @@ import (
 
 // RegisterPathServices registers path generation services
 func RegisterPathServices(c *dig.Container) {
-	must(c.Provide(generator.NewInsertionPathGenerator))
-	must(c.Provide(validator.NewDefaultPathValidator))
-	must(c.Provide(planner.NewDefaultPathPlanner))
+	utils.Must(c.Provide(generator.NewInsertionPathGenerator))
+	utils.Must(c.Provide(validator.NewDefaultPathValidator))
+	utils.Must(c.Provide(planner.NewDefaultPathPlanner))
 }

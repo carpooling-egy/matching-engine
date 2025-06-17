@@ -2,6 +2,7 @@ package di
 
 import (
 	"go.uber.org/dig"
+	"matching-engine/internal/app/di/utils"
 
 	"matching-engine/internal/service/checker"
 	"matching-engine/internal/service/earlypruning"
@@ -15,10 +16,10 @@ import (
 
 // RegisterMatchingServices registers matching algorithm services
 func RegisterMatchingServices(c *dig.Container) {
-	must(c.Provide(provideMatchEvaluator))
-	must(c.Provide(earlypruning.NewPreChecksCandidateGenerator))
-	must(c.Provide(maximummatching.NewHopcroftKarp))
-	must(c.Provide(matcher.NewMatcher))
+	utils.Must(c.Provide(provideMatchEvaluator))
+	utils.Must(c.Provide(earlypruning.NewPreChecksCandidateGenerator))
+	utils.Must(c.Provide(maximummatching.NewHopcroftKarp))
+	utils.Must(c.Provide(matcher.NewMatcher))
 }
 
 // MatchEvaluatorParams contains the dependencies for the match evaluator

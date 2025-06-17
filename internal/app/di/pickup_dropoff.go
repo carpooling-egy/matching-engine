@@ -2,6 +2,7 @@ package di
 
 import (
 	"go.uber.org/dig"
+	"matching-engine/internal/app/di/utils"
 
 	"matching-engine/internal/service/pickupdropoffservice"
 	"matching-engine/internal/service/pickupdropoffservice/pickupdropoffcache"
@@ -11,8 +12,8 @@ import (
 
 // RegisterPickupDropoffServices registers pickup/dropoff services
 func RegisterPickupDropoffServices(c *dig.Container) {
-	must(c.Provide(pickupdropoffservice.NewWalkingTimeCalculator))
-	must(c.Provide(pickupdropoffservice.NewIntersectionBasedGenerator))
-	must(c.Provide(pickupdropoffcache.NewPickupDropoffCache))
-	must(c.Provide(pickupdropoffservice.NewPickupDropoffSelector))
+	utils.Must(c.Provide(pickupdropoffservice.NewWalkingTimeCalculator))
+	utils.Must(c.Provide(pickupdropoffservice.NewIntersectionBasedGenerator))
+	utils.Must(c.Provide(pickupdropoffcache.NewPickupDropoffCache))
+	utils.Must(c.Provide(pickupdropoffservice.NewPickupDropoffSelector))
 }

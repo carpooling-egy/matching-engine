@@ -2,6 +2,7 @@ package di
 
 import (
 	"go.uber.org/dig"
+	"matching-engine/internal/app/di/utils"
 	"matching-engine/internal/app/starter"
 )
 
@@ -9,5 +10,5 @@ import (
 
 // RegisterStarterService registers the starter service
 func RegisterStarterService(c *dig.Container) {
-	must(c.Provide(starter.NewStarterService))
+	utils.Must(c.Provide(starter.NewStarterService))
 }

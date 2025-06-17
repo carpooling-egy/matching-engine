@@ -29,7 +29,7 @@ func (r *PostgresInputReader) GetOffersAndRequests(ctx context.Context) ([]*mode
 
 	// TODO - check if we need to add a timeout to the context
 	// TODO - Read start and end time from config
-	requests, err := r.requestsRepository.FindUnmatched(ctx, time.Now(), time.Now().Add(24*time.Hour))
+	requests, err := r.requestsRepository.GetUnmatched(ctx, time.Now(), time.Now().Add(24*time.Hour))
 
 	if err != nil {
 		return nil, nil, false, fmt.Errorf("failed to get requests %w", err)
