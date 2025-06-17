@@ -23,10 +23,8 @@ func (MatrixMapper) ToTransport(params *model.DistanceTimeMatrixParams) (*pb.Api
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	sources, targets, err := mapSourcesAndTargetsToLocations(
-		params.Sources(),
-		params.Targets(),
-	)
+	sources := common.WayPointsToLocations(params.Sources())
+	targets := common.WayPointsToLocations(params.Targets())
 
 	costingType, costing, err := common.MapProfileToCosting(params.Profile())
 	if err != nil {
@@ -54,30 +52,6 @@ func (MatrixMapper) ToTransport(params *model.DistanceTimeMatrixParams) (*pb.Api
 			},
 		},
 	}, nil
-}
-
-func mapSourcesAndTargetsToLocations(
-	sources, targets []model.Coordinate,
-) (srcLocs, tgtLocs []*pb.Location, err error) {
-	mapCoords := func(coords []model.Coordinate) ([]*pb.Location, error) {
-		locs := make([]*pb.Location, len(coords))
-		for i, pt := range coords {
-			locs[i] = common.CreateLocation(pt.Lat(), pt.Lng())
-		}
-		return locs, nil
-	}
-
-	srcLocs, err = mapCoords(sources)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	tgtLocs, err = mapCoords(targets)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return srcLocs, tgtLocs, nil
 }
 
 func (MatrixMapper) FromTransport(response *pb.Api) (*model.DistanceTimeMatrix, error) {

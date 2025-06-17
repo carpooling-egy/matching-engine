@@ -26,9 +26,9 @@ func (SnapToRoadMapper) ToTransport(point *model.Coordinate) (*pb.Api, error) {
 		Options: &pb.Options{
 			Action: pb.Options_trace_attributes,
 			Format: common.DefaultResponseFormat,
-			Shape: []*pb.Location{
-				common.CreateLocation(point.Lat(), point.Lng()),
-				common.CreateLocation(point.Lat(), point.Lng()),
+			Shape: []*pb.Location{ // same location twice to trick the engine to snap it to a road
+				common.CreateLocation(point.Lat(), point.Lng(), pb.Location_kBreak),
+				common.CreateLocation(point.Lat(), point.Lng(), pb.Location_kBreak),
 			},
 			CostingType: pb.Costing_auto_,
 			Costings: map[int32]*pb.Costing{

@@ -23,11 +23,7 @@ func (WalkingTimeMapper) ToTransport(params *model.WalkParams) (*pb.Api, error) 
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	wps := []*model.Coordinate{params.Origin(), params.Destination()}
-	locations := make([]*pb.Location, 2)
-	for i, wp := range wps {
-		locations[i] = common.CreateLocation(wp.Lat(), wp.Lng())
-	}
+	locations := common.WayPointsToLocations([]model.Coordinate{*params.Origin(), *params.Destination()})
 
 	return &pb.Api{
 		Options: &pb.Options{
