@@ -38,12 +38,18 @@ func MapProfileToCosting(profile model.Profile) (pb.Costing_Type, *pb.Costing, e
 	return 0, nil, fmt.Errorf("unsupported profile: %s", profile)
 }
 
-func WayPointsToLocations(wayPoints []model.Coordinate) []*pb.Location {
+// WayPointsToLocations The first and last locations are always set to "break" type regardless of
+// the throughPointType parameter, as they represent the start and end points of the route.
+func WayPointsToLocations(wayPoints []model.Coordinate, throughPointType pb.Location_Type) []*pb.Location {
 	locations := make([]*pb.Location, len(wayPoints))
 	for i, wp := range wayPoints {
-		locations[i] = CreateLocation(wp.Lat(), wp.Lng(), pb.Location_kThrough)
+		locations[i] = CreateLocation(wp.Lat(), wp.Lng(), throughPointType)
 	}
-	locations[0].Type = pb.Location_kBreak
-	locations[len(locations)-1].Type = pb.Location_kBreak
+
+	if len(locations) > 0 {
+		locations[0].Type = pb.Location_kBreak
+		locations[len(locations)-1].Type = pb.Location_kBreak
+	}
+
 	return locations
 }
