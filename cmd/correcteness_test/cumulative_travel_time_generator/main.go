@@ -48,7 +48,7 @@ func main() {
 	var coords []model.Coordinate
 	for scanner.Scan() {
 		var lat, lon float64
-		_, err := fmt.Sscanf(scanner.Text(), "%f %f", &lat, &lon)
+		_, err := fmt.Sscanf(scanner.Text(), "%f, %f", &lat, &lon)
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to parse coordinates")
 			continue
