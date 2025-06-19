@@ -11,7 +11,7 @@ type DefaultSelector struct {
 	cache *cache.TimeMatrixCache
 }
 
-func NewDefaultSelector(cache *cache.TimeMatrixCache) *DefaultSelector {
+func NewDefaultSelector(cache *cache.TimeMatrixCache) Selector {
 	return &DefaultSelector{
 		cache: cache,
 	}

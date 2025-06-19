@@ -18,11 +18,11 @@ type PostgresRiderRequestRepo struct {
 }
 
 // NewPostgresRiderRequestRepo creates a new rider request repository
-func NewPostgresRiderRequestRepo(db *gorm.DB) repository.RiderRequestRepo {
+func NewPostgresRiderRequestRepo(db *Database) repository.RiderRequestRepo {
 	if db == nil {
 		panic("db cannot be nil")
 	}
-	return &PostgresRiderRequestRepo{db: db}
+	return &PostgresRiderRequestRepo{db: db.DB}
 }
 
 // GetByID fetches a rider request by ID
@@ -47,8 +47,8 @@ func (r *PostgresRiderRequestRepo) GetByID(ctx context.Context, id string) (*mod
 	return riderRequestDB.ToRiderRequest(), nil
 }
 
-// FindUnmatched finds rider requests that can be matched within the specified time window
-func (r *PostgresRiderRequestRepo) FindUnmatched(ctx context.Context, start, end time.Time) ([]*model.Request, error) {
+// GetUnmatched finds rider requests that can be matched within the specified time window
+func (r *PostgresRiderRequestRepo) GetUnmatched(ctx context.Context, start, end time.Time) ([]*model.Request, error) {
 	if end.Before(start) {
 		return nil, errors.InvalidTimeRange()
 	}

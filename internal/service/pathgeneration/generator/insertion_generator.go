@@ -9,7 +9,7 @@ import (
 type InsertionPathGenerator struct {
 }
 
-func NewInsertionPathGenerator() *InsertionPathGenerator {
+func NewInsertionPathGenerator() PathGenerator {
 	return &InsertionPathGenerator{}
 }
 

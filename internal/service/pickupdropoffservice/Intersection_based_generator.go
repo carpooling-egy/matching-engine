@@ -16,7 +16,7 @@ type IntersectionBasedGenerator struct {
 	processorFactory    processor.ProcessorFactory
 }
 
-func NewIntersectionBasedGenerator(factory processor.ProcessorFactory) *IntersectionBasedGenerator {
+func NewIntersectionBasedGenerator(factory processor.ProcessorFactory) PickupDropoffGenerator {
 	return &IntersectionBasedGenerator{
 		offerProcessorCache: collections.NewSyncMap[string, processor.GeospatialProcessor](),
 		processorFactory:    factory,

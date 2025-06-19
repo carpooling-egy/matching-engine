@@ -9,7 +9,7 @@ type PreferenceChecker struct {
 }
 
 // NewPreferenceChecker creates a new PreferenceChecker
-func NewPreferenceChecker() *PreferenceChecker {
+func NewPreferenceChecker() Checker {
 	return &PreferenceChecker{}
 }
 

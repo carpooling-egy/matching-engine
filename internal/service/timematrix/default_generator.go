@@ -13,7 +13,7 @@ type DefaultGenerator struct {
 	pickupDropoffSelector pickupdropoffservice.PickupDropoffSelectorInterface
 }
 
-func NewDefaultGenerator(engine routing.Engine, pickupDropoffSelector pickupdropoffservice.PickupDropoffSelectorInterface) *DefaultGenerator {
+func NewDefaultGenerator(engine routing.Engine, pickupDropoffSelector pickupdropoffservice.PickupDropoffSelectorInterface) Generator {
 	return &DefaultGenerator{
 		engine:                engine,
 		pickupDropoffSelector: pickupDropoffSelector,

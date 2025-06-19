@@ -23,7 +23,7 @@ func WithInterval(interval time.Duration) TimeThresholdDownSamplerOption {
 	}
 }
 
-func NewTimeThresholdDownSampler(opts ...TimeThresholdDownSamplerOption) *TimeThresholdDownSampler {
+func NewTimeThresholdDownSampler(opts ...TimeThresholdDownSamplerOption) RouteDownSampler {
 	t := &TimeThresholdDownSampler{
 		intervalAngle: durationToAngle(DefaultInterval),
 	}

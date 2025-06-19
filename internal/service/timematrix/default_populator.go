@@ -11,7 +11,7 @@ type DefaultPopulator struct {
 	cache     *cache.TimeMatrixCache
 }
 
-func NewDefaultPopulator(generator Generator, cache *cache.TimeMatrixCache) *DefaultPopulator {
+func NewDefaultPopulator(generator Generator, cache *cache.TimeMatrixCache) Populator {
 	return &DefaultPopulator{
 		generator: generator,
 		cache:     cache,

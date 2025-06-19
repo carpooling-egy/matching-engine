@@ -12,7 +12,7 @@ type MatchEvaluator struct {
 	preferenceChecker checker.Checker
 }
 
-func NewMatchEvaluator(pathPlanner planner.PathPlanner, preferenceChecker checker.Checker) *MatchEvaluator {
+func NewMatchEvaluator(pathPlanner planner.PathPlanner, preferenceChecker checker.Checker) Evaluator {
 	return &MatchEvaluator{
 		pathPlanner:       pathPlanner,
 		preferenceChecker: preferenceChecker,

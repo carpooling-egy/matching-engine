@@ -13,7 +13,7 @@ type RiderRequestRepo interface {
 	GetByID(ctx context.Context, id string) (*model.Request, error)
 
 	// GetPendingRequests retrieves all rider requests that haven't been matched with a driver
-	FindUnmatched(ctx context.Context, start, end time.Time) ([]*model.Request, error)
+	GetUnmatched(ctx context.Context, start, end time.Time) ([]*model.Request, error)
 }
 
 // DriverRepository defines operations for driver offer persistence

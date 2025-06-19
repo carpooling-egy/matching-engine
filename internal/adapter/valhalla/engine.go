@@ -14,7 +14,7 @@ type Valhalla struct {
 	mapper *Mapper
 }
 
-func NewValhalla(clientOpts ...client.Option) (*Valhalla, error) {
+func NewValhalla(clientOpts ...client.Option) (re.Engine, error) {
 	c, err := client.NewValhallaClient(clientOpts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create valhalla client: %w", err)
@@ -25,8 +25,6 @@ func NewValhalla(clientOpts ...client.Option) (*Valhalla, error) {
 		mapper: NewMapper(),
 	}, nil
 }
-
-var _ re.Engine = (*Valhalla)(nil)
 
 func (v *Valhalla) PlanDrivingRoute(
 	ctx context.Context,

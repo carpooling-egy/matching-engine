@@ -11,7 +11,7 @@ type DefaultPathValidator struct {
 	timeMatrixService timematrix.Service
 }
 
-func NewDefaultPathValidator(timeMatrixService timematrix.Service) *DefaultPathValidator {
+func NewDefaultPathValidator(timeMatrixService timematrix.Service) PathValidator {
 	return &DefaultPathValidator{
 		timeMatrixService: timeMatrixService,
 	}

@@ -23,7 +23,7 @@ func WithEpsilonMeters(epsMeters float64) RDPDownSamplerOption {
 	}
 }
 
-func NewRDPDownSampler(opts ...RDPDownSamplerOption) *RDPDownSampler {
+func NewRDPDownSampler(opts ...RDPDownSamplerOption) RouteDownSampler {
 	s := &RDPDownSampler{
 		eps: metersToChord(DefaultEpsilonMeters),
 	}

@@ -11,7 +11,7 @@ type PreChecksCandidateGenerator struct {
 	checker checker.Checker
 }
 
-func NewPreChecksCandidateGenerator(checker checker.Checker) *PreChecksCandidateGenerator {
+func NewPreChecksCandidateGenerator(checker checker.Checker) CandidateGenerator {
 	return &PreChecksCandidateGenerator{
 		checker: checker,
 	}
