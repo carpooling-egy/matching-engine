@@ -26,7 +26,11 @@ func (SnapToRoadMapper) ToTransport(point *model.Coordinate) (*pb.Api, error) {
 		Options: &pb.Options{
 			Action: pb.Options_trace_attributes,
 			Format: common.DefaultResponseFormat,
-			Shape: []*pb.Location{ // same location twice to trick the engine to snap it to a road
+
+			// The map matching endpoint expects a route (multiple points).
+			// Since we only have a single point and the snapping endpoint isn't supported in the proto schema,
+			// we duplicate the point to simulate a route. This tricks the engine into snapping it to the nearest road.
+			Shape: []*pb.Location{
 				common.CreateLocation(point.Lat(), point.Lng(), pb.Location_kBreak),
 				common.CreateLocation(point.Lat(), point.Lng(), pb.Location_kBreak),
 			},

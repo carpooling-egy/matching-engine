@@ -23,8 +23,8 @@ func (MatrixMapper) ToTransport(params *model.DistanceTimeMatrixParams) (*pb.Api
 		return nil, fmt.Errorf("params cannot be nil")
 	}
 
-	sources := common.WayPointsToLocations(params.Sources())
-	targets := common.WayPointsToLocations(params.Targets())
+	sources := common.WayPointsToLocations(params.Sources(), pb.Location_kBreak)
+	targets := common.WayPointsToLocations(params.Targets(), pb.Location_kBreak)
 
 	costingType, costing, err := common.MapProfileToCosting(params.Profile())
 	if err != nil {

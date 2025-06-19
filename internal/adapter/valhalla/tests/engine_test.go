@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"matching-engine/internal/adapter/valhalla"
+	"matching-engine/internal/geo"
 	"matching-engine/internal/model"
+	"os"
 	"testing"
 	"time"
 )
@@ -14,6 +16,16 @@ func must[T any](v T, err error) T {
 		panic(err)
 	}
 	return v
+}
+
+func emust(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func writeToFile(filename, content string) error {
+	return os.WriteFile(filename, []byte(content), 0644) // 0644 is rw-r--r--
 }
 
 /*
@@ -47,8 +59,9 @@ func TestValhalla_PlanDrivingRoute(t *testing.T) {
 			name: "valid route",
 			routeParam: must(model.NewRouteParams(
 				[]model.Coordinate{
-					*must(model.NewCoordinate(42.43, 1.42)),
-					*must(model.NewCoordinate(42.6, 1.7)),
+					*must(model.NewCoordinate(29.977462461368575, 31.249469996140675)),
+					*must(model.NewCoordinate(29.9811224983645, 31.250405678626862)),
+					*must(model.NewCoordinate(29.97376, 31.254408)),
 				},
 				time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 			)),
@@ -68,7 +81,16 @@ func TestValhalla_PlanDrivingRoute(t *testing.T) {
 				t.Errorf("unexpected error status: got %v, wantErr %v", err, tc.wantErr)
 				return
 			}
-			fmt.Println(result)
+
+			json := geo.NewGeoJSON().AddRoute(result, "blue")
+			for _, point := range tc.routeParam.Waypoints() {
+				json.AddPoint(point, "red")
+			}
+
+			emust(writeToFile(
+				tc.name+".json",
+				must(json.Build()),
+			))
 		})
 	}
 }
@@ -88,9 +110,10 @@ func TestValhalla_ComputeDrivingTime(t *testing.T) {
 			name: "valid time",
 			routeParam: must(model.NewRouteParams(
 				[]model.Coordinate{
-					*must(model.NewCoordinate(42.5078, 1.5211)),
-					*must(model.NewCoordinate(42.5057, 1.5265)),
-					*must(model.NewCoordinate(42.5057, 1.5650)),
+					*must(model.NewCoordinate(29.977462461368575, 31.249469996140675)),
+					*must(model.NewCoordinate(29.9811224983645, 31.250405678626862)),
+					*must(model.NewCoordinate(29.97828744926288, 31.251670041058134)),
+					*must(model.NewCoordinate(29.97376, 31.254408)),
 				},
 				time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 			)),
@@ -129,8 +152,8 @@ func TestValhalla_ComputeWalkingTime(t *testing.T) {
 		{
 			name: "valid walking time",
 			walkParam: must(model.NewWalkParams(
-				must(model.NewCoordinate(42.5669, 1.4846)),
-				must(model.NewCoordinate(42.5440, 1.5148)),
+				must(model.NewCoordinate(29.977462461368575, 31.249469996140675)),
+				must(model.NewCoordinate(29.9811224983645, 31.250405678626862)),
 			)),
 			wantErr: false,
 		},
@@ -167,7 +190,7 @@ func TestValhalla_ComputeIsochrone(t *testing.T) {
 		{
 			name: "valid isochrone",
 			req: must(model.NewIsochroneParams(
-				must(model.NewCoordinate(42.5347, 1.5830)),
+				must(model.NewCoordinate(29.977462461368575, 31.249469996140675)),
 				must(model.NewContour(30, model.ContourMetricDistanceInKilometers)),
 				model.ProfilePedestrian,
 			)),
@@ -207,19 +230,14 @@ func TestValhalla_ComputeDistanceTimeMatrix(t *testing.T) {
 			name: "valid matrix",
 			req: must(model.NewDistanceTimeMatrixParams(
 				[]model.Coordinate{
-					*must(model.NewCoordinate(42.5078, 1.5211)),
-					*must(model.NewCoordinate(42.5440, 1.5148)),
-					*must(model.NewCoordinate(42.5057, 1.5265)),
-					*must(model.NewCoordinate(42.5440, 1.5148)),
-					*must(model.NewCoordinate(42.5057, 1.5265)),
+					*must(model.NewCoordinate(29.977462461368575, 31.249469996140675)),
 				},
-				model.ProfileAuto,
+				model.ProfilePedestrian,
 				model.WithDepartureTime(time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)),
 				model.WithTargets([]model.Coordinate{
-					*must(model.NewCoordinate(42.5057, 1.5265)),
-					*must(model.NewCoordinate(42.5440, 1.5148)),
-					*must(model.NewCoordinate(42.5057, 1.5265)),
-					*must(model.NewCoordinate(42.5036, 1.5148)),
+					*must(model.NewCoordinate(29.97828744926288, 31.251670041058134)),
+					*must(model.NewCoordinate(29.97376, 31.254408)),
+					*must(model.NewCoordinate(29.9811224983645, 31.250405678626862)),
 				}),
 			)),
 			wantErr: false,
@@ -257,7 +275,7 @@ func TestValhalla_SnapPointToRoad(t *testing.T) {
 	}{
 		{
 			name:    "valid point",
-			point:   must(model.NewCoordinate(42.50828, 1.53210)),
+			point:   must(model.NewCoordinate(29.9811, 31.2504)),
 			wantErr: false,
 		},
 		{
