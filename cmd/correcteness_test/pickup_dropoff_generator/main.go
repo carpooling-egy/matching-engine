@@ -23,7 +23,7 @@ func readNextCoordinate(scanner *bufio.Scanner) (*model.Coordinate, error) {
 			continue
 		}
 		var lat, lon float64
-		if _, err := fmt.Sscanf(line, "%f %f", &lat, &lon); err == nil {
+		if _, err := fmt.Sscanf(line, "%f, %f", &lat, &lon); err == nil {
 			return model.NewCoordinate(lat, lon)
 		}
 		return nil, fmt.Errorf("invalid coordinate line: %s", line)
@@ -85,7 +85,7 @@ func main() {
 			continue
 		}
 		var lat, lon float64
-		if _, err := fmt.Sscanf(line, "%f %f", &lat, &lon); err != nil {
+		if _, err := fmt.Sscanf(line, "%f, %f", &lat, &lon); err != nil {
 			log.Warn().Msgf("Skipping invalid coordinate: %s", line)
 			continue
 		}
