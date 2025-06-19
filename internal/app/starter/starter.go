@@ -31,9 +31,11 @@ func (s *StarterService) Start(ctx context.Context) error {
 	// Get offers and requests
 	requests, offers, exists, err := s.reader.GetOffersAndRequests(ctx)
 	if err != nil {
+		s.reader.Close()
 		return fmt.Errorf("failed to get offers and requests: %w", err)
 	}
 	if !exists {
+		s.reader.Close()
 		log.Info().Msg("No offers or requests found")
 		return nil
 	}
