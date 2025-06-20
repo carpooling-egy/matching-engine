@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"context"
 	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/adapter/valhalla"
@@ -19,7 +20,7 @@ type MatchedRequest struct {
 	dropoffOrder int
 }
 
-func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, []*model.MatchingResult) {
+func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult) {
 	offers := make([]*model.Offer, 0)
 	requests := make([]*model.Request, 0)
 
@@ -85,8 +86,90 @@ func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, []
 	// Add the request to the list of requests
 	requests = append(requests, request)
 
-	// TODO: Add Expected Results for the matcher
-	expectedResults := make([]*model.MatchingResult, 0)
+	// Create expected results
+	expectedResults := make(map[string]*model.MatchingResult)
+	return offers, requests, expectedResults
+}
+
+func getTest2a(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult) {
+	offers := make([]*model.Offer, 0)
+	requests := make([]*model.Request, 0)
+
+	// Create an offer with the specified attributes
+	offerSource, _ := model.NewCoordinate(31.2460735985739, 29.9744554984058)
+	offerDestination, _ := model.NewCoordinate(31.2068412085851, 29.9246876930902)
+	offerDepartureTime, _ := time.Parse("15:04", "10:30")
+	offerDetourDuration := time.Duration(8)
+	offerCapacity := 1
+	offerCurrentNumberOfRequests := 1
+	offerSameGender := false
+	offerGender := enums.Male
+	offerMaxEstimatedArrivalTime := getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine)
+
+	// Create a matched request for this offer
+	matchedRequestSource, _ := model.NewCoordinate(31.22082087, 29.94795413)
+	matchedRequestDestination, _ := model.NewCoordinate(31.208936, 29.933419)
+	matchedRequestPickup, _ := model.NewCoordinate(31.22082087, 29.94795413)
+	matchedRequestDropoff, _ := model.NewCoordinate(31.208936, 29.933419)
+	matchedRequestEarliestDepartureTime, _ := time.Parse("15:04:05", "10:20:00")
+	matchedRequestLatestArrivalTime, _ := time.Parse("15:04", "11:20")
+	matchedRequestMaxWalkingDuration := time.Duration(0)
+	matchedRequestNumberOfRiders := 1
+	matchedRequestSameGender := true
+	matchedRequestGender := enums.Male
+	matchedRequest := createRequest("2", "1", *matchedRequestSource, *matchedRequestDestination,
+		matchedRequestEarliestDepartureTime, matchedRequestLatestArrivalTime,
+		matchedRequestMaxWalkingDuration, matchedRequestNumberOfRiders,
+		matchedRequestGender, matchedRequestSameGender)
+	offerRequests := []*model.Request{matchedRequest}
+
+	offer := createOffer("1", "1", *offerSource, *offerDestination, offerDepartureTime,
+		offerDetourDuration, offerCapacity, offerCurrentNumberOfRequests, offerGender,
+		offerSameGender, offerMaxEstimatedArrivalTime, offerRequests)
+
+	// Create a matched request with pickup and dropoff coordinates
+	matchedReq := &MatchedRequest{
+		request:      matchedRequest,
+		pickupCoord:  matchedRequestPickup,
+		pickupOrder:  1,
+		dropoffCoord: matchedRequestDropoff,
+		dropoffOrder: 2,
+	}
+	offer.SetPath(createPath(offer, []*MatchedRequest{matchedReq}, engine))
+	// Add the offer to the list of offers
+	offers = append(offers, offer)
+
+	// Create another request
+	requestSource, _ := model.NewCoordinate(31.208936, 29.933419)
+	requestDestination, _ := model.NewCoordinate(31.20773291, 29.92687263)
+	requestEarliestDepartureTime, _ := time.Parse("15:04:05", "10:20:00")
+	requestLatestArrivalTime, _ := time.Parse("15:04", "11:20")
+	requestMaxWalkingDuration := time.Duration(0)
+	requestNumberOfRiders := 1
+	requestSameGender := true
+	requestGender := enums.Male
+
+	request := createRequest("3", "2", *requestSource, *requestDestination,
+		requestEarliestDepartureTime, requestLatestArrivalTime,
+		requestMaxWalkingDuration, requestNumberOfRiders,
+		requestGender, requestSameGender)
+
+	// Add the request to the list of requests
+	requests = append(requests, request)
+
+	// Create expected results
+	expectedResults := make(map[string]*model.MatchingResult)
+	pickupPoint, dropoffPoint := computeRequestPickupDropoffPoints(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination, requestEarliestDepartureTime, request, requestLatestArrivalTime)
+	pickupOrder, dropoffOrder := 4, 5
+	offerPath := addPointsToPath(engine, offer, pickupOrder, dropoffOrder, pickupPoint, dropoffPoint)
+
+	expectedResults[offer.ID()] = model.NewMatchingResult(
+		offer.ID(),
+		offer.UserID(),
+		[]*model.Request{request},
+		offerPath,
+		offer.CurrentNumberOfRequests()+1,
+	)
 	return offers, requests, expectedResults
 }
 
@@ -98,11 +181,15 @@ func TestCorrecteness(t *testing.T) {
 	}
 	tests := []struct {
 		name     string
-		testFunc func(engine routing.Engine) ([]*model.Offer, []*model.Request, []*model.MatchingResult)
+		testFunc func(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult)
 	}{
 		{
 			name:     "Test1ai",
 			testFunc: getTest1aiData,
+		},
+		{
+			name:     "Test2a",
+			testFunc: getTest2a,
 		},
 	}
 
@@ -132,19 +219,94 @@ func TestCorrecteness(t *testing.T) {
 	}
 }
 
-func compareResults(results []*model.MatchingResult, expectedResults []*model.MatchingResult) bool {
+func addPointsToPath(engine routing.Engine, offer *model.Offer, pickupOrder int, dropoffOrder int, pickupPoint *model.PathPoint, dropoffPoint *model.PathPoint) []model.PathPoint {
+	prefix := offer.Path()[:pickupOrder]
+	middle := offer.Path()[pickupOrder:dropoffOrder]
+	suffix := offer.Path()[dropoffOrder:]
+	offerPath := append(prefix, *pickupPoint)
+	offerPath = append(offerPath, *dropoffPoint)
+	offerPath = append(offerPath, middle...)
+	offerPath = append(offerPath, suffix...)
+	offerPath = calculateExpectedArrivalTimes(offerPath, offer.DepartureTime(), engine)
+	return offerPath
+}
+
+func computeRequestPickupDropoffPoints(engine routing.Engine, offer *model.Offer, requestSource *model.Coordinate, requestMaxWalkingDuration time.Duration, requestDestination *model.Coordinate, requestEarliestDepartureTime time.Time, request *model.Request, requestLatestArrivalTime time.Time) (*model.PathPoint, *model.PathPoint) {
+	pickupCoord, pickupDuration, dropoffCoord, dropoffDuration := correcteness_test.GetPickupDropoffPointsAndDurations(
+		engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
+	var pickupPoint, dropoffPoint *model.PathPoint
+	if pickupDuration > requestMaxWalkingDuration {
+		pickupCoord, err := engine.SnapPointToRoad(context.Background(), requestSource)
+		if err != nil {
+			pickupPoint = model.NewPathPoint(*requestSource, enums.Pickup, requestEarliestDepartureTime, request, 0)
+		} else {
+			pickupPoint = model.NewPathPoint(*pickupCoord, enums.Pickup, requestEarliestDepartureTime, request, 0)
+		}
+	} else {
+		pickupPoint = model.NewPathPoint(*pickupCoord, enums.Pickup, requestEarliestDepartureTime, request, pickupDuration)
+	}
+	if dropoffDuration > requestMaxWalkingDuration {
+		dropoffCoord, err := engine.SnapPointToRoad(context.Background(), requestDestination)
+		if err != nil {
+			dropoffPoint = model.NewPathPoint(*requestDestination, enums.Dropoff, requestLatestArrivalTime, request, 0)
+		} else {
+			dropoffPoint = model.NewPathPoint(*dropoffCoord, enums.Dropoff, requestLatestArrivalTime, request, 0)
+		}
+	} else {
+		dropoffPoint = model.NewPathPoint(*dropoffCoord, enums.Dropoff, requestLatestArrivalTime, request, dropoffDuration)
+	}
+	return pickupPoint, dropoffPoint
+}
+
+func compareResults(results []*model.MatchingResult, expectedResults map[string]*model.MatchingResult) bool {
 	if len(results) != len(expectedResults) {
 		return false
 	}
-	for i, result := range results {
-		expectedResult := expectedResults[i]
+	for _, result := range results {
+		expectedResult := expectedResults[result.OfferID()]
 		if result.UserID() != expectedResult.UserID() || result.OfferID() != expectedResult.OfferID() {
 			return false
 		}
 		if len(result.AssignedMatchedRequests()) != len(expectedResult.AssignedMatchedRequests()) {
 			return false
 		}
-
+		if len(result.NewPath()) != len(expectedResult.NewPath()) {
+			return false
+		}
+		if result.CurrentNumberOfRequests() != expectedResult.CurrentNumberOfRequests() {
+			return false
+		}
+		for _, req := range result.AssignedMatchedRequests() {
+			matchedRequests := false
+			for _, expectedReq := range expectedResult.AssignedMatchedRequests() {
+				if req.ID() == expectedReq.ID() &&
+					req.Source().Equal(expectedReq.Source()) &&
+					req.Destination().Equal(expectedReq.Destination()) &&
+					req.EarliestDepartureTime().Equal(expectedReq.EarliestDepartureTime()) &&
+					req.LatestArrivalTime().Equal(expectedReq.LatestArrivalTime()) &&
+					req.MaxWalkingDurationMinutes() == expectedReq.MaxWalkingDurationMinutes() &&
+					req.NumberOfRiders() == expectedReq.NumberOfRiders() &&
+					req.Preferences() == expectedReq.Preferences() {
+					matchedRequests = true
+				}
+			}
+			if !matchedRequests {
+				return false
+			}
+		}
+		for i, point := range result.NewPath() {
+			if i >= len(expectedResult.NewPath()) {
+				return false
+			}
+			expectedPoint := expectedResult.NewPath()[i]
+			if !point.Coordinate().Equal(expectedPoint.Coordinate()) ||
+				point.PointType() != expectedPoint.PointType() ||
+				!point.ExpectedArrivalTime().Equal(expectedPoint.ExpectedArrivalTime()) ||
+				point.WalkingDuration() != expectedPoint.WalkingDuration() ||
+				point.Owner() != expectedPoint.Owner() {
+				return false
+			}
+		}
 	}
 	return true
 }
@@ -204,11 +366,11 @@ func createPath(offer *model.Offer, matchedRequests []*MatchedRequest, engine ro
 		path[matchedReq.dropoffOrder] = *dropoffPoint
 	}
 	// Calculate travel times for the path
-	path = calculateTravelTimes(path, offer.DepartureTime(), engine)
+	path = calculateExpectedArrivalTimes(path, offer.DepartureTime(), engine)
 	return path
 }
 
-func calculateTravelTimes(path []model.PathPoint, departureTime time.Time, engine routing.Engine) []model.PathPoint {
+func calculateExpectedArrivalTimes(path []model.PathPoint, departureTime time.Time, engine routing.Engine) []model.PathPoint {
 	coords := make([]model.Coordinate, len(path))
 	for i, p := range path {
 		coords[i] = *p.Coordinate()
