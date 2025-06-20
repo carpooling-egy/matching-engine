@@ -8,6 +8,7 @@ import (
 	"matching-engine/internal/enums"
 	"matching-engine/internal/model"
 	matcher2 "matching-engine/internal/service/matcher"
+	"matching-engine/internal/service/pickupdropoffservice"
 	"testing"
 	"time"
 )
@@ -357,11 +358,18 @@ func createPath(offer *model.Offer, matchedRequests []*MatchedRequest, engine ro
 	path := make([]model.PathPoint, len(matchedRequests)*2+2) // 2 points for the offer source and destination, 2 points for each request pickup and dropoff
 	path[0] = *model.NewPathPoint(*offer.Source(), enums.Source, offer.DepartureTime(), offer, 0)
 	path[len(path)-1] = *model.NewPathPoint(*offer.Destination(), enums.Destination, offer.MaxEstimatedArrivalTime(), offer, 0)
+	walkingTimeCalculator := pickupdropoffservice.NewWalkingTimeCalculator(engine)
 	for _, matchedReq := range matchedRequests {
 		pickupPoint := model.NewPathPoint(
 			*matchedReq.pickupCoord, enums.Pickup, matchedReq.request.EarliestDepartureTime(), matchedReq.request, 0)
 		dropoffPoint := model.NewPathPoint(
 			*matchedReq.dropoffCoord, enums.Dropoff, matchedReq.request.LatestArrivalTime(), matchedReq.request, 0)
+		pickupWalkingDuration, dropoffWalkingDuration, err := walkingTimeCalculator.ComputeWalkingDurations(context.Background(), matchedReq.request, pickupPoint, dropoffPoint)
+		if err != nil {
+			panic("Failed to compute walking durations: " + err.Error())
+		}
+		pickupPoint.SetWalkingDuration(pickupWalkingDuration)
+		dropoffPoint.SetWalkingDuration(dropoffWalkingDuration)
 		path[matchedReq.pickupOrder] = *pickupPoint
 		path[matchedReq.dropoffOrder] = *dropoffPoint
 	}
