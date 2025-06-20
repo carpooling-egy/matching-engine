@@ -2,8 +2,8 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"fmt"
+	"matching-engine/cmd/correcteness_test"
 	"os"
 	"time"
 
@@ -64,19 +64,7 @@ func main() {
 		log.Error().Err(err).Msg("Error reading points.txt")
 		return
 	}
-
-	// Build route parameters
-	routeParams, err := model.NewRouteParams(coords, timestamp)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create route parameters")
-	}
-
-	// Compute driving time
-	drivingTimes, err := engine.ComputeDrivingTime(context.Background(), routeParams)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to compute driving time")
-	}
-
+	drivingTimes := correcteness_test.GetCumulativeTimes(coords, timestamp, engine)
 	log.Info().Msgf("Computed driving times: %v", drivingTimes)
 
 	// Write output to file
