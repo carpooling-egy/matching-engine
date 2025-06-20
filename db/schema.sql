@@ -86,15 +86,15 @@ CREATE TABLE path_point (
 
 -- Table to store matching information between driver offers and rider requests
 CREATE TABLE ride_matches (
-  driver_offer_id VARCHAR(50) NOT NULL REFERENCES driver_offers(id) ON DELETE CASCADE,
-  rider_request_id VARCHAR(50) NOT NULL REFERENCES rider_requests(id) ON DELETE CASCADE,
+    driver_offer_id VARCHAR(50) NOT NULL REFERENCES driver_offers(id) ON DELETE CASCADE,
+    rider_request_id VARCHAR(50) NOT NULL REFERENCES rider_requests(id) ON DELETE CASCADE,
 
-  pickup_point_id VARCHAR(50) NOT NULL REFERENCES path_point(id) ON DELETE CASCADE,
-  dropoff_point_id VARCHAR(50) NOT NULL REFERENCES path_point(id) ON DELETE CASCADE,
+    pickup_point_id VARCHAR(50) NOT NULL REFERENCES path_point(id) ON DELETE CASCADE,
+    dropoff_point_id VARCHAR(50) NOT NULL REFERENCES path_point(id) ON DELETE CASCADE,
 
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (driver_offer_id, rider_request_id)
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (driver_offer_id, rider_request_id)
 );
 
 -- Indexes for performance optimization
