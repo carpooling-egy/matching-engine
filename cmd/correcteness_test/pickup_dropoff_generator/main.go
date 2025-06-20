@@ -4,11 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/rs/zerolog/log"
+	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/valhalla"
 	"matching-engine/internal/enums"
-	"matching-engine/internal/geo/downsampling"
-	"matching-engine/internal/geo/processor"
-	"matching-engine/internal/geo/pruning"
 	"matching-engine/internal/model"
 	"os"
 	"strconv"
@@ -120,25 +118,7 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Error creating Valhalla engine")
 	}
-	factory := processor.NewProcessorFactory(
-		pruning.CreateRTreePrunerFactory(),
-		downsampling.NewRDPDownSampler(),
-		engine,
-	)
-	proc, err := factory.CreateProcessor(offer)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Error creating geospatial processor")
-	}
-
-	// Compute pickup and dropoff
-	pickup, pickupDuration, err := proc.ComputeClosestRoutePoint(source, walkingDuration)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to compute pickup point")
-	}
-	dropoff, dropoffDuration, err := proc.ComputeClosestRoutePoint(destination, walkingDuration)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to compute dropoff point")
-	}
+	pickup, pickupDuration, dropoff, dropoffDuration := correcteness_test.GetPickupDropoffPointsAndDurations(engine, offer, source, walkingDuration, destination)
 
 	// Write output
 	outputFile, err := os.Create("cmd/correcteness_test/pickup_dropoff_generator/output.txt")
