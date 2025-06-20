@@ -35,45 +35,45 @@ func (m *MockPickupDropoffGenerator) GeneratePickupDropoffPoints(request *model.
 	return m.pickup, m.dropoff, m.err
 }
 
-// MockRoutingEngine is a mock implementation of the routing.Engine interface
-type MockRoutingEngine struct {
+// MockRoutingEngine_pickup_dropoff_selector is a mock implementation of the routing.Engine interface
+type MockRoutingEngine_pickup_dropoff_selector struct {
 	walkingDuration time.Duration
 	err             error
 	// Add a field to track calls
 	callCount int
 }
 
-func NewMockRoutingEngine(walkingDuration time.Duration, err error) *MockRoutingEngine {
-	return &MockRoutingEngine{
+func NewMockRoutingEngine_pickup_dropoff_selector(walkingDuration time.Duration, err error) *MockRoutingEngine_pickup_dropoff_selector {
+	return &MockRoutingEngine_pickup_dropoff_selector{
 		walkingDuration: walkingDuration,
 		err:             err,
 		callCount:       0,
 	}
 }
 
-func (m *MockRoutingEngine) ComputeWalkingTime(ctx context.Context, walkParams *model.WalkParams) (time.Duration, error) {
+func (m *MockRoutingEngine_pickup_dropoff_selector) ComputeWalkingTime(ctx context.Context, walkParams *model.WalkParams) (time.Duration, error) {
 	m.callCount++
 	return m.walkingDuration, m.err
 }
 
 // Implement other methods of the routing.Engine interface with empty implementations
-func (m *MockRoutingEngine) ComputeDrivingTime(ctx context.Context, routeParams *model.RouteParams) ([]time.Duration, error) {
+func (m *MockRoutingEngine_pickup_dropoff_selector) ComputeDrivingTime(ctx context.Context, routeParams *model.RouteParams) ([]time.Duration, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (m *MockRoutingEngine) PlanDrivingRoute(ctx context.Context, routeParams *model.RouteParams) (*model.Route, error) {
+func (m *MockRoutingEngine_pickup_dropoff_selector) PlanDrivingRoute(ctx context.Context, routeParams *model.RouteParams) (*model.Route, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (m *MockRoutingEngine) ComputeIsochrone(ctx context.Context, req *model.IsochroneParams) (*model.Isochrone, error) {
+func (m *MockRoutingEngine_pickup_dropoff_selector) ComputeIsochrone(ctx context.Context, req *model.IsochroneParams) (*model.Isochrone, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (m *MockRoutingEngine) ComputeDistanceTimeMatrix(ctx context.Context, req *model.DistanceTimeMatrixParams) (*model.DistanceTimeMatrix, error) {
+func (m *MockRoutingEngine_pickup_dropoff_selector) ComputeDistanceTimeMatrix(ctx context.Context, req *model.DistanceTimeMatrixParams) (*model.DistanceTimeMatrix, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (m *MockRoutingEngine) SnapPointToRoad(ctx context.Context, point *model.Coordinate) (*model.Coordinate, error) {
+func (m *MockRoutingEngine_pickup_dropoff_selector) SnapPointToRoad(ctx context.Context, point *model.Coordinate) (*model.Coordinate, error) {
 	return nil, errors.New("not implemented")
 }
 
@@ -139,7 +139,7 @@ func TestPickupDropoffSelector_GetPickupDropoffPointsAndDurations(t *testing.T) 
 		{
 			name:                   "Success - Generate new points",
 			generator:              NewMockPickupDropoffGenerator(pickup, dropoff, nil),
-			routingEngine:          NewMockRoutingEngine(5*time.Minute, nil),
+			routingEngine:          NewMockRoutingEngine_pickup_dropoff_selector(5*time.Minute, nil),
 			cache:                  pickupdropoffcache.NewPickupDropoffCache(),
 			request:                request,
 			offer:                  offer,
@@ -154,7 +154,7 @@ func TestPickupDropoffSelector_GetPickupDropoffPointsAndDurations(t *testing.T) 
 		{
 			name:                   "Success - Cache hit",
 			generator:              NewMockPickupDropoffGenerator(pickup, dropoff, nil),
-			routingEngine:          NewMockRoutingEngine(5*time.Minute, nil),
+			routingEngine:          NewMockRoutingEngine_pickup_dropoff_selector(5*time.Minute, nil),
 			cache:                  pickupdropoffcache.NewPickupDropoffCache(),
 			request:                request,
 			offer:                  offer,
@@ -169,7 +169,7 @@ func TestPickupDropoffSelector_GetPickupDropoffPointsAndDurations(t *testing.T) 
 		{
 			name:                   "Error - Generator fails",
 			generator:              NewMockPickupDropoffGenerator(nil, nil, errors.New("generator error")),
-			routingEngine:          NewMockRoutingEngine(5*time.Minute, nil),
+			routingEngine:          NewMockRoutingEngine_pickup_dropoff_selector(5*time.Minute, nil),
 			cache:                  pickupdropoffcache.NewPickupDropoffCache(),
 			request:                request,
 			offer:                  offer,
@@ -184,7 +184,7 @@ func TestPickupDropoffSelector_GetPickupDropoffPointsAndDurations(t *testing.T) 
 		{
 			name:                   "Error - Walking time calculator fails",
 			generator:              NewMockPickupDropoffGenerator(pickup, dropoff, nil),
-			routingEngine:          NewMockRoutingEngine(0, errors.New("walking time calculator error")),
+			routingEngine:          NewMockRoutingEngine_pickup_dropoff_selector(0, errors.New("walking time calculator error")),
 			cache:                  pickupdropoffcache.NewPickupDropoffCache(),
 			request:                request,
 			offer:                  offer,
@@ -308,7 +308,7 @@ func TestPickupDropoffSelector_GetPickupDropoffPointsAndDurations_CacheUsage(t *
 	generator := NewMockPickupDropoffGenerator(pickup, dropoff, nil)
 
 	// Create a routing engine that counts calls
-	routingEngine := NewMockRoutingEngine(5*time.Minute, nil)
+	routingEngine := NewMockRoutingEngine_pickup_dropoff_selector(5*time.Minute, nil)
 
 	// Create walking time calculator with the mock routing engine
 	walkingTimeCalculator := pickupdropoffservice.NewWalkingTimeCalculator(routingEngine)
