@@ -227,12 +227,6 @@ func getMaxEstimatedArrivalTime(source model.Coordinate, destination model.Coord
 	return departureTime.Add(detour).Add(directTimes[1])
 }
 
-func getDrivingDuration(source model.Coordinate, destination model.Coordinate, departureTime time.Time, engine routing.Engine) time.Duration {
-	directCoords := []model.Coordinate{source, destination}
-	directTimes := correcteness_test.GetCumulativeTimes(directCoords, departureTime, engine)
-	return directTimes[1]
-}
-
 func createRequest(userID, id string, source, destination model.Coordinate, earliestDepartureTime, latestArrivalTime time.Time,
 	maxWalkingDurationMinutes time.Duration, numberOfRiders int, gender enums.Gender, sameGender bool) *model.Request {
 	preference := *model.NewPreference(gender, sameGender)
