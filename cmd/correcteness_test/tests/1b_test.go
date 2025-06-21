@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult) {
+func getTest1bData(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult) {
 	offers := make([]*model.Offer, 0)
 	requests := make([]*model.Request, 0)
 
@@ -59,10 +59,10 @@ func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 	// Create another request
 	requestSource, _ := model.NewCoordinate(31.2544088, 29.97376046)
 	requestDestination, _ := model.NewCoordinate(31.20611645, 29.92487334)
-	requestEarliestDepartureTime := offerDepartureTime.Add(-1 * time.Hour)
-	requestLatestArrivalTime := offerDepartureTime.Add(-10 * time.Minute)
 	requestMaxWalkingDuration := time.Duration(0) * time.Minute
-	requestNumberOfRiders := 2
+	requestEarliestDepartureTime := offerDepartureTime.Add(-requestMaxWalkingDuration).Add(-1 * time.Minute)
+	requestLatestArrivalTime := offerMaxEstimatedArrivalTime.Add(requestMaxWalkingDuration).Add(1 * time.Minute)
+	requestNumberOfRiders := 4
 	requestSameGender := true
 	requestGender := enums.Male
 

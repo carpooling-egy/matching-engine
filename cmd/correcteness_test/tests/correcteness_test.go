@@ -6,6 +6,7 @@ import (
 	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/adapter/valhalla"
+	"matching-engine/internal/app/config"
 	"matching-engine/internal/app/di"
 	"matching-engine/internal/app/di/utils"
 	"matching-engine/internal/enums"
@@ -25,6 +26,8 @@ type MatchedRequest struct {
 }
 
 func TestCorrecteness(t *testing.T) {
+	config.ConfigureLogging()
+
 	// Create a mock routing engine
 	engine, err := valhalla.NewValhalla()
 	if err != nil {
@@ -37,6 +40,22 @@ func TestCorrecteness(t *testing.T) {
 		{
 			name:     "Test1ai",
 			testFunc: getTest1aiData,
+		},
+		{
+			name:     "Test1aii",
+			testFunc: getTest1aiiData,
+		},
+		{
+			name:     "Test1b",
+			testFunc: getTest1bData,
+		},
+		{
+			name:     "Test1ci",
+			testFunc: getTest1ciData,
+		},
+		{
+			name:     "Test1cii",
+			testFunc: getTest1ciiData,
 		},
 		{
 			name:     "Test2a",
