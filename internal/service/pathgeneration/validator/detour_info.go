@@ -3,7 +3,7 @@ package validator
 import (
 	"fmt"
 	"time"
-	
+
 	"matching-engine/internal/model"
 )
 
@@ -28,6 +28,11 @@ func (validator *DefaultPathValidator) calculateDetourInfo(
 
 	tripDetour := totalTripDuration - directTripDuration
 	isWithinDetourLimit := tripDetour <= offer.DetourDurationMinutes()
+
+	if isWithinDetourLimit {
+		fmt.Println(totalTripDuration)
+		fmt.Println(directTripDuration)
+	}
 
 	return isWithinDetourLimit,
 		offer.DetourDurationMinutes() - tripDetour,
