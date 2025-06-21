@@ -3,6 +3,7 @@ package checker
 import (
 	"context"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/model"
 	"matching-engine/internal/service/pickupdropoffservice"
@@ -43,15 +44,27 @@ func (dtc *DetourTimeChecker) Check(offer *model.Offer, request *model.Request) 
 	dropoffDuration := durations[2]
 
 	if offer.DepartureTime().Add(pickupDuration).Before(request.EarliestDepartureTime().Add(value.Pickup().WalkingDuration())) {
+		log.Debug().
+			Str("offer_id", offer.ID()).
+			Str("request_id", request.ID()).
+			Msg("offer departure time is before request earliest departure time with pickup walking duration")
 		return false, nil
 	}
 
 	if offer.DepartureTime().Add(dropoffDuration).After(request.LatestArrivalTime().Add(-value.Dropoff().WalkingDuration())) {
+		log.Debug().
+			Str("offer_id", offer.ID()).
+			Str("request_id", request.ID()).
+			Msg("offer departure time is after request latest arrival time with dropoff walking duration")
 		return false, nil
 	}
 	// Check if the detour time is within the acceptable range
 	totalTripDuration := durations[3]
 	if totalTripDuration > offer.MaxEstimatedArrivalTime().Sub(offer.DepartureTime()) {
+		log.Debug().
+			Str("offer_id", offer.ID()).
+			Str("request_id", request.ID()).
+			Msg("total trip duration exceeds the maximum estimated arrival time")
 		return false, nil
 	}
 
