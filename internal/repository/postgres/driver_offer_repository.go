@@ -48,7 +48,7 @@ func (r *PostgresDriverOfferRepo) GetByID(ctx context.Context, id string) (*mode
 }
 
 // GetAvailable fetches available driver offers with their paths and associated rider requests
-func (r *PostgresDriverOfferRepo) GetAvailable(ctx context.Context, start, end time.Time) ([]*model.Offer, error) {
+func (r *PostgresDriverOfferRepo) GetAvailable(ctx context.Context, start, end time.Time, datasetId string) ([]*model.Offer, error) {
 	if end.Before(start) {
 		return nil, errors.InvalidTimeRange()
 	}
@@ -60,6 +60,8 @@ func (r *PostgresDriverOfferRepo) GetAvailable(ctx context.Context, start, end t
 		Preload("PathPoints.RiderRequest").
 		Where("departure_time BETWEEN ? AND ?", start, end).
 		Where("current_number_of_requests < ?", constants.MaxDriverCapacity).
+		Where("dataset_id = ?", datasetId).
+		Omit("dataset_id").
 		Find(&driverOfferDB).Error
 
 	if err != nil {
