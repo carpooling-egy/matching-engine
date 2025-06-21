@@ -1,7 +1,10 @@
 package tests
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"github.com/stretchr/testify/mock"
 	"matching-engine/internal/geo/processor"
 	"matching-engine/internal/model"
 	"matching-engine/internal/service/pickupdropoffservice"
@@ -80,12 +83,47 @@ func (m *MockProcessorFactory) CreateProcessor(offer *model.Offer) (processor.Ge
 
 // We're now using the real IntersectionBasedGenerator instead of a test-specific implementation
 
+// MockRoutingEngine_pickup_dropoff_selector mocks the routing.Engine interface
+type MockRoutingEngine_intersection_based_generator struct {
+	mock.Mock
+}
+
+func (m *MockRoutingEngine_intersection_based_generator) PlanDrivingRoute(ctx context.Context, routeParams *model.RouteParams) (*model.Route, error) {
+	return nil, errors.New("PlanDrivingRoute should not be called in this test")
+}
+
+func (m *MockRoutingEngine_intersection_based_generator) ComputeDrivingTime(ctx context.Context, routeParams *model.RouteParams) ([]time.Duration, error) {
+	return nil, errors.New("ComputeDrivingTime should not be called in this test")
+}
+
+func (m *MockRoutingEngine_intersection_based_generator) ComputeWalkingTime(ctx context.Context, walkParams *model.WalkParams) (time.Duration, error) {
+	return 0, errors.New("ComputeWalkingTime should not be called in this test")
+}
+
+func (m *MockRoutingEngine_intersection_based_generator) ComputeIsochrone(ctx context.Context, req *model.IsochroneParams) (*model.Isochrone, error) {
+	return nil, errors.New("ComputeIsochrone should not be called in this test")
+}
+
+func (m *MockRoutingEngine_intersection_based_generator) SnapPointToRoad(ctx context.Context, point *model.Coordinate) (*model.Coordinate, error) {
+	args := m.Called(ctx, point)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*model.Coordinate), args.Error(1)
+}
+
+func (m *MockRoutingEngine_intersection_based_generator) ComputeDistanceTimeMatrix(ctx context.Context, req *model.DistanceTimeMatrixParams) (*model.DistanceTimeMatrix, error) {
+	return nil, errors.New("ComputeDistanceTimeMatrix should not be called in this test")
+}
+
 func TestIntersectionBasedGenerator_GeneratePickupDropoffPoints(t *testing.T) {
 	// Create test coordinates
 	sourceCoord, _ := model.NewCoordinate(1.0, 1.0)
 	destCoord, _ := model.NewCoordinate(2.0, 2.0)
 	pickupCoord, _ := model.NewCoordinate(1.1, 1.1)
 	dropoffCoord, _ := model.NewCoordinate(1.9, 1.9)
+	snappedSourceCoord, _ := model.NewCoordinate(1.1, 1.1)
+	snappedDestCoord, _ := model.NewCoordinate(1.8, 1.8)
 
 	// Create test times
 	now := time.Now()
@@ -180,8 +218,8 @@ func TestIntersectionBasedGenerator_GeneratePickupDropoffPoints(t *testing.T) {
 			dropoffDuration:      20 * time.Minute, // More than max walking duration
 			dropoffErr:           nil,
 			factoryErr:           nil,
-			expectedPickupCoord:  pickupCoord, // Should use computed route point
-			expectedDropoffCoord: destCoord,   // Should use original destination
+			expectedPickupCoord:  pickupCoord,      // Should use computed route point
+			expectedDropoffCoord: snappedDestCoord, // Should use snapped destination
 			expectError:          false,
 		},
 		{
@@ -218,8 +256,8 @@ func TestIntersectionBasedGenerator_GeneratePickupDropoffPoints(t *testing.T) {
 			dropoffDuration:      10 * time.Minute, // Less than max walking duration
 			dropoffErr:           nil,
 			factoryErr:           nil,
-			expectedPickupCoord:  sourceCoord,  // Should use original source
-			expectedDropoffCoord: dropoffCoord, // Should use computed route point
+			expectedPickupCoord:  snappedSourceCoord, // Should use snapped source
+			expectedDropoffCoord: dropoffCoord,       // Should use computed route point
 			expectError:          false,
 		},
 		{
@@ -256,8 +294,8 @@ func TestIntersectionBasedGenerator_GeneratePickupDropoffPoints(t *testing.T) {
 			dropoffDuration:      20 * time.Minute, // More than max walking duration
 			dropoffErr:           nil,
 			factoryErr:           nil,
-			expectedPickupCoord:  sourceCoord, // Should use original source
-			expectedDropoffCoord: destCoord,   // Should use original destination
+			expectedPickupCoord:  snappedSourceCoord, // Should use snapped source
+			expectedDropoffCoord: snappedDestCoord,   // Should use snapped destination
 			expectError:          false,
 		},
 		{
@@ -384,11 +422,20 @@ func TestIntersectionBasedGenerator_GeneratePickupDropoffPoints(t *testing.T) {
 				tc.dropoffErr,
 			)
 
+			// Create mock routing engine
+			mockEngine := new(MockRoutingEngine_intersection_based_generator)
+			mockEngine.On("SnapPointToRoad", mock.Anything, sourceCoord).Return(
+				snappedSourceCoord, nil,
+			)
+			mockEngine.On("SnapPointToRoad", mock.Anything, destCoord).Return(
+				snappedDestCoord, nil,
+			)
+
 			// Create mock factory
 			mockFactory := NewMockProcessorFactory(mockProcessor, tc.factoryErr)
 
 			// Create generator using the real implementation
-			generator := pickupdropoffservice.NewIntersectionBasedGenerator(mockFactory)
+			generator := pickupdropoffservice.NewIntersectionBasedGenerator(mockFactory, mockEngine)
 
 			// Call the method
 			pickup, dropoff, err := generator.GeneratePickupDropoffPoints(tc.request, tc.offer)

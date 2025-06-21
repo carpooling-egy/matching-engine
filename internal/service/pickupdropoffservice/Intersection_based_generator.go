@@ -1,7 +1,9 @@
 package pickupdropoffservice
 
 import (
+	"context"
 	"fmt"
+	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/collections"
 	"matching-engine/internal/enums"
 	"matching-engine/internal/geo/processor"
@@ -14,12 +16,14 @@ var _ PickupDropoffGenerator = (*IntersectionBasedGenerator)(nil)
 type IntersectionBasedGenerator struct {
 	offerProcessorCache *collections.SyncMap[string, processor.GeospatialProcessor]
 	processorFactory    processor.ProcessorFactory
+	routingEngine       routing.Engine
 }
 
-func NewIntersectionBasedGenerator(factory processor.ProcessorFactory) PickupDropoffGenerator {
+func NewIntersectionBasedGenerator(factory processor.ProcessorFactory, engine routing.Engine) PickupDropoffGenerator {
 	return &IntersectionBasedGenerator{
 		offerProcessorCache: collections.NewSyncMap[string, processor.GeospatialProcessor](),
 		processorFactory:    factory,
+		routingEngine:       engine,
 	}
 }
 
@@ -36,7 +40,11 @@ func (g *IntersectionBasedGenerator) getPickupDropoffPoint(
 		return nil, fmt.Errorf("failed to compute closest route point: %w", err)
 	}
 	if duration > request.MaxWalkingDurationMinutes() {
-		return model.NewPathPoint(*coord, pointType, timeValue, request, zeroWalkingDuration), nil
+		snappedCoord, snapErr := g.routingEngine.SnapPointToRoad(context.Background(), coord)
+		if snapErr != nil {
+			return nil, fmt.Errorf("failed to snap point to road: %w", snapErr)
+		}
+		return model.NewPathPoint(*snappedCoord, pointType, timeValue, request, zeroWalkingDuration), nil
 	}
 	return model.NewPathPoint(*computedCoord, pointType, timeValue, request, duration), nil
 }
