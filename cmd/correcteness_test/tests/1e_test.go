@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func getTest1diData(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult) {
+func getTest1eData(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult) {
 	offers := make([]*model.Offer, 0)
 	requests := make([]*model.Request, 0)
 
@@ -16,7 +16,7 @@ func getTest1diData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 	offerSource, _ := model.NewCoordinate(31.2544088039743, 29.97376045816)
 	offerDestination, _ := model.NewCoordinate(31.20611644667, 29.9248733439259)
 	offerDepartureTime := correcteness_test.ParseTime("10:30")
-	offerDetourDuration := time.Duration(30) * time.Minute
+	offerDetourDuration := time.Duration(30) * time.Minute // will be overridden by the engine
 	offerCapacity := 3
 	offerCurrentNumberOfRequests := 1
 	offerSameGender := true
@@ -40,6 +40,7 @@ func getTest1diData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 		matchedRequestGender, matchedRequestSameGender)
 	offerRequests := []*model.Request{matchedRequest}
 
+	// Create the offer
 	offer := createOffer("1", "1", *offerSource, *offerDestination, offerDepartureTime,
 		offerDetourDuration, offerCapacity, offerCurrentNumberOfRequests, offerGender,
 		offerSameGender, offerMaxEstimatedArrivalTime, offerRequests)
@@ -61,11 +62,13 @@ func getTest1diData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 	requestDestination, _ := model.NewCoordinate(31.223313, 29.933295)
 	requestMaxWalkingDuration := time.Duration(0) * time.Minute
 
-	pickup, _, _, _ := correcteness_test.GetPickupDropoffPointsAndDurations(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
-	cumulativeTimes := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *pickup}, offerDepartureTime, engine)
-	driverToPickupDuration := cumulativeTimes[1]
-	requestEarliestDepartureTime := offerDepartureTime.Add(driverToPickupDuration).Add(5 * time.Minute) // 5 min is just an offset
-	requestLatestArrivalTime := offerMaxEstimatedArrivalTime.Add(requestMaxWalkingDuration).Add(5 * time.Minute)
+	pickup, _, dropoff, _ := correcteness_test.GetPickupDropoffPointsAndDurations(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
+	cumulativeTimesWithoutRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *offerDestination}, offerDepartureTime, engine)
+	cumulativeTimesWithRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *pickup, *dropoff, *offerSource}, offerDepartureTime, engine)
+	offer.SetDetour((cumulativeTimesWithRider[3] - cumulativeTimesWithoutRider[1]) / 2)
+	offer.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, (cumulativeTimesWithRider[3]-cumulativeTimesWithoutRider[1])/2, engine))
+	requestEarliestDepartureTime := offerDepartureTime.Add(-requestMaxWalkingDuration).Add(-1 * time.Minute)
+	requestLatestArrivalTime := offerMaxEstimatedArrivalTime.Add(requestMaxWalkingDuration).Add(1 * time.Minute)
 	requestNumberOfRiders := 2
 	requestSameGender := true
 	requestGender := enums.Male
