@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/enums"
 	"matching-engine/internal/model"
@@ -14,7 +15,7 @@ func getTest2a(engine routing.Engine) ([]*model.Offer, []*model.Request, map[str
 	// Create an offer with the specified attributes
 	offerSource, _ := model.NewCoordinate(31.2460735985739, 29.9744554984058)
 	offerDestination, _ := model.NewCoordinate(31.2068412085851, 29.9246876930902)
-	offerDepartureTime, _ := time.Parse("15:04", "10:30")
+	offerDepartureTime := correcteness_test.ParseTime("10:30")
 	offerDetourDuration := time.Duration(8)
 	offerCapacity := 1
 	offerCurrentNumberOfRequests := 1
@@ -27,8 +28,8 @@ func getTest2a(engine routing.Engine) ([]*model.Offer, []*model.Request, map[str
 	matchedRequestDestination, _ := model.NewCoordinate(31.208936, 29.933419)
 	matchedRequestPickup, _ := model.NewCoordinate(31.22082087, 29.94795413)
 	matchedRequestDropoff, _ := model.NewCoordinate(31.208936, 29.933419)
-	matchedRequestEarliestDepartureTime, _ := time.Parse("15:04:05", "10:20:00")
-	matchedRequestLatestArrivalTime, _ := time.Parse("15:04", "11:20")
+	matchedRequestEarliestDepartureTime := correcteness_test.ParseTime("10:20:00")
+	matchedRequestLatestArrivalTime := correcteness_test.ParseTime("11:20")
 	matchedRequestMaxWalkingDuration := time.Duration(0)
 	matchedRequestNumberOfRiders := 1
 	matchedRequestSameGender := true
@@ -58,8 +59,8 @@ func getTest2a(engine routing.Engine) ([]*model.Offer, []*model.Request, map[str
 	// Create another request
 	requestSource, _ := model.NewCoordinate(31.208936, 29.933419)
 	requestDestination, _ := model.NewCoordinate(31.20773291, 29.92687263)
-	requestEarliestDepartureTime, _ := time.Parse("15:04:05", "10:20:00")
-	requestLatestArrivalTime, _ := time.Parse("15:04", "11:20")
+	requestEarliestDepartureTime := correcteness_test.ParseTime("10:20:00")
+	requestLatestArrivalTime := correcteness_test.ParseTime("11:20")
 	requestMaxWalkingDuration := time.Duration(0)
 	requestNumberOfRiders := 1
 	requestSameGender := true
@@ -76,7 +77,7 @@ func getTest2a(engine routing.Engine) ([]*model.Offer, []*model.Request, map[str
 	// Create expected results
 	expectedResults := make(map[string]*model.MatchingResult)
 	pickupPoint, dropoffPoint := computeRequestPickupDropoffPoints(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination, requestEarliestDepartureTime, request, requestLatestArrivalTime)
-	pickupOrder, dropoffOrder := 4, 5
+	pickupOrder, dropoffOrder := 3, 4
 	offerPath := addPointsToPath(engine, offer, pickupOrder, dropoffOrder, pickupPoint, dropoffPoint)
 
 	expectedResults[offer.ID()] = model.NewMatchingResult(

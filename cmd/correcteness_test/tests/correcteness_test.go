@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"fmt"
 	"go.uber.org/dig"
 	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
@@ -248,6 +249,7 @@ func runMatcher(c *dig.Container, offers []*model.Offer, requests []*model.Reque
 	if err != nil {
 		panic("Failed to invoke matcher in the container: " + err.Error())
 	}
+	fmt.Println(matches)
 	return matches, matchErr
 }
 
