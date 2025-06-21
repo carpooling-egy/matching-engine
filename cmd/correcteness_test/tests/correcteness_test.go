@@ -67,15 +67,13 @@ func TestCorrecteness(t *testing.T) {
 		},
 	}
 
-	c := initializeMatchingService()
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			offers, requests, expectedResults := tt.testFunc(engine)
 			if len(offers) == 0 || len(requests) == 0 {
 				t.Fatalf("No offers or requests generated for test %s", tt.name)
 			}
-			results, err := runMatcher(c, offers, requests)
+			results, err := runMatcher(offers, requests)
 			if err != nil {
 				t.Fatalf("Matcher failed for test %s: %v", tt.name, err)
 			}
@@ -279,19 +277,8 @@ func calculateExpectedArrivalTimes(path []model.PathPoint, departureTime time.Ti
 	return path
 }
 
-func runMatcher(c *dig.Container, offers []*model.Offer, requests []*model.Request) ([]*model.MatchingResult, error) {
-	var matches []*model.MatchingResult
-	var matchErr error
-	err := c.Invoke(func(matcher *matcher2.Matcher) {
-		matches, matchErr = matcher.Match(offers, requests)
-	})
-	if err != nil {
-		panic("Failed to invoke matcher in the container: " + err.Error())
-	}
-	return matches, matchErr
-}
+func runMatcher(offers []*model.Offer, requests []*model.Request) ([]*model.MatchingResult, error) {
 
-func initializeMatchingService() *dig.Container {
 	c := dig.New()
 
 	// register all dependencies for matching services
@@ -303,5 +290,13 @@ func initializeMatchingService() *dig.Container {
 	di.RegisterMatchingServices(c)
 	utils.Must(c.Provide(valhalla.NewValhalla))
 
-	return c
+	var matches []*model.MatchingResult
+	var matchErr error
+	err := c.Invoke(func(matcher *matcher2.Matcher) {
+		matches, matchErr = matcher.Match(offers, requests)
+	})
+	if err != nil {
+		panic("Failed to invoke matcher in the container: " + err.Error())
+	}
+	return matches, matchErr
 }
