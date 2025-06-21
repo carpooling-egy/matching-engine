@@ -59,9 +59,9 @@ func getTest1ciiData(engine routing.Engine) ([]*model.Offer, []*model.Request, m
 	// Create another request
 	requestSource, _ := model.NewCoordinate(31.2544088, 29.97376046)
 	requestDestination, _ := model.NewCoordinate(31.20611645, 29.92487334)
-	requestEarliestDepartureTime := correcteness_test.ParseTime("10:20:00")
-	requestLatestArrivalTime := correcteness_test.ParseTime("11:20")
 	requestMaxWalkingDuration := time.Duration(0) * time.Minute
+	requestEarliestDepartureTime := offerDepartureTime.Add(-requestMaxWalkingDuration).Add(-1 * time.Minute)
+	requestLatestArrivalTime := offerMaxEstimatedArrivalTime.Add(requestMaxWalkingDuration).Add(1 * time.Minute)
 	requestNumberOfRiders := 2
 	requestSameGender := true
 	requestGender := enums.Female
