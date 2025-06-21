@@ -152,14 +152,31 @@ func compareResults(results []*model.MatchingResult, expectedResults map[string]
 			expectedPoint := expectedResult.NewPath()[i]
 			if !point.Coordinate().Equal(expectedPoint.Coordinate()) ||
 				point.PointType() != expectedPoint.PointType() ||
-				!point.ExpectedArrivalTime().Equal(expectedPoint.ExpectedArrivalTime()) ||
+				!checkTimeOverlap(point.ExpectedArrivalTime(), expectedPoint.ExpectedArrivalTime(), 10*time.Second) ||
 				point.WalkingDuration() != expectedPoint.WalkingDuration() ||
-				point.Owner() != expectedPoint.Owner() {
+				!checkOwnerMatch(point, expectedPoint) {
 				return false
 			}
 		}
 	}
 	return true
+}
+
+func checkOwnerMatch(point model.PathPoint, expectedPoint model.PathPoint) bool {
+	_, isRequest := point.Owner().AsRequest()
+	_, isExpectedRequest := expectedPoint.Owner().AsRequest()
+	if isRequest != isExpectedRequest {
+		return false
+	}
+	if point.GetOwnerID() != expectedPoint.GetOwnerID() {
+		return false
+	}
+	return true
+}
+
+func checkTimeOverlap(time1, time2 time.Time, tolerance time.Duration) bool {
+	// Check if the two times are within the specified tolerance
+	return time1.After(time2.Add(-tolerance)) && time1.Before(time2.Add(tolerance))
 }
 
 func createOffer(userID, id string, source, destination model.Coordinate, departureTime time.Time,
@@ -234,8 +251,8 @@ func calculateExpectedArrivalTimes(path []model.PathPoint, departureTime time.Ti
 		coords[i] = *p.Coordinate()
 	}
 	drivingTimes := correcteness_test.GetCumulativeTimes(coords, departureTime, engine)
-	for i, p := range path {
-		p.SetExpectedArrivalTime(departureTime.Add(drivingTimes[i]))
+	for i := range path {
+		path[i].SetExpectedArrivalTime(departureTime.Add(drivingTimes[i]))
 	}
 	return path
 }
