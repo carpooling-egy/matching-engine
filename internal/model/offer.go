@@ -89,6 +89,16 @@ func (o *Offer) SetPath(path []PathPoint) {
 	o.path = path
 }
 
+//  TODO: SetDetour & SetMaxEstimatedArrivalTime are added for tests use only, we need to remove them and use a cleaner approach
+
+// SetDetour sets the detour duration
+func (o *Offer) SetDetour(detour time.Duration) {
+	o.detourDurMins = detour
+}
+
+func (o *Offer) SetMaxEstimatedArrivalTime(maxEstimatedArrivalTime time.Time) {
+	o.maxEstimatedArrivalTime = maxEstimatedArrivalTime
+}
 func (o *Offer) Validate() error {
 	if o == nil {
 		return fmt.Errorf(errors.ErrNilOfferInOfferNode)
