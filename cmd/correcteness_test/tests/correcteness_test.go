@@ -58,6 +58,10 @@ func TestCorrecteness(t *testing.T) {
 			testFunc: getTest1ciiData,
 		},
 		{
+			name:     "Test1di",
+			testFunc: getTest1diData,
+		},
+		{
 			name:     "Test2a",
 			testFunc: getTest2a,
 		},
@@ -221,6 +225,12 @@ func getMaxEstimatedArrivalTime(source model.Coordinate, destination model.Coord
 	directCoords := []model.Coordinate{source, destination}
 	directTimes := correcteness_test.GetCumulativeTimes(directCoords, departureTime, engine)
 	return departureTime.Add(detour).Add(directTimes[1])
+}
+
+func getDrivingDuration(source model.Coordinate, destination model.Coordinate, departureTime time.Time, engine routing.Engine) time.Duration {
+	directCoords := []model.Coordinate{source, destination}
+	directTimes := correcteness_test.GetCumulativeTimes(directCoords, departureTime, engine)
+	return directTimes[1]
 }
 
 func createRequest(userID, id string, source, destination model.Coordinate, earliestDepartureTime, latestArrivalTime time.Time,
