@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult) {
+func getTest1ciiData(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult) {
 	offers := make([]*model.Offer, 0)
 	requests := make([]*model.Request, 0)
 
@@ -19,7 +19,7 @@ func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 	offerDetourDuration := time.Duration(30) * time.Minute
 	offerCapacity := 3
 	offerCurrentNumberOfRequests := 1
-	offerSameGender := false
+	offerSameGender := true
 	offerGender := enums.Male
 	offerMaxEstimatedArrivalTime := getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine)
 
@@ -32,7 +32,7 @@ func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 	matchedRequestLatestArrivalTime := offerMaxEstimatedArrivalTime.Add(10 * time.Minute)
 	matchedRequestMaxWalkingDuration := time.Duration(0) * time.Minute
 	matchedRequestNumberOfRiders := 1
-	matchedRequestSameGender := true
+	matchedRequestSameGender := false
 	matchedRequestGender := enums.Male
 	matchedRequest := createRequest("2", "1", *matchedRequestSource, *matchedRequestDestination,
 		matchedRequestEarliestDepartureTime, matchedRequestLatestArrivalTime,
@@ -59,12 +59,12 @@ func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 	// Create another request
 	requestSource, _ := model.NewCoordinate(31.2544088, 29.97376046)
 	requestDestination, _ := model.NewCoordinate(31.20611645, 29.92487334)
-	requestEarliestDepartureTime := offerDepartureTime.Add(-1 * time.Hour)
-	requestLatestArrivalTime := offerDepartureTime.Add(-10 * time.Minute)
+	requestEarliestDepartureTime := correcteness_test.ParseTime("10:20:00")
+	requestLatestArrivalTime := correcteness_test.ParseTime("11:20")
 	requestMaxWalkingDuration := time.Duration(0) * time.Minute
 	requestNumberOfRiders := 2
 	requestSameGender := true
-	requestGender := enums.Male
+	requestGender := enums.Female
 
 	request := createRequest("3", "2", *requestSource, *requestDestination,
 		requestEarliestDepartureTime, requestLatestArrivalTime,
