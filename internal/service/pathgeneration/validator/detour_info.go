@@ -32,6 +32,8 @@ func (validator *DefaultPathValidator) calculateDetourInfo(
 	if isWithinDetourLimit {
 		fmt.Println(totalTripDuration)
 		fmt.Println(directTripDuration)
+	} else {
+		fmt.Println("inside detour limit")
 	}
 
 	return isWithinDetourLimit,
