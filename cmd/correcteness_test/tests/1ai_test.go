@@ -16,7 +16,7 @@ func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 	offerSource, _ := model.NewCoordinate(31.2544088039743, 29.97376045816)
 	offerDestination, _ := model.NewCoordinate(31.20611644667, 29.9248733439259)
 	offerDepartureTime := correcteness_test.ParseTime("10:30")
-	offerDetourDuration := time.Duration(30)
+	offerDetourDuration := time.Duration(30) * time.Minute
 	offerCapacity := 3
 	offerCurrentNumberOfRequests := 1
 	offerSameGender := false
@@ -30,7 +30,7 @@ func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 	matchedRequestDropoff, _ := model.NewCoordinate(31.20611645, 29.92487334)
 	matchedRequestEarliestDepartureTime := correcteness_test.ParseTime("10:20:00")
 	matchedRequestLatestArrivalTime := correcteness_test.ParseTime("11:20")
-	matchedRequestMaxWalkingDuration := time.Duration(0)
+	matchedRequestMaxWalkingDuration := time.Duration(0) * time.Minute
 	matchedRequestNumberOfRiders := 1
 	matchedRequestSameGender := true
 	matchedRequestGender := enums.Male
@@ -61,7 +61,7 @@ func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 	requestDestination, _ := model.NewCoordinate(31.20611645, 29.92487334)
 	requestEarliestDepartureTime := correcteness_test.ParseTime("09:20:00")
 	requestLatestArrivalTime := correcteness_test.ParseTime("10:20")
-	requestMaxWalkingDuration := time.Duration(0)
+	requestMaxWalkingDuration := time.Duration(0) * time.Minute
 	requestNumberOfRiders := 2
 	requestSameGender := true
 	requestGender := enums.Male
