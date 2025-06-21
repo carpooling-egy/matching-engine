@@ -17,12 +17,12 @@ func getTest1fiiData(engine routing.Engine) ([]*model.Offer, []*model.Request, m
 	offerSource, _ := model.NewCoordinate(31.2460735985739, 29.9744554984058)
 	offerDestination, _ := model.NewCoordinate(31.2068412085851, 29.9246876930902)
 	offerDepartureTime := correcteness_test.ParseTime("10:30")
-	offerDetourDuration := time.Duration(5) * time.Minute // will be overwritten this is a placeholder value
+	offerDetourDuration := time.Duration(4) * time.Minute // will be overwritten this is a placeholder value
 	offerCapacity := 1
 	offerCurrentNumberOfRequests := 1
 	offerSameGender := false
 	offerGender := enums.Male
-	offerMaxEstimatedArrivalTime := getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine) // will be overwritten this is a placeholder value
+	offerMaxEstimatedArrivalTime := offerDepartureTime.Add(15 * time.Minute) // will be overwritten this is a placeholder value
 
 	// Create a matched request for this offer
 	matchedRequestSource, _ := model.NewCoordinate(31.232139, 29.951709)
@@ -72,9 +72,9 @@ func getTest1fiiData(engine routing.Engine) ([]*model.Offer, []*model.Request, m
 	fmt.Println("withoutRider: ", cumulativeTimesWithoutRider[1])
 	fmt.Println("withRider: ", cumulativeTimesWithRider[3])
 	fmt.Println("offerDetourDuration: ", offerDetourDuration)
-	offer.SetDetour(offerDetourDuration)
-	offer.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine))
-	matchedRequest.SetLatestArrivalTime(offer.MaxEstimatedArrivalTime().Add(10 * time.Minute))
+	//offer.SetDetour(offerDetourDuration)
+	//offer.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine))
+	//matchedRequest.SetLatestArrivalTime(offer.MaxEstimatedArrivalTime().Add(10 * time.Minute))
 
 	requestEarliestDepartureTime := offerDepartureTime.Add(-10 * time.Minute)
 	requestLatestArrivalTime := offerMaxEstimatedArrivalTime.Add(10 * time.Minute)
