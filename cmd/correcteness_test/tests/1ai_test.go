@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/enums"
 	"matching-engine/internal/model"
@@ -14,8 +15,7 @@ func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 	// Create an offer with the specified attributes
 	offerSource, _ := model.NewCoordinate(31.2544088039743, 29.97376045816)
 	offerDestination, _ := model.NewCoordinate(31.20611644667, 29.9248733439259)
-	offerDepartureTime, _ := time.Parse("15:04", "10:30")
-	offerDepartureTime = adjustToNextDay(offerDepartureTime)
+	offerDepartureTime := correcteness_test.ParseTime("10:30")
 	offerDetourDuration := time.Duration(30)
 	offerCapacity := 3
 	offerCurrentNumberOfRequests := 1
@@ -28,10 +28,8 @@ func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 	matchedRequestDestination, _ := model.NewCoordinate(31.20611645, 29.92487334)
 	matchedRequestPickup, _ := model.NewCoordinate(31.2544088, 29.97376046)
 	matchedRequestDropoff, _ := model.NewCoordinate(31.20611645, 29.92487334)
-	matchedRequestEarliestDepartureTime, _ := time.Parse("15:04:05", "10:20:00")
-	matchedRequestLatestArrivalTime, _ := time.Parse("15:04", "11:20")
-	matchedRequestEarliestDepartureTime = adjustToNextDay(matchedRequestEarliestDepartureTime)
-	matchedRequestLatestArrivalTime = adjustToNextDay(matchedRequestLatestArrivalTime)
+	matchedRequestEarliestDepartureTime := correcteness_test.ParseTime("10:20:00")
+	matchedRequestLatestArrivalTime := correcteness_test.ParseTime("11:20")
 	matchedRequestMaxWalkingDuration := time.Duration(0)
 	matchedRequestNumberOfRiders := 1
 	matchedRequestSameGender := true
@@ -61,10 +59,8 @@ func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 	// Create another request
 	requestSource, _ := model.NewCoordinate(31.2544088, 29.97376046)
 	requestDestination, _ := model.NewCoordinate(31.20611645, 29.92487334)
-	requestEarliestDepartureTime, _ := time.Parse("15:04:05", "09:20:00")
-	requestLatestArrivalTime, _ := time.Parse("15:04", "10:20")
-	requestEarliestDepartureTime = adjustToNextDay(requestEarliestDepartureTime)
-	requestLatestArrivalTime = adjustToNextDay(requestLatestArrivalTime)
+	requestEarliestDepartureTime := correcteness_test.ParseTime("09:20:00")
+	requestLatestArrivalTime := correcteness_test.ParseTime("10:20")
 	requestMaxWalkingDuration := time.Duration(0)
 	requestNumberOfRiders := 2
 	requestSameGender := true
@@ -81,10 +77,4 @@ func getTest1aiData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 	// Create expected results
 	expectedResults := make(map[string]*model.MatchingResult)
 	return offers, requests, expectedResults
-}
-
-// adjustToNextDay adjusts the given time to the next day while preserving the time of day
-func adjustToNextDay(t time.Time) time.Time {
-	now := time.Now()
-	return time.Date(now.Year(), now.Month(), now.Day()+1, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location())
 }
