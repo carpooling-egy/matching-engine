@@ -2,6 +2,7 @@ package checker
 
 import (
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"matching-engine/internal/model"
 )
 
@@ -20,6 +21,10 @@ func (cc *CapacityChecker) Check(offer *model.Offer, request *model.Request) (bo
 	}
 	// Check if the offer has enough capacity to accommodate the request
 	if offer.Capacity() < request.NumberOfRiders() {
+		log.Debug().
+			Str("offer_id", offer.ID()).
+			Str("request_id", request.ID()).
+			Msg("offer capacity is less than request capacity")
 		return false, nil
 	}
 	return true, nil

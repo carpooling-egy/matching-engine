@@ -2,6 +2,7 @@ package checker
 
 import (
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"matching-engine/internal/model"
 )
 
@@ -24,6 +25,10 @@ func (pc *PreferenceChecker) Check(offer *model.Offer, request *model.Request) (
 		return false, fmt.Errorf("failed to check preference match: %w", err)
 	}
 	if !matched {
+		log.Debug().
+			Str("offer_id", offer.ID()).
+			Str("request_id", request.ID()).
+			Msg("Offer preferences do not match with request preferences")
 		return false, nil
 	}
 	// Check if the request preferences match with the matched requests in the offer
@@ -36,6 +41,10 @@ func (pc *PreferenceChecker) Check(offer *model.Offer, request *model.Request) (
 			return false, fmt.Errorf("failed to check preference match: %w", err)
 		}
 		if !matched {
+			log.Debug().
+				Str("matched_request_id", matchedRequest.ID()).
+				Str("request_id", request.ID()).
+				Msg("MatchedRequest preferences do not match with request preferences")
 			return false, nil
 		}
 	}
