@@ -74,6 +74,10 @@ func TestCorrecteness(t *testing.T) {
 			testFunc: getTest1fiData,
 		},
 		{
+			name:     "Test1fii",
+			testFunc: getTest1fiiData,
+		},
+		{
 			name:     "Test2a",
 			testFunc: getTest2a,
 		},
