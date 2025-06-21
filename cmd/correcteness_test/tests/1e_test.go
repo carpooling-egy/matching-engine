@@ -66,6 +66,11 @@ func getTest1eData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 	cumulativeTimesWithoutRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *offerDestination}, offerDepartureTime, engine)
 	cumulativeTimesWithRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *pickup, *dropoff, *offerSource}, offerDepartureTime, engine)
 
+	// overwrite offer detour, maxEstimated arrival time && matchedRequestLatestArrivalTime
+	offer.SetDetour((cumulativeTimesWithRider[3] - cumulativeTimesWithoutRider[1]) / 2)
+	offer.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, (cumulativeTimesWithRider[3]-cumulativeTimesWithoutRider[1])/2, engine))
+	matchedRequest.SetLatestArrivalTime(offer.MaxEstimatedArrivalTime().Add(10 * time.Minute))
+
 	requestEarliestDepartureTime := offerDepartureTime.Add(-requestMaxWalkingDuration).Add(-1 * time.Minute)
 	requestLatestArrivalTime := offerMaxEstimatedArrivalTime.Add(requestMaxWalkingDuration).Add(1 * time.Minute)
 	requestNumberOfRiders := 2
@@ -79,11 +84,6 @@ func getTest1eData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 
 	// Add the request to the list of requests
 	requests = append(requests, request)
-
-	// overwrite offer detour, maxEstimated arrival time && matchedRequestLatestArrivalTime
-	offer.SetDetour((cumulativeTimesWithRider[3] - cumulativeTimesWithoutRider[1]) / 2)
-	offer.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, (cumulativeTimesWithRider[3]-cumulativeTimesWithoutRider[1])/2, engine))
-	matchedRequest.SetLatestArrivalTime(offer.MaxEstimatedArrivalTime().Add(10 * time.Minute))
 
 	// Create expected results
 	expectedResults := make(map[string]*model.MatchingResult)
