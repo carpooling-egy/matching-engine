@@ -47,7 +47,8 @@ func (dtc *DetourTimeChecker) Check(offer *model.Offer, request *model.Request) 
 		log.Debug().
 			Str("offer_id", offer.ID()).
 			Str("request_id", request.ID()).
-			Msg("offer departure time is before request earliest departure time with pickup walking duration")
+			Msg("offer arrival time at pickup" +
+				" is before request earliest departure time with pickup walking duration")
 		return false, nil
 	}
 
@@ -55,7 +56,7 @@ func (dtc *DetourTimeChecker) Check(offer *model.Offer, request *model.Request) 
 		log.Debug().
 			Str("offer_id", offer.ID()).
 			Str("request_id", request.ID()).
-			Msg("offer departure time is after request latest arrival time with dropoff walking duration")
+			Msg("offer arrival time at dropoff after request latest arrival time with dropoff walking duration")
 		return false, nil
 	}
 	// Check if the detour time is within the acceptable range
