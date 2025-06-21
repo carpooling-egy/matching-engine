@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"fmt"
 	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/enums"
@@ -8,31 +9,31 @@ import (
 	"time"
 )
 
-func getTest1eData(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult) {
+func getTest1fiiData(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult) {
 	offers := make([]*model.Offer, 0)
 	requests := make([]*model.Request, 0)
 
 	// Create an offer with the specified attributes
-	offerSource, _ := model.NewCoordinate(31.2544088039743, 29.97376045816)
-	offerDestination, _ := model.NewCoordinate(31.20611644667, 29.9248733439259)
+	offerSource, _ := model.NewCoordinate(31.2460735985739, 29.9744554984058)
+	offerDestination, _ := model.NewCoordinate(31.2068412085851, 29.9246876930902)
 	offerDepartureTime := correcteness_test.ParseTime("10:30")
-	offerDetourDuration := time.Duration(30) * time.Minute // will be overwritten this is a placeholder value
-	offerCapacity := 3
+	offerDetourDuration := time.Duration(5) * time.Minute // will be overwritten this is a placeholder value
+	offerCapacity := 1
 	offerCurrentNumberOfRequests := 1
-	offerSameGender := true
+	offerSameGender := false
 	offerGender := enums.Male
 	offerMaxEstimatedArrivalTime := getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine) // will be overwritten this is a placeholder value
 
 	// Create a matched request for this offer
-	matchedRequestSource, _ := model.NewCoordinate(31.2544088, 29.97376046)
-	matchedRequestDestination, _ := model.NewCoordinate(31.20611645, 29.92487334)
-	matchedRequestPickup, _ := model.NewCoordinate(31.2544088, 29.97376046)
-	matchedRequestDropoff, _ := model.NewCoordinate(31.20611645, 29.92487334)
+	matchedRequestSource, _ := model.NewCoordinate(31.232139, 29.951709)
+	matchedRequestDestination, _ := model.NewCoordinate(31.2208208709376, 29.9479541306202)
+	matchedRequestPickup, _ := model.NewCoordinate(31.232139, 29.951709)
+	matchedRequestDropoff, _ := model.NewCoordinate(31.2208208709376, 29.9479541306202)
 	matchedRequestEarliestDepartureTime := offerDepartureTime.Add(-10 * time.Minute)
 	matchedRequestLatestArrivalTime := offerMaxEstimatedArrivalTime.Add(10 * time.Minute)
 	matchedRequestMaxWalkingDuration := time.Duration(0) * time.Minute
 	matchedRequestNumberOfRiders := 1
-	matchedRequestSameGender := false
+	matchedRequestSameGender := true
 	matchedRequestGender := enums.Male
 	matchedRequest := createRequest("2", "1", *matchedRequestSource, *matchedRequestDestination,
 		matchedRequestEarliestDepartureTime, matchedRequestLatestArrivalTime,
@@ -40,7 +41,6 @@ func getTest1eData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 		matchedRequestGender, matchedRequestSameGender)
 	offerRequests := []*model.Request{matchedRequest}
 
-	// Create the offer
 	offer := createOffer("1", "1", *offerSource, *offerDestination, offerDepartureTime,
 		offerDetourDuration, offerCapacity, offerCurrentNumberOfRequests, offerGender,
 		offerSameGender, offerMaxEstimatedArrivalTime, offerRequests)
@@ -58,8 +58,8 @@ func getTest1eData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 	offers = append(offers, offer)
 
 	// Create another request
-	requestSource, _ := model.NewCoordinate(31.241047, 29.962955)
-	requestDestination, _ := model.NewCoordinate(31.223313, 29.933295)
+	requestSource, _ := model.NewCoordinate(31.208936, 29.933419)
+	requestDestination, _ := model.NewCoordinate(31.2077329110055, 29.9268726301741)
 	requestMaxWalkingDuration := time.Duration(0) * time.Minute
 
 	pickup, _, dropoff, _ := correcteness_test.GetPickupDropoffPointsAndDurations(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
@@ -67,13 +67,18 @@ func getTest1eData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 	cumulativeTimesWithRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *pickup, *dropoff, *offerSource}, offerDepartureTime, engine)
 
 	// overwrite offer detour, maxEstimated arrival time && matchedRequestLatestArrivalTime
-	offer.SetDetour((cumulativeTimesWithRider[3] - cumulativeTimesWithoutRider[1]) / 2)
-	offer.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offer.DetourDurationMinutes(), engine))
+	// offerDetourDuration is done as this so that it passes the early check of the detour but don't pass the detour validation in the feasiblity check
+	offerDetourDuration = cumulativeTimesWithRider[3] - cumulativeTimesWithoutRider[1]
+	fmt.Println("withoutRider: ", cumulativeTimesWithoutRider[1])
+	fmt.Println("withRider: ", cumulativeTimesWithRider[3])
+	fmt.Println("offerDetourDuration: ", offerDetourDuration)
+	offer.SetDetour(offerDetourDuration)
+	offer.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine))
 	matchedRequest.SetLatestArrivalTime(offer.MaxEstimatedArrivalTime().Add(10 * time.Minute))
 
-	requestEarliestDepartureTime := offerDepartureTime.Add(-requestMaxWalkingDuration).Add(-1 * time.Minute)
-	requestLatestArrivalTime := offerMaxEstimatedArrivalTime.Add(requestMaxWalkingDuration).Add(1 * time.Minute)
-	requestNumberOfRiders := 2
+	requestEarliestDepartureTime := offerDepartureTime.Add(-10 * time.Minute)
+	requestLatestArrivalTime := offerMaxEstimatedArrivalTime.Add(10 * time.Minute)
+	requestNumberOfRiders := 1
 	requestSameGender := true
 	requestGender := enums.Male
 
