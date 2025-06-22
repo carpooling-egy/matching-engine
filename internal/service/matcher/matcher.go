@@ -60,15 +60,15 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 		return nil, fmt.Errorf("failed to build candidate matches: %w", err)
 	}
 
-	fmt.Println(matcher.potentialOfferRequests, "potential offer requests found")
-	v, ok := matcher.potentialOfferRequests.Get("1")
-	if !ok {
-		return nil, fmt.Errorf("no potential requests found for offer 1")
-	}
-	fmt.Println("Potential requests for offer 1:", v)
-	for _, requestID := range v.ToSlice() {
-		fmt.Println("Potential requests for offer 1:", requestID)
-	}
+	//fmt.Println(matcher.potentialOfferRequests, "potential offer requests found")
+	//v, ok := matcher.potentialOfferRequests.Get("1")
+	//if !ok {
+	//	return nil, nil
+	//}
+	//fmt.Println("Potential requests for offer 1:", v)
+	//for _, requestID := range v.ToSlice() {
+	//	fmt.Println("Potential requests for offer 1:", requestID)
+	//}
 	graph := model.NewGraph()
 
 	for matcher.availableOffers.Size() > 0 && matcher.availableRequests.Size() > 0 {
