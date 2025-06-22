@@ -3,6 +3,7 @@ package tests
 import (
 	"context"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"go.uber.org/dig"
 	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
@@ -84,16 +85,20 @@ func TestCorrecteness(t *testing.T) {
 			testFunc: getTest1fiiiData,
 		},
 		{
+			name:     "Test1fiv",
+			testFunc: getTest1fivData,
+		},
+		{
 			name:     "Test2a",
-			testFunc: getTest2a,
+			testFunc: getTest2aData,
 		},
 		{
 			name:     "Test3a",
-			testFunc: getTest3a,
+			testFunc: getTest3aData,
 		},
 		{
 			name:     "Test3b",
-			testFunc: getTest3b,
+			testFunc: getTest3bData,
 		},
 	}
 
@@ -209,31 +214,28 @@ func computeRequestPickupDropoffPoints(engine routing.Engine, offer *model.Offer
 
 func compareResults(results []*model.MatchingResult, expectedResults map[string]*model.MatchingResult) bool {
 	if len(results) != len(expectedResults) {
-		fmt.Printf("Expected %d results, got %d\n", len(expectedResults), len(results))
+		log.Debug().Msgf("Results length mismatch: got %d, expected %d\n", len(results), len(expectedResults))
 		return false
 	}
 	for _, result := range results {
 		expectedResult := expectedResults[result.OfferID()]
 		if result.UserID() != expectedResult.UserID() || result.OfferID() != expectedResult.OfferID() {
-			fmt.Printf("UserID or OfferID mismatch: got %s/%s, expected %s/%s\n",
+			log.Debug().Msgf("UserID or OfferID mismatch: got %s/%s, expected %s/%s\n",
 				result.UserID(), result.OfferID(), expectedResult.UserID(), expectedResult.OfferID())
 			return false
 		}
-		for _, req := range result.AssignedMatchedRequests() {
-			fmt.Println("AssignedMatchedRequests:", req.ID())
-		}
 		if len(result.AssignedMatchedRequests()) != len(expectedResult.AssignedMatchedRequests()) {
-			fmt.Printf("Number of assigned matched requests mismatch: got %d, expected %d\n",
+			log.Debug().Msgf("Assigned matched requests length mismatch: got %d, expected %d\n",
 				len(result.AssignedMatchedRequests()), len(expectedResult.AssignedMatchedRequests()))
 			return false
 		}
 		if len(result.NewPath()) != len(expectedResult.NewPath()) {
-			fmt.Printf("Number of path points mismatch: got %d, expected %d\n",
+			log.Debug().Msgf("Path length mismatch: got %d, expected %d\n",
 				len(result.NewPath()), len(expectedResult.NewPath()))
 			return false
 		}
 		if result.CurrentNumberOfRequests() != expectedResult.CurrentNumberOfRequests() {
-			fmt.Printf("Current number of requests mismatch: got %d, expected %d\n",
+			log.Debug().Msgf("Number of requests mismatch: got %d, expected %d\n",
 				result.CurrentNumberOfRequests(), expectedResult.CurrentNumberOfRequests())
 			return false
 		}
@@ -252,20 +254,17 @@ func compareResults(results []*model.MatchingResult, expectedResults map[string]
 				}
 			}
 			if !matchedRequests {
-				fmt.Printf("Assigned matched request mismatch for offer %s: got %s, expected %s\n",
-					result.OfferID(), req.ID(), expectedResult.AssignedMatchedRequests()[0].ID())
+				log.Debug().
+					Str("requestID", req.ID()).
+					Msg("Assigned matched request not found in expected results")
 				return false
 			}
 		}
-		for _, point := range result.NewPath() {
-			fmt.Printf("Point details: Coordinate: %f, %f, Type: %s, ExpectedArrivalTime: %s, WalkingDuration: %d, OwnerID: %s\n",
-				point.Coordinate().Lat(), point.Coordinate().Lng(), point.PointType(), point.ExpectedArrivalTime().Format(time.RFC3339),
-				point.WalkingDuration(), point.GetOwnerID())
-		}
 		for i, point := range result.NewPath() {
 			if i >= len(expectedResult.NewPath()) {
-				fmt.Printf("Path point index out of range: got %d, expected %d for offer %s\n",
-					i, len(expectedResult.NewPath()), result.OfferID())
+				log.Debug().
+					Int("point", i).
+					Msg("Point index out of bounds in expected result")
 				return false
 			}
 			expectedPoint := expectedResult.NewPath()[i]
@@ -274,16 +273,9 @@ func compareResults(results []*model.MatchingResult, expectedResults map[string]
 				!checkTimeOverlap(point.ExpectedArrivalTime(), expectedPoint.ExpectedArrivalTime(), 10*time.Second) ||
 				point.WalkingDuration() != expectedPoint.WalkingDuration() ||
 				!checkOwnerMatch(point, expectedPoint) {
-				fmt.Printf("Path point mismatch at index %d for offer %s: got %+v, expected %+v\n",
-					i, result.OfferID(), point, expectedPoint)
-				// Print the details of the point for better debugging
-				fmt.Printf("Point details: Coordinate: %s, Type: %s, ExpectedArrivalTime: %s, WalkingDuration: %d, OwnerID: %s\n",
-					point.Coordinate(), point.PointType(), point.ExpectedArrivalTime().Format(time.RFC3339),
-					point.WalkingDuration(), point.GetOwnerID())
-				fmt.Printf("Expected Point details: Coordinate: %s, Type: %s, ExpectedArrivalTime: %s, WalkingDuration: %d, OwnerID: %s\n",
-					expectedPoint.Coordinate(), expectedPoint.PointType(),
-					expectedPoint.ExpectedArrivalTime().Format(time.RFC3339),
-					expectedPoint.WalkingDuration(), expectedPoint.GetOwnerID())
+				log.Debug().
+					Int("point", i).
+					Msg("Point mismatch: ")
 				return false
 			}
 		}
@@ -294,8 +286,6 @@ func compareResults(results []*model.MatchingResult, expectedResults map[string]
 func checkOwnerMatch(point model.PathPoint, expectedPoint model.PathPoint) bool {
 	_, isRequest := point.Owner().AsRequest()
 	_, isExpectedRequest := expectedPoint.Owner().AsRequest()
-	fmt.Println(isRequest)
-	fmt.Println(isExpectedRequest)
 	if isRequest != isExpectedRequest {
 		return false
 	}

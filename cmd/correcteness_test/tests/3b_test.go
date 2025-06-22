@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func getTest3b(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult) {
+func getTest3bData(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult) {
 	offers := make([]*model.Offer, 0)
 	requests := make([]*model.Request, 0)
 
@@ -89,7 +89,7 @@ func getTest3b(engine routing.Engine) ([]*model.Offer, []*model.Request, map[str
 	offerDetourDuration = cumulativeTimesWithRider[7] - cumulativeTimesWithoutRider[1] + 1*time.Second // adding 1 second to ensure the detour is valid
 
 	offer.SetDetour(offerDetourDuration)
-	offer.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine))
+	offer.SetMaxEstimatedArrivalTime(offerDepartureTime.Add(cumulativeTimesWithoutRider[1]).Add(offerDetourDuration))
 	matchedRequest.SetLatestArrivalTime(offer.MaxEstimatedArrivalTime().Add(10 * time.Minute))
 	request1EarliestDepartureTime := offerDepartureTime.Add(-request1MaxWalkingDuration).Add(-1 * time.Minute)
 	request1LatestArrivalTime := offerMaxEstimatedArrivalTime.Add(request1MaxWalkingDuration).Add(100 * time.Minute)
