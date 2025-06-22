@@ -2,6 +2,7 @@ package validator
 
 import (
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"time"
 
 	"matching-engine/internal/model"
@@ -29,11 +30,11 @@ func (validator *DefaultPathValidator) calculateDetourInfo(
 	tripDetour := totalTripDuration - directTripDuration
 	isWithinDetourLimit := tripDetour <= offer.DetourDurationMinutes()
 
-	if isWithinDetourLimit {
-		fmt.Println(totalTripDuration)
-		fmt.Println(directTripDuration)
-	} else {
-		fmt.Println("inside detour limit")
+	if !isWithinDetourLimit {
+		log.Debug().
+			Int("tripDetourMinutes", int(tripDetour.Minutes())).
+			Int("offerDetourLimitMinutes", int(offer.DetourDurationMinutes().Minutes())).
+			Msg("Trip exceeds detour limit: ")
 	}
 
 	return isWithinDetourLimit,

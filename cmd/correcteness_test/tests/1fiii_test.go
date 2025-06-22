@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func getTest1fiiData(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult) {
+func getTest1fiiiData(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult) {
 	offers := make([]*model.Offer, 0)
 	requests := make([]*model.Request, 0)
 
@@ -17,7 +17,7 @@ func getTest1fiiData(engine routing.Engine) ([]*model.Offer, []*model.Request, m
 	offerSource, _ := model.NewCoordinate(31.2460735985739, 29.9744554984058)
 	offerDestination, _ := model.NewCoordinate(31.2068412085851, 29.9246876930902)
 	offerDepartureTime := correcteness_test.ParseTime("10:30")
-	offerDetourDuration := time.Duration(4) * time.Minute // will be overwritten this is a placeholder value
+	offerDetourDuration := time.Duration(8) * time.Minute // will be overwritten this is a placeholder value
 	offerCapacity := 1
 	offerCurrentNumberOfRequests := 1
 	offerSameGender := false
@@ -67,11 +67,10 @@ func getTest1fiiData(engine routing.Engine) ([]*model.Offer, []*model.Request, m
 	cumulativeTimesWithRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *matchedRequestSource, *matchedRequestDestination, *pickup, *dropoff, *offerDestination}, offerDepartureTime, engine)
 
 	// overwrite offer detour, maxEstimated arrival time && matchedRequestLatestArrivalTime
-	// offerDetourDuration is done as this so that it passes the early check of the detour but don't pass the detour validation in the feasiblity check
-	offerDetourDuration = cumulativeTimesWithRider[5] - cumulativeTimesWithoutRider[1]
+	offerDetourDuration = cumulativeTimesWithRider[5] - cumulativeTimesWithoutRider[1] + 10*time.Minute // adding 10 minutes to ensure the detour is valid
 	offer.SetDetour(offerDetourDuration)
 	offer.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine))
-	matchedRequest.SetLatestArrivalTime(offer.MaxEstimatedArrivalTime().Add(10 * time.Minute))
+	matchedRequest.SetLatestArrivalTime(offerDepartureTime.Add(cumulativeTimesWithRider[4]).Add(-5 * time.Minute)) // setting it to 5 minutes before arrival time at dropoff to ensure the request won't reach before his latest arrival time
 
 	log.Debug().
 		Int("offerDetourDurationMinutes", int(offerDetourDuration.Minutes())).
