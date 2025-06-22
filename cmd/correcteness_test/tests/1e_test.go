@@ -62,7 +62,7 @@ func getTest1eData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 	requestDestination, _ := model.NewCoordinate(31.223313, 29.933295)
 	requestMaxWalkingDuration := time.Duration(0) * time.Minute
 
-	pickup, _, dropoff, _ := correcteness_test.GetPickupDropoffPointsAndDurations(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
+	pickup, _, dropoff, _ := getRequestPointsAndDurations(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
 	cumulativeTimesWithoutRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *offerDestination}, offerDepartureTime, engine)
 	cumulativeTimesWithRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *pickup, *dropoff, *offerDestination}, offerDepartureTime, engine)
 

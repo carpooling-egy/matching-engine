@@ -62,13 +62,13 @@ func getTest1fiiData(engine routing.Engine) ([]*model.Offer, []*model.Request, m
 	requestDestination, _ := model.NewCoordinate(31.2077329110055, 29.9268726301741)
 	requestMaxWalkingDuration := time.Duration(0) * time.Minute
 
-	pickup, _, dropoff, _ := correcteness_test.GetPickupDropoffPointsAndDurations(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
+	pickup, _, dropoff, _ := getRequestPointsAndDurations(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
 	cumulativeTimesWithoutRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *offerDestination}, offerDepartureTime, engine)
 	cumulativeTimesWithRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *matchedRequestSource, *matchedRequestDestination, *pickup, *dropoff, *offerDestination}, offerDepartureTime, engine)
 
 	// overwrite offer detour, maxEstimated arrival time && matchedRequestLatestArrivalTime
 	// offerDetourDuration is done as this so that it passes the early check of the detour but don't pass the detour validation in the feasiblity check
-	offerDetourDuration = cumulativeTimesWithRider[5] - cumulativeTimesWithoutRider[1]
+	offerDetourDuration = cumulativeTimesWithRider[5] - cumulativeTimesWithoutRider[1] - 1*time.Minute
 	offer.SetDetour(offerDetourDuration)
 	offer.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine))
 	matchedRequest.SetLatestArrivalTime(offer.MaxEstimatedArrivalTime().Add(10 * time.Minute))

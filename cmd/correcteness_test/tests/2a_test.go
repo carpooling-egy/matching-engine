@@ -78,7 +78,10 @@ func getTest2a(engine routing.Engine) ([]*model.Offer, []*model.Request, map[str
 	expectedResults := make(map[string]*model.MatchingResult)
 	pickupPoint, dropoffPoint := computeRequestPickupDropoffPoints(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination, requestEarliestDepartureTime, request, requestLatestArrivalTime)
 	pickupOrder, dropoffOrder := 3, 4
-	offerPath := addPointsToPath(engine, offer, pickupOrder, dropoffOrder, pickupPoint, dropoffPoint)
+	// Compute the offer path with the new pickup and dropoff points
+	points := []*model.PathPoint{pickupPoint, dropoffPoint}
+	pointsOrder := []int{pickupOrder, dropoffOrder}
+	offerPath := addPointsToPath(engine, offer, pointsOrder, points)
 
 	expectedResults[offer.ID()] = model.NewMatchingResult(
 		offer.ID(),

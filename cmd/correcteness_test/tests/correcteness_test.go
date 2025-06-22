@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"fmt"
 	"go.uber.org/dig"
 	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
@@ -13,6 +14,7 @@ import (
 	"matching-engine/internal/model"
 	matcher2 "matching-engine/internal/service/matcher"
 	"matching-engine/internal/service/pickupdropoffservice"
+	"sort"
 	"testing"
 	"time"
 )
@@ -85,6 +87,10 @@ func TestCorrecteness(t *testing.T) {
 			name:     "Test2a",
 			testFunc: getTest2a,
 		},
+		{
+			name:     "Test3b",
+			testFunc: getTest3b,
+		},
 	}
 
 	for _, tt := range tests {
@@ -110,61 +116,121 @@ func TestCorrecteness(t *testing.T) {
 	}
 }
 
-func addPointsToPath(engine routing.Engine, offer *model.Offer, pickupOrder int, dropoffOrder int, pickupPoint *model.PathPoint, dropoffPoint *model.PathPoint) []model.PathPoint {
-	prefix := offer.Path()[:pickupOrder]
-	middle := offer.Path()[pickupOrder:dropoffOrder]
-	suffix := offer.Path()[dropoffOrder:]
-	offerPath := append(prefix, *pickupPoint)
-	offerPath = append(offerPath, *dropoffPoint)
-	offerPath = append(offerPath, middle...)
-	offerPath = append(offerPath, suffix...)
-	offerPath = calculateExpectedArrivalTimes(offerPath, offer.DepartureTime(), engine)
-	return offerPath
+func addPointsToPath(engine routing.Engine, offer *model.Offer, pointsOrder []int, points []*model.PathPoint) []model.PathPoint {
+	if len(pointsOrder) != len(points) {
+		panic("pointsOrder and points must have the same length")
+	}
+
+	originalPath := offer.Path()
+	newLen := len(originalPath) + len(points)
+
+	// Pair points with their insertion order
+	type pointInsert struct {
+		order int
+		point *model.PathPoint
+	}
+	inserts := make([]pointInsert, len(pointsOrder))
+	for i := range pointsOrder {
+		// Clamp insertion index to end if it's too large
+		order := pointsOrder[i]
+		inserts[i] = pointInsert{order, points[i]}
+	}
+
+	// Sort by insertion order
+	sort.Slice(inserts, func(i, j int) bool {
+		return inserts[i].order < inserts[j].order
+	})
+
+	fmt.Println(inserts)
+
+	newPath := make([]model.PathPoint, 0, newLen)
+
+	origIndex, insertIndex := 0, 0
+
+	for i := 0; i < newLen; i++ {
+		fmt.Println(i, origIndex, insertIndex, len(originalPath), len(inserts))
+		if insertIndex < len(inserts) && inserts[insertIndex].order == i {
+			fmt.Println("Inserting point at index", i, ":", inserts[insertIndex].point)
+			// Insert the new point at the correct position
+			newPath = append(newPath, *inserts[insertIndex].point)
+			insertIndex++
+		} else {
+			// Add the original path point
+			if origIndex < len(originalPath) {
+				newPath = append(newPath, originalPath[origIndex])
+				origIndex++
+			} else {
+				panic("Original path has fewer points than expected")
+			}
+		}
+	}
+
+	// Recalculate arrival times
+	newPath = calculateExpectedArrivalTimes(newPath, offer.DepartureTime(), engine)
+
+	return newPath
+}
+
+func getRequestPointsAndDurations(engine routing.Engine, offer *model.Offer, source *model.Coordinate, walkingDuration time.Duration, destination *model.Coordinate) (*model.Coordinate, time.Duration, *model.Coordinate, time.Duration) {
+	pickup, pickupDuration, dropoff, dropoffDuration := correcteness_test.GetPickupDropoffPointsAndDurations(
+		engine, offer, source, walkingDuration, destination)
+	if pickupDuration > walkingDuration {
+		pickupCoord, err := engine.SnapPointToRoad(context.Background(), source)
+		if err != nil {
+			pickupCoord = source
+		}
+		pickup = pickupCoord
+		pickupDuration = 0
+	}
+	if dropoffDuration > walkingDuration {
+		dropoffCoord, err := engine.SnapPointToRoad(context.Background(), destination)
+		if err != nil {
+			dropoffCoord = destination
+		}
+		dropoff = dropoffCoord
+		dropoffDuration = 0
+	}
+	return pickup, pickupDuration, dropoff, dropoffDuration
 }
 
 func computeRequestPickupDropoffPoints(engine routing.Engine, offer *model.Offer, requestSource *model.Coordinate, requestMaxWalkingDuration time.Duration, requestDestination *model.Coordinate, requestEarliestDepartureTime time.Time, request *model.Request, requestLatestArrivalTime time.Time) (*model.PathPoint, *model.PathPoint) {
-	pickupCoord, pickupDuration, dropoffCoord, dropoffDuration := correcteness_test.GetPickupDropoffPointsAndDurations(
+	pickupCoord, pickupDuration, dropoffCoord, dropoffDuration := getRequestPointsAndDurations(
 		engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
-	var pickupPoint, dropoffPoint *model.PathPoint
-	if pickupDuration > requestMaxWalkingDuration {
-		pickupCoord, err := engine.SnapPointToRoad(context.Background(), requestSource)
-		if err != nil {
-			pickupPoint = model.NewPathPoint(*requestSource, enums.Pickup, requestEarliestDepartureTime, request, 0)
-		} else {
-			pickupPoint = model.NewPathPoint(*pickupCoord, enums.Pickup, requestEarliestDepartureTime, request, 0)
-		}
-	} else {
-		pickupPoint = model.NewPathPoint(*pickupCoord, enums.Pickup, requestEarliestDepartureTime, request, pickupDuration)
-	}
-	if dropoffDuration > requestMaxWalkingDuration {
-		dropoffCoord, err := engine.SnapPointToRoad(context.Background(), requestDestination)
-		if err != nil {
-			dropoffPoint = model.NewPathPoint(*requestDestination, enums.Dropoff, requestLatestArrivalTime, request, 0)
-		} else {
-			dropoffPoint = model.NewPathPoint(*dropoffCoord, enums.Dropoff, requestLatestArrivalTime, request, 0)
-		}
-	} else {
-		dropoffPoint = model.NewPathPoint(*dropoffCoord, enums.Dropoff, requestLatestArrivalTime, request, dropoffDuration)
-	}
+	pickupPoint := model.NewPathPoint(
+		*pickupCoord, enums.Pickup, requestEarliestDepartureTime, request, pickupDuration)
+	dropoffPoint := model.NewPathPoint(
+		*dropoffCoord, enums.Dropoff, requestLatestArrivalTime, request, dropoffDuration)
 	return pickupPoint, dropoffPoint
 }
 
 func compareResults(results []*model.MatchingResult, expectedResults map[string]*model.MatchingResult) bool {
 	if len(results) != len(expectedResults) {
+		fmt.Printf("Expected %d results, got %d\n", len(expectedResults), len(results))
 		return false
 	}
 	for _, result := range results {
 		expectedResult := expectedResults[result.OfferID()]
 		if result.UserID() != expectedResult.UserID() || result.OfferID() != expectedResult.OfferID() {
+			fmt.Printf("UserID or OfferID mismatch: got %s/%s, expected %s/%s\n",
+				result.UserID(), result.OfferID(), expectedResult.UserID(), expectedResult.OfferID())
 			return false
 		}
+		for _, req := range result.AssignedMatchedRequests() {
+			fmt.Println("AssignedMatchedRequests:", req.ID())
+		}
 		if len(result.AssignedMatchedRequests()) != len(expectedResult.AssignedMatchedRequests()) {
+			fmt.Printf("Number of assigned matched requests mismatch: got %d, expected %d\n",
+				len(result.AssignedMatchedRequests()), len(expectedResult.AssignedMatchedRequests()))
 			return false
 		}
 		if len(result.NewPath()) != len(expectedResult.NewPath()) {
+			fmt.Printf("Number of path points mismatch: got %d, expected %d\n",
+				len(result.NewPath()), len(expectedResult.NewPath()))
 			return false
 		}
 		if result.CurrentNumberOfRequests() != expectedResult.CurrentNumberOfRequests() {
+			fmt.Printf("Current number of requests mismatch: got %d, expected %d\n",
+				result.CurrentNumberOfRequests(), expectedResult.CurrentNumberOfRequests())
 			return false
 		}
 		for _, req := range result.AssignedMatchedRequests() {
@@ -182,11 +248,20 @@ func compareResults(results []*model.MatchingResult, expectedResults map[string]
 				}
 			}
 			if !matchedRequests {
+				fmt.Printf("Assigned matched request mismatch for offer %s: got %s, expected %s\n",
+					result.OfferID(), req.ID(), expectedResult.AssignedMatchedRequests()[0].ID())
 				return false
 			}
 		}
+		for _, point := range result.NewPath() {
+			fmt.Printf("Point details: Coordinate: %f, %f, Type: %s, ExpectedArrivalTime: %s, WalkingDuration: %d, OwnerID: %s\n",
+				point.Coordinate().Lat(), point.Coordinate().Lng(), point.PointType(), point.ExpectedArrivalTime().Format(time.RFC3339),
+				point.WalkingDuration(), point.GetOwnerID())
+		}
 		for i, point := range result.NewPath() {
 			if i >= len(expectedResult.NewPath()) {
+				fmt.Printf("Path point index out of range: got %d, expected %d for offer %s\n",
+					i, len(expectedResult.NewPath()), result.OfferID())
 				return false
 			}
 			expectedPoint := expectedResult.NewPath()[i]
@@ -195,6 +270,16 @@ func compareResults(results []*model.MatchingResult, expectedResults map[string]
 				!checkTimeOverlap(point.ExpectedArrivalTime(), expectedPoint.ExpectedArrivalTime(), 10*time.Second) ||
 				point.WalkingDuration() != expectedPoint.WalkingDuration() ||
 				!checkOwnerMatch(point, expectedPoint) {
+				fmt.Printf("Path point mismatch at index %d for offer %s: got %+v, expected %+v\n",
+					i, result.OfferID(), point, expectedPoint)
+				// Print the details of the point for better debugging
+				fmt.Printf("Point details: Coordinate: %s, Type: %s, ExpectedArrivalTime: %s, WalkingDuration: %d, OwnerID: %s\n",
+					point.Coordinate(), point.PointType(), point.ExpectedArrivalTime().Format(time.RFC3339),
+					point.WalkingDuration(), point.GetOwnerID())
+				fmt.Printf("Expected Point details: Coordinate: %s, Type: %s, ExpectedArrivalTime: %s, WalkingDuration: %d, OwnerID: %s\n",
+					expectedPoint.Coordinate(), expectedPoint.PointType(),
+					expectedPoint.ExpectedArrivalTime().Format(time.RFC3339),
+					expectedPoint.WalkingDuration(), expectedPoint.GetOwnerID())
 				return false
 			}
 		}
@@ -205,6 +290,8 @@ func compareResults(results []*model.MatchingResult, expectedResults map[string]
 func checkOwnerMatch(point model.PathPoint, expectedPoint model.PathPoint) bool {
 	_, isRequest := point.Owner().AsRequest()
 	_, isExpectedRequest := expectedPoint.Owner().AsRequest()
+	fmt.Println(isRequest)
+	fmt.Println(isExpectedRequest)
 	if isRequest != isExpectedRequest {
 		return false
 	}
