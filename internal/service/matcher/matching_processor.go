@@ -18,8 +18,6 @@ func (matcher *Matcher) processMaximumMatching(graph *model.Graph, limit int) er
 		return nil
 	}
 
-	log.Info().Msgf("Found %d maximum matching pairs", len(maxPairs))
-
 	for _, pair := range maxPairs {
 		offerNode := pair.First
 		edge := pair.Second
@@ -42,13 +40,8 @@ func (matcher *Matcher) processMaximumMatching(graph *model.Graph, limit int) er
 			matcher.availableOffers.Delete(offerNode.Offer().ID())
 			matcher.potentialOfferRequests.Delete(offerNode.Offer().ID())
 		}
-		fmt.Println(requestNode.Request().ID())
 
 		matcher.availableRequests.Delete(requestNode.Request().ID())
 	}
-	matcher.availableRequests.Range(func(offerID string, offerNode *model.RequestNode) error {
-		fmt.Println("Remaining request:", offerID)
-		return nil
-	})
 	return nil
 }

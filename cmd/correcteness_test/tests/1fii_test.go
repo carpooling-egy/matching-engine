@@ -70,7 +70,7 @@ func getTest1fiiData(engine routing.Engine) ([]*model.Offer, []*model.Request, m
 	// offerDetourDuration is done as this so that it passes the early check of the detour but don't pass the detour validation in the feasiblity check
 	offerDetourDuration = cumulativeTimesWithRider[5] - cumulativeTimesWithoutRider[1] - 1*time.Minute
 	offer.SetDetour(offerDetourDuration)
-	offer.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine))
+	offer.SetMaxEstimatedArrivalTime(offerDepartureTime.Add(cumulativeTimesWithoutRider[1]).Add(offerDetourDuration))
 	matchedRequest.SetLatestArrivalTime(offer.MaxEstimatedArrivalTime().Add(10 * time.Minute))
 
 	log.Debug().
