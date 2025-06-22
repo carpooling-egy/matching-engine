@@ -8,6 +8,7 @@ CREATE TYPE gender_type AS ENUM ('male', 'female');
 CREATE TABLE rider_requests (
     id VARCHAR(50) PRIMARY KEY,
     user_id VARCHAR(50) NOT NULL,
+    dataset_id VARCHAR(50) NOT NULL DEFAULT 'default',
 
     -- source
     source_latitude DECIMAL(10, 8) NOT NULL,
@@ -37,6 +38,8 @@ CREATE TABLE rider_requests (
 CREATE TABLE driver_offers (
     id VARCHAR(50) PRIMARY KEY,
     user_id VARCHAR(50) NOT NULL,
+    dataset_id VARCHAR(50) NOT NULL DEFAULT 'default',
+
     --source
     source_latitude DECIMAL(10, 8) NOT NULL,
     source_longitude DECIMAL(11, 8) NOT NULL,

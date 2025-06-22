@@ -48,7 +48,7 @@ func (r *PostgresRiderRequestRepo) GetByID(ctx context.Context, id string) (*mod
 }
 
 // GetUnmatched finds rider requests that can be matched within the specified time window
-func (r *PostgresRiderRequestRepo) GetUnmatched(ctx context.Context, start, end time.Time) ([]*model.Request, error) {
+func (r *PostgresRiderRequestRepo) GetUnmatched(ctx context.Context, start, end time.Time, datasetId string) ([]*model.Request, error) {
 	if end.Before(start) {
 		return nil, errors.InvalidTimeRange()
 	}
@@ -59,6 +59,8 @@ func (r *PostgresRiderRequestRepo) GetUnmatched(ctx context.Context, start, end 
 		Omit("created_at, updated_at").
 		Where("is_matched = false").
 		Where("earliest_departure_time BETWEEN ? AND ?", start, end).
+		Where("dataset_id = ?", datasetId).
+		Omit("dataset_id").
 		Find(&riderRequestDB).Error
 
 	if err != nil {
