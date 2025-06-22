@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"fmt"
 	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/enums"
@@ -14,22 +13,24 @@ func getTest3b(engine routing.Engine) ([]*model.Offer, []*model.Request, map[str
 	requests := make([]*model.Request, 0)
 
 	// Create an offer with the specified attributes
-	offerSource, _ := model.NewCoordinate(31.2460735985739, 29.9744554984058)
-	offerDestination, _ := model.NewCoordinate(31.2068412085851, 29.9246876930902)
+	offerSource, _ := model.NewCoordinate(31.24587, 29.97458)
+	offerDestination, _ := model.NewCoordinate(31.196, 29.90127)
 	offerDepartureTime := correcteness_test.ParseTime("10:30")
-	offerDetourDuration := time.Duration(8) * time.Minute
-	offerCapacity := 3
+	offerDetourDuration := time.Duration(8) * time.Minute // will be overwritten later
+	offerCapacity := 1
 	offerCurrentNumberOfRequests := 1
 	offerSameGender := false
 	offerGender := enums.Male
+	// offerMaxEstimatedArrivalTime will be overwritten later
 	offerMaxEstimatedArrivalTime := getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine)
 
 	// Create a matched request for this offer
-	matchedRequestSource, _ := model.NewCoordinate(31.22082087, 29.94795413)
-	matchedRequestDestination, _ := model.NewCoordinate(31.208936, 29.933419)
-	matchedRequestPickup, _ := model.NewCoordinate(31.22082087, 29.94795413)
-	matchedRequestDropoff, _ := model.NewCoordinate(31.208936, 29.933419)
+	// TODO correct pick up and dropoff coordinates
+	matchedRequestSource, _ := model.NewCoordinate(31.23985, 29.96469)
+	matchedRequestDestination, _ := model.NewCoordinate(31.23213, 29.9517)
+
 	matchedRequestEarliestDepartureTime := offerDepartureTime.Add(-10 * time.Minute)
+	// matchedRequestLatestArrivalTime will be overwritten later
 	matchedRequestLatestArrivalTime := offerMaxEstimatedArrivalTime.Add(10 * time.Minute)
 	matchedRequestMaxWalkingDuration := time.Duration(0) * time.Minute
 	matchedRequestNumberOfRiders := 1
@@ -45,6 +46,14 @@ func getTest3b(engine routing.Engine) ([]*model.Offer, []*model.Request, map[str
 		offerDetourDuration, offerCapacity, offerCurrentNumberOfRequests, offerGender,
 		offerSameGender, offerMaxEstimatedArrivalTime, offerRequests)
 
+	path := []model.PathPoint{
+		*model.NewPathPoint(*offerSource, enums.Source, offerDepartureTime, offer, 0),
+		*model.NewPathPoint(*offerDestination, enums.Destination, offerMaxEstimatedArrivalTime, offer, 0)}
+
+	offer.SetPath(path)
+
+	matchedRequestPickup, _, matchedRequestDropoff, _ := getRequestPointsAndDurations(engine, offer, matchedRequestSource, matchedRequestMaxWalkingDuration, matchedRequestDestination)
+
 	// Create a matched request with pickup and dropoff coordinates
 	matchedReq := &MatchedRequest{
 		request:      matchedRequest,
@@ -58,37 +67,35 @@ func getTest3b(engine routing.Engine) ([]*model.Offer, []*model.Request, map[str
 	offers = append(offers, offer)
 
 	// Create request 1
-	request1Source, _ := model.NewCoordinate(31.208789314386852, 29.932685590743088)
-	request1Destination, _ := model.NewCoordinate(31.2077329110055, 29.9268726301741)
+	request1Source, _ := model.NewCoordinate(31.22082, 29.94795)
+	request1Destination, _ := model.NewCoordinate(31.21261, 29.9416)
 	request1MaxWalkingDuration := time.Duration(0) * time.Minute
 	request1NumberOfRiders := 1
 	request1SameGender := true
 	request1Gender := enums.Male
 	pickup1, _, dropoff1, _ := getRequestPointsAndDurations(engine, offer, request1Source, request1MaxWalkingDuration, request1Destination)
 	// Create request 2
-	request2Source, _ := model.NewCoordinate(31.2398552645433, 29.9646946591899)
-	request2Destination, _ := model.NewCoordinate(31.2251143325977, 29.9474103945877)
+	request2Source, _ := model.NewCoordinate(31.19699, 29.90388)
+	request2Destination, _ := model.NewCoordinate(31.19661, 29.90294)
 	request2MaxWalkingDuration := time.Duration(0) * time.Minute
-	request2NumberOfRiders := 3
+	request2NumberOfRiders := 1
 	request2SameGender := false
 	request2Gender := enums.Male
 	pickup2, _, dropoff2, _ := getRequestPointsAndDurations(engine, offer, request2Source, request2MaxWalkingDuration, request2Destination)
 
 	cumulativeTimesWithoutRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *offerDestination}, offerDepartureTime, engine)
-	cumulativeTimesWithRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *pickup2, *dropoff2, *matchedRequestSource, *matchedRequestDestination, *pickup1, *dropoff1, *offerDestination}, offerDepartureTime, engine)
+	cumulativeTimesWithRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *matchedRequestPickup, *matchedRequestDropoff, *pickup1, *dropoff1, *pickup2, *dropoff2, *offerDestination}, offerDepartureTime, engine)
 
-	// overwrite offer detour, maxEstimated arrival time && matchedRequestLatestArrivalTime
-	fmt.Println(cumulativeTimesWithoutRider)
-	fmt.Println(cumulativeTimesWithRider)
-	offerDetourDuration = cumulativeTimesWithRider[7] - cumulativeTimesWithoutRider[1] + 10*time.Second // adding 1 minutes to ensure the detour is valid
+	offerDetourDuration = cumulativeTimesWithRider[7] - cumulativeTimesWithoutRider[1] + 1*time.Second // adding 1 second to ensure the detour is valid
+
 	offer.SetDetour(offerDetourDuration)
 	offer.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine))
 	matchedRequest.SetLatestArrivalTime(offer.MaxEstimatedArrivalTime().Add(10 * time.Minute))
 	request1EarliestDepartureTime := offerDepartureTime.Add(-request1MaxWalkingDuration).Add(-1 * time.Minute)
-	request1LatestArrivalTime := offerMaxEstimatedArrivalTime.Add(request1MaxWalkingDuration).Add(1 * time.Minute)
+	request1LatestArrivalTime := offerMaxEstimatedArrivalTime.Add(request1MaxWalkingDuration).Add(100 * time.Minute)
 
 	request2EarliestDepartureTime := offerDepartureTime.Add(-request2MaxWalkingDuration).Add(-1 * time.Minute)
-	request2LatestArrivalTime := offerMaxEstimatedArrivalTime.Add(request2MaxWalkingDuration).Add(1 * time.Minute)
+	request2LatestArrivalTime := offerMaxEstimatedArrivalTime.Add(request2MaxWalkingDuration).Add(100 * time.Minute)
 
 	request1 := createRequest("3", "2", *request1Source, *request1Destination,
 		request1EarliestDepartureTime, request1LatestArrivalTime,
@@ -109,10 +116,10 @@ func getTest3b(engine routing.Engine) ([]*model.Offer, []*model.Request, map[str
 	// Create expected results
 	expectedResults := make(map[string]*model.MatchingResult)
 	pickupPoint1, dropoffPoint1 := computeRequestPickupDropoffPoints(engine, offer, request1Source, request1MaxWalkingDuration, request1Destination, request1EarliestDepartureTime, request1, request1LatestArrivalTime)
-	pickupOrder1, dropoffOrder1 := 5, 6
+	pickupOrder1, dropoffOrder1 := 3, 4
 
 	pickupPoint2, dropoffPoint2 := computeRequestPickupDropoffPoints(engine, offer, request2Source, request2MaxWalkingDuration, request2Destination, request2EarliestDepartureTime, request2, request2LatestArrivalTime)
-	pickupOrder2, dropoffOrder2 := 1, 2
+	pickupOrder2, dropoffOrder2 := 5, 6
 	// Add the requests to the offer
 	points := []*model.PathPoint{
 		pickupPoint1,
