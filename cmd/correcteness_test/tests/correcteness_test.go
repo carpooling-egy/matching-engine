@@ -88,6 +88,10 @@ func TestCorrecteness(t *testing.T) {
 			testFunc: getTest2a,
 		},
 		{
+			name:     "Test3a",
+			testFunc: getTest3a,
+		},
+		{
 			name:     "Test3b",
 			testFunc: getTest3b,
 		},
@@ -148,9 +152,9 @@ func addPointsToPath(engine routing.Engine, offer *model.Offer, pointsOrder []in
 	origIndex, insertIndex := 0, 0
 
 	for i := 0; i < newLen; i++ {
-		fmt.Println(i, origIndex, insertIndex, len(originalPath), len(inserts))
+		//fmt.Println(i, origIndex, insertIndex, len(originalPath), len(inserts))
 		if insertIndex < len(inserts) && inserts[insertIndex].order == i {
-			fmt.Println("Inserting point at index", i, ":", inserts[insertIndex].point)
+			//fmt.Println("Inserting point at index", i, ":", inserts[insertIndex].point)
 			// Insert the new point at the correct position
 			newPath = append(newPath, *inserts[insertIndex].point)
 			insertIndex++
@@ -406,4 +410,11 @@ func runMatcher(offers []*model.Offer, requests []*model.Request) ([]*model.Matc
 		panic("Failed to invoke matcher in the container: " + err.Error())
 	}
 	return matches, matchErr
+}
+
+func must[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
 }
