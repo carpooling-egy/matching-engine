@@ -61,7 +61,7 @@ func getTest1diData(engine routing.Engine) ([]*model.Offer, []*model.Request, ma
 	requestDestination, _ := model.NewCoordinate(31.223313, 29.933295)
 	requestMaxWalkingDuration := time.Duration(0) * time.Minute
 
-	pickup, _, _, _ := correcteness_test.GetPickupDropoffPointsAndDurations(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
+	pickup, _, _, _ := getRequestPointsAndDurations(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
 	cumulativeTimes := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *pickup}, offerDepartureTime, engine)
 	driverToPickupDuration := cumulativeTimes[1]
 	requestEarliestDepartureTime := offerDepartureTime.Add(driverToPickupDuration).Add(5 * time.Minute) // 5 min is just an offset

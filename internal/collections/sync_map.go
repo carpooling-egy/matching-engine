@@ -123,4 +123,5 @@ func (sm *SyncMap[K, V]) Contains(key K) bool {
 // Clear removes all items from the syncMap
 func (sm *SyncMap[K, V]) Clear() {
 	sm.store = sync.Map{}
+	atomic.StoreInt64(&sm.size, 0)
 }

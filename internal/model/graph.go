@@ -53,8 +53,8 @@ func (g *Graph) Clear() {
 		node.ClearEdges()
 		return nil
 	})
-	g.offerNodes.Clear()
-	g.requestNodes.Clear()
+	g.offerNodes = collections.NewSyncMap[string, *OfferNode]()
+	g.requestNodes = collections.NewSyncMap[string, *RequestNode]()
 	g.edges.Clear()
 }
 
