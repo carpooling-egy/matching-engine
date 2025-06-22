@@ -19,6 +19,7 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.Graph) (bool, error) {
 		requestNodes := make([]*model.RequestNode, 0, requestSet.Size())
 		requestSetSlice := requestSet.ToSlice()
 		for _, requestID := range requestSetSlice {
+			fmt.Printf("Checking request ID: %s for offer ID: %s\n", requestID, offerID)
 			if requestNode, ok := matcher.availableRequests.Get(requestID); ok && requestNode != nil {
 				requestNodes = append(requestNodes, requestNode)
 			} else {
@@ -30,6 +31,8 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.Graph) (bool, error) {
 		if err != nil {
 			return err
 		}
+
+		fmt.Printf("Processing offer %s with %d potential requests\n", offerID, len(requestNodes))
 
 		for _, requestNode := range requestNodes {
 
