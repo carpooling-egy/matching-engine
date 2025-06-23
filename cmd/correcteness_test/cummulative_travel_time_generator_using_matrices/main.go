@@ -19,7 +19,7 @@ func main() {
 	}
 
 	// Open points.txt file
-	pointsFile, err := os.Open("/home/samni/College/graduation_project/carpooling/matching-engine/cmd/correcteness_test/cummulative_travel_time_generator_using_matrices/points.txt")
+	pointsFile, err := os.Open("cmd/correcteness_test/cummulative_travel_time_generator_using_matrices/points.txt")
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to open points.txt")
 	}
@@ -62,6 +62,7 @@ func main() {
 		log.Error().Err(err).Msg("Error reading points.txt")
 		return
 	}
+	fmt.Println(coords)
 	// Build route parameters
 	routeParams, err := model.NewRouteParams(coords, timestamp)
 	if err != nil {

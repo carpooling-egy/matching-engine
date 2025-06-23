@@ -54,11 +54,6 @@ func (planner *DefaultPathPlanner) FindFirstFeasiblePath(offerNode *model.OfferN
 			return nil, false, fmt.Errorf("failed to validate path: %w", validateErr)
 		}
 		if isValidPath {
-			fmt.Println("valid")
-		} else {
-			fmt.Println("Invalid")
-		}
-		if isValidPath {
 			// Found a valid path, return it immediately
 			return candidatePath, true, nil
 		}
