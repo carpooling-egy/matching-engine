@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"fmt"
 	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/enums"
@@ -123,12 +122,9 @@ func getTest4(engine routing.Engine) ([]*model.Offer, []*model.Request, map[stri
 	pickupOrder3, dropoffOrder3 := 3, 4
 
 	cumulativeTimesForDriver1With3 := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offer1.Source(), *request1Source, *request1Destination, request3Source, request3Destination, *offer1.Destination()}, offer1.DepartureTime(), engine)
-	//cumulativeTimesForDriver1Without3 := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offer1.Source(), *request1Source, *request1Destination, *offer1.Destination()}, offer1.DepartureTime(), engine)
 	cumulativeTimesForDriver1Direct := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offer1.Source(), *offer1.Destination()}, offer1.DepartureTime(), engine)
-	cumulativeTimesForDriver1With2 := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offer1.Source(), *request2Source, *request2Destination, *offer1.Destination()}, offer1.DepartureTime(), engine)
 
 	cumulativeTimesForDriver2With3 := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offer2.Source(), *pickupPoint2_b.Coordinate(), *dropoffPoint2_b.Coordinate(), *pickupPoint3_b.Coordinate(), *dropoffPoint3_b.Coordinate(), *offer2.Destination()}, offer2.DepartureTime(), engine)
-	//cumulativeTimesForDriver2Without3 := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offer2.Source(), *request2Source, *request2Destination, *offer2.Destination()}, offer1.DepartureTime(), engine)
 	cumulativeTimesForDriver2Direct := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offer2.Source(), *offer2.Destination()}, offer2.DepartureTime(), engine)
 
 	cumulativeTimesForDriver3Direct := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offer3.Source(), *offer3.Destination()}, offer3.DepartureTime(), engine)
@@ -137,14 +133,6 @@ func getTest4(engine routing.Engine) ([]*model.Offer, []*model.Request, map[stri
 	offerDetourDuration1 := cumulativeTimesForDriver1With3[5] - cumulativeTimesForDriver1Direct[1] + 60*time.Second // adding 10 seconds to ensure the detour is valid
 	offerDetourDuration2 := cumulativeTimesForDriver2With3[5] - cumulativeTimesForDriver2Direct[1] + 60*time.Second // adding 10 seconds to ensure the detour is valid
 	offerDetourDuration3 := cumulativeTimesForDriver3Direct[1] + 10*time.Second                                     // adding 10 seconds to ensure the detour is valid
-
-	fmt.Println("cumulativeTimesForDriver1With3:", cumulativeTimesForDriver1With3)
-	fmt.Println("Coordinates for Driver2With3:")
-	for i, c := range []model.Coordinate{*offer2.Source(), *pickupPoint2_b.Coordinate(), *dropoffPoint2_b.Coordinate(), *pickupPoint3_b.Coordinate(), *dropoffPoint3_b.Coordinate(), *offer2.Destination()} {
-		fmt.Printf("  %d: %+v\n", i, c)
-	}
-	fmt.Println("cumulativeTimesForDriver2With3:", cumulativeTimesForDriver2With3)
-	fmt.Println("cumulativeTimesForDriver1With2:", cumulativeTimesForDriver1With2)
 
 	offer1.SetDetour(offerDetourDuration1 + 10*time.Second) // adding 10 seconds to ensure the detour is valid
 	offer1.SetMaxEstimatedArrivalTime(GetMaxEstimatedArrivalTime(*offer1.Source(), *offer1.Destination(), offer1.DepartureTime(), offerDetourDuration1, engine))

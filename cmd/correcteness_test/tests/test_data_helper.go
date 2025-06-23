@@ -2,7 +2,6 @@ package tests
 
 import (
 	"context"
-	"fmt"
 	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/enums"
@@ -44,16 +43,12 @@ func AddPointsToPath(engine routing.Engine, offer *model.Offer, pointsOrder []in
 		return inserts[i].order < inserts[j].order
 	})
 
-	fmt.Println(inserts)
-
 	newPath := make([]model.PathPoint, 0, newLen)
 
 	origIndex, insertIndex := 0, 0
 
 	for i := 0; i < newLen; i++ {
-		//fmt.Println(i, origIndex, insertIndex, len(originalPath), len(inserts))
 		if insertIndex < len(inserts) && inserts[insertIndex].order == i {
-			//fmt.Println("Inserting point at index", i, ":", inserts[insertIndex].point)
 			// Insert the new point at the correct position
 			newPath = append(newPath, *inserts[insertIndex].point)
 			insertIndex++

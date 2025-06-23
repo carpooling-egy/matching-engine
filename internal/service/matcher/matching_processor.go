@@ -36,6 +36,7 @@ func (matcher *Matcher) processMaximumMatching(graph *model.Graph, limit int) er
 		}
 
 		if len(offerNode.GetAllRequests()) >= limit {
+			log.Info().Msgf("Exceeded maximum matching limit of %d requests", limit)
 			matcher.updateResults(offerNode)
 			matcher.availableOffers.Delete(offerNode.Offer().ID())
 			matcher.potentialOfferRequests.Delete(offerNode.Offer().ID())
