@@ -26,7 +26,6 @@ func (p *DefaultPopulator) Populate(offer *model.OfferNode, requestNodes []*mode
 		return nil
 	}
 
-	fmt.Println("populated for offer", offer.Offer().ID())
 	// Create a new time matrix
 	timeMatrix, err := p.generator.Generate(offer, requestNodes)
 	if err != nil {

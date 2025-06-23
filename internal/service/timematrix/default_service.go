@@ -42,8 +42,6 @@ func (s *DefaultService) GetCumulativeTravelDurations(offer *model.OfferNode, pa
 		return nil, err
 	}
 
-	matrix.PrintMatrix()
-	
 	cumulativeDuration := make([]time.Duration, len(pathPoints))
 	cumulativeDuration[0] = 0
 	for i := 0; i < len(pathPoints)-1; i++ {
@@ -66,8 +64,6 @@ func (s *DefaultService) GetCumulativeTravelTimes(offer *model.OfferNode, pathPo
 	if err != nil {
 		return nil, err
 	}
-
-	matrix.PrintMatrix()
 
 	cumulativeTimes := make([]time.Time, len(pathPoints))
 	cumulativeTimes[0] = offer.Offer().DepartureTime()

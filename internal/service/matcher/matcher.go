@@ -60,34 +60,12 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 		return nil, fmt.Errorf("failed to build candidate matches: %w", err)
 	}
 
-	//fmt.Println(matcher.potentialOfferRequests, "potential offer requests found")
-	//v, ok := matcher.potentialOfferRequests.Get("1")
-	//if !ok {
-	//	return nil, nil
-	//}
-	//fmt.Println("Potential requests for offer 1:", v)
-	//for _, requestID := range v.ToSlice() {
-	//	fmt.Println("Potential requests for offer 1:", requestID)
-	//}
 	graph := model.NewGraph()
 
 	for matcher.availableOffers.Size() > 0 && matcher.availableRequests.Size() > 0 {
 		// Build Matching Graph
 		log.Info().Msg("Building matching graph")
-		fmt.Printf("matcher.availableOffers.Size(): %d, matcher.availableRequests.Size(): %d\n", matcher.availableOffers.Size(), matcher.availableRequests.Size())
-		matcher.availableRequests.Range(func(requestId string, requestNode *model.RequestNode) error {
-			fmt.Println("Processing request:", requestId, requestNode.Request().ID())
-			return nil
-		})
-		matcher.availableOffers.Range(func(offerID string, offerNode *model.OfferNode) error {
-			fmt.Println("Processing offer:", offerID)
-			return nil
-		})
 		// Build the matching graph with potential edges between offers and requests
-		fmt.Println(matcher.availableOffers.Size())
-		fmt.Println(matcher.availableRequests.Size())
-
-		fmt.Println("Before matching graph build")
 		hasNewEdge, err := matcher.buildMatchingGraph(graph)
 		if err != nil {
 			return nil, fmt.Errorf("failed to build matching graph: %w", err)
@@ -107,18 +85,6 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 		// Update the graph with potential requests
 		matcher.availableRequests = graph.RequestNodes()
 
-		fmt.Println(matcher.availableRequests)
-		fmt.Println("Available requests:", matcher.availableRequests.Size())
-		fmt.Println("Available offers:", matcher.availableOffers.Size())
-
-		fmt.Println("Before processing maximum matching")
-		// Print all potential requests for each offer
-		matcher.potentialOfferRequests.Range(func(offerID string, requestSet *collections.Set[string]) error {
-			fmt.Printf("Offer ID: %s, Potential Requests: %v\n", offerID, requestSet.ToSlice())
-			return nil
-		},
-		)
-		
 		// Find Maximum Matching
 		if err = matcher.processMaximumMatching(graph, matcher.limit); err != nil {
 			return nil, fmt.Errorf("failed to process maximum matching: %w", err)

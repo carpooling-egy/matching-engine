@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"fmt"
 	"github.com/rs/zerolog/log"
 	"go.uber.org/dig"
 	"matching-engine/internal/adapter/routing"
@@ -133,12 +132,6 @@ func TestCorrecteness4(t *testing.T) {
 	if results == nil && (expectedResults_a == nil || expectedResults_b == nil) {
 		return // Both results are nil, which is acceptable
 	}
-	fmt.Println("debugging results")
-
-	fmt.Println(len(results))
-	fmt.Println(len(results[0].AssignedMatchedRequests()))
-	fmt.Println(len(results[1].AssignedMatchedRequests()))
-
 	if len(results) != len(expectedResults_a) && len(results) != len(expectedResults_b) {
 		t.Fatalf("[%s] Expected %d or %d results, got %d", testName, len(expectedResults_a), len(expectedResults_b), len(results))
 	}
@@ -148,7 +141,6 @@ func TestCorrecteness4(t *testing.T) {
 }
 
 func compareResults(results []*model.MatchingResult, expectedResults map[string]*model.MatchingResult) bool {
-	fmt.Println("calllledddddddd")
 	if len(results) != len(expectedResults) {
 		log.Debug().Msgf("Results length mismatch: got %d, expected %d\n", len(results), len(expectedResults))
 		return false
