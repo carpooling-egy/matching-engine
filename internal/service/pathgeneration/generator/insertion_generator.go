@@ -24,6 +24,13 @@ func (ip *InsertionPathGenerator) GeneratePaths(
 		return nil, fmt.Errorf("path must contain at least two points")
 	}
 
+	fmt.Println("called GeneratePaths with the following points:")
+	for _, p := range path {
+		fmt.Println(p.ID(), " ", p.Coordinate())
+	}
+	fmt.Println("and pickup point:", pickup.GetOwnerID())
+	fmt.Println("and dropoff point:", dropoff.GetOwnerID())
+
 	// The following upper bound guarantee that we are not losing any possible path though generating
 	// paths is still expensive, especially that there are some combinations that are infeasible with high probability
 	// Example:
@@ -66,6 +73,16 @@ func (ip *InsertionPathGenerator) GeneratePaths(
 				newPath = append(newPath, *dropoff)
 				newPath = append(newPath, suffix...)
 
+				println("Generated path:")
+				for _, p := range newPath {
+					fmt.Print(p.GetOwnerID(), " ")
+				}
+				fmt.Println()
+				for _, p := range newPath {
+					fmt.Println(p.ID(), " ", p.Coordinate())
+				}
+
+				fmt.Println()
 				if !yield(newPath, nil) {
 					// Stop iterating if consumer is done
 					return
