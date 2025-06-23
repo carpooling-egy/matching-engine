@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"fmt"
 	"github.com/rs/zerolog/log"
 	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
@@ -68,16 +67,11 @@ func getTest1fivData(engine routing.Engine) ([]*model.Offer, []*model.Request, m
 	cumulativeTimesWithMatchedRequest := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *matchedRequestSource, *matchedRequestDestination, *offerDestination}, offerDepartureTime, engine)
 	cumulativeTimesWithRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *pickup, *dropoff, *matchedRequestSource, *matchedRequestDestination, *offerDestination}, offerDepartureTime, engine)
 
-	fmt.Println(cumulativeTimesWithRider)
-	fmt.Println(cumulativeTimesWithMatchedRequest)
-	fmt.Println(cumulativeTimesWithoutRider)
-
 	// overwrite offer detour, maxEstimated arrival time && matchedRequestLatestArrivalTime
 	offerDetourDuration = cumulativeTimesWithRider[5] - cumulativeTimesWithoutRider[1] + 5*time.Minute // adding 5 minutes to ensure the detour is valid
 	offer.SetDetour(offerDetourDuration)
 	offer.SetMaxEstimatedArrivalTime(offerDepartureTime.Add(cumulativeTimesWithoutRider[1]).Add(offerDetourDuration))
 	matchedRequest.SetLatestArrivalTime(offerDepartureTime.Add(cumulativeTimesWithMatchedRequest[2]).Add(1 * time.Minute)) // setting matchedRequestLatestArrivalTime to the arrival time before adding a new request to ensure it will not arrive before it's latest arrival time
-	fmt.Println(matchedRequest.LatestArrivalTime())
 
 	log.Debug().
 		Int("offerDetourDurationMinutes", int(offerDetourDuration.Minutes())).

@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"fmt"
 	"github.com/rs/zerolog/log"
 	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
@@ -73,9 +72,6 @@ func getTest1fiiiData(engine routing.Engine) ([]*model.Offer, []*model.Request, 
 	offer.SetMaxEstimatedArrivalTime(offerDepartureTime.Add(cumulativeTimesWithoutRider[1]).Add(offerDetourDuration))
 	matchedRequest.SetLatestArrivalTime(offer.MaxEstimatedArrivalTime().Add(10 * time.Minute))
 
-	fmt.Println(cumulativeTimesWithoutRider)
-	fmt.Println(cumulativeTimesWithRider)
-
 	log.Debug().
 		Int("offerDetourDurationMinutes", int(offerDetourDuration.Minutes())).
 		Str("offerMaxEstimatedArrivalTime", offer.MaxEstimatedArrivalTime().Format(time.RFC3339)).
@@ -83,7 +79,6 @@ func getTest1fiiiData(engine routing.Engine) ([]*model.Offer, []*model.Request, 
 		Msg("Offer and matched request details after detour adjustment")
 	requestEarliestDepartureTime := offerDepartureTime.Add(-10 * time.Minute)
 	requestLatestArrivalTime := offerDepartureTime.Add(cumulativeTimesWithRider[4]).Add(-5 * time.Minute) // setting it to 5 minutes before arrival time at dropoff to ensure the request won't reach before his latest arrival time
-	fmt.Println("requestLatestArrivalTime", requestLatestArrivalTime.Format(time.RFC3339))
 	requestNumberOfRiders := 1
 	requestSameGender := true
 	requestGender := enums.Male
