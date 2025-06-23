@@ -1,32 +1,19 @@
 package tests
 
 import (
-	"context"
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"go.uber.org/dig"
-	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/adapter/valhalla"
 	"matching-engine/internal/app/config"
 	"matching-engine/internal/app/di"
 	"matching-engine/internal/app/di/utils"
-	"matching-engine/internal/enums"
 	"matching-engine/internal/model"
 	matcher2 "matching-engine/internal/service/matcher"
-	"matching-engine/internal/service/pickupdropoffservice"
-	"sort"
 	"testing"
 	"time"
 )
-
-type MatchedRequest struct {
-	request      *model.Request
-	pickupCoord  *model.Coordinate
-	pickupOrder  int
-	dropoffCoord *model.Coordinate
-	dropoffOrder int
-}
 
 func TestCorrecteness(t *testing.T) {
 	config.ConfigureLogging()
@@ -160,93 +147,6 @@ func TestCorrecteness4(t *testing.T) {
 	}
 }
 
-func addPointsToPath(engine routing.Engine, offer *model.Offer, pointsOrder []int, points []*model.PathPoint) []model.PathPoint {
-	if len(pointsOrder) != len(points) {
-		panic("pointsOrder and points must have the same length")
-	}
-
-	originalPath := offer.Path()
-	newLen := len(originalPath) + len(points)
-
-	// Pair points with their insertion order
-	type pointInsert struct {
-		order int
-		point *model.PathPoint
-	}
-	inserts := make([]pointInsert, len(pointsOrder))
-	for i := range pointsOrder {
-		// Clamp insertion index to end if it's too large
-		order := pointsOrder[i]
-		inserts[i] = pointInsert{order, points[i]}
-	}
-
-	// Sort by insertion order
-	sort.Slice(inserts, func(i, j int) bool {
-		return inserts[i].order < inserts[j].order
-	})
-
-	fmt.Println(inserts)
-
-	newPath := make([]model.PathPoint, 0, newLen)
-
-	origIndex, insertIndex := 0, 0
-
-	for i := 0; i < newLen; i++ {
-		//fmt.Println(i, origIndex, insertIndex, len(originalPath), len(inserts))
-		if insertIndex < len(inserts) && inserts[insertIndex].order == i {
-			//fmt.Println("Inserting point at index", i, ":", inserts[insertIndex].point)
-			// Insert the new point at the correct position
-			newPath = append(newPath, *inserts[insertIndex].point)
-			insertIndex++
-		} else {
-			// Add the original path point
-			if origIndex < len(originalPath) {
-				newPath = append(newPath, originalPath[origIndex])
-				origIndex++
-			} else {
-				panic("Original path has fewer points than expected")
-			}
-		}
-	}
-
-	// Recalculate arrival times
-	newPath = calculateExpectedArrivalTimes(newPath, offer.DepartureTime(), engine)
-
-	return newPath
-}
-
-func getRequestPointsAndDurations(engine routing.Engine, offer *model.Offer, source *model.Coordinate, walkingDuration time.Duration, destination *model.Coordinate) (*model.Coordinate, time.Duration, *model.Coordinate, time.Duration) {
-	pickup, pickupDuration, dropoff, dropoffDuration := correcteness_test.GetPickupDropoffPointsAndDurations(
-		engine, offer, source, walkingDuration, destination)
-	if pickupDuration > walkingDuration {
-		pickupCoord, err := engine.SnapPointToRoad(context.Background(), source)
-		if err != nil {
-			pickupCoord = source
-		}
-		pickup = pickupCoord
-		pickupDuration = 0
-	}
-	if dropoffDuration > walkingDuration {
-		dropoffCoord, err := engine.SnapPointToRoad(context.Background(), destination)
-		if err != nil {
-			dropoffCoord = destination
-		}
-		dropoff = dropoffCoord
-		dropoffDuration = 0
-	}
-	return pickup, pickupDuration, dropoff, dropoffDuration
-}
-
-func computeRequestPickupDropoffPoints(engine routing.Engine, offer *model.Offer, requestSource *model.Coordinate, requestMaxWalkingDuration time.Duration, requestDestination *model.Coordinate, requestEarliestDepartureTime time.Time, request *model.Request, requestLatestArrivalTime time.Time) (*model.PathPoint, *model.PathPoint) {
-	pickupCoord, pickupDuration, dropoffCoord, dropoffDuration := getRequestPointsAndDurations(
-		engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
-	pickupPoint := model.NewPathPoint(
-		*pickupCoord, enums.Pickup, requestEarliestDepartureTime, request, pickupDuration)
-	dropoffPoint := model.NewPathPoint(
-		*dropoffCoord, enums.Dropoff, requestLatestArrivalTime, request, dropoffDuration)
-	return pickupPoint, dropoffPoint
-}
-
 func compareResults(results []*model.MatchingResult, expectedResults map[string]*model.MatchingResult) bool {
 	fmt.Println("calllledddddddd")
 	if len(results) != len(expectedResults) {
@@ -336,84 +236,6 @@ func checkTimeOverlap(time1, time2 time.Time, tolerance time.Duration) bool {
 	return time1.After(time2.Add(-tolerance)) && time1.Before(time2.Add(tolerance))
 }
 
-func createOffer(userID, id string, source, destination model.Coordinate, departureTime time.Time,
-	detourDurMins time.Duration, capacity, currentNumberOfRequests int, gender enums.Gender, sameGender bool,
-	maxEstimatedArrivalTime time.Time, matchedRequests []*model.Request) *model.Offer {
-	preference := *model.NewPreference(gender, sameGender)
-	return model.NewOffer(
-		id,
-		userID,
-		source,
-		destination,
-		departureTime,
-		detourDurMins,
-		capacity,
-		preference,
-		maxEstimatedArrivalTime,
-		currentNumberOfRequests,
-		nil,
-		matchedRequests,
-	)
-}
-
-func getMaxEstimatedArrivalTime(source model.Coordinate, destination model.Coordinate, departureTime time.Time, detour time.Duration, engine routing.Engine) time.Time {
-	directCoords := []model.Coordinate{source, destination}
-	directTimes := correcteness_test.GetCumulativeTimes(directCoords, departureTime, engine)
-	return departureTime.Add(detour).Add(directTimes[1])
-}
-
-func createRequest(userID, id string, source, destination model.Coordinate, earliestDepartureTime, latestArrivalTime time.Time,
-	maxWalkingDurationMinutes time.Duration, numberOfRiders int, gender enums.Gender, sameGender bool) *model.Request {
-	preference := *model.NewPreference(gender, sameGender)
-	return model.NewRequest(
-		id,
-		userID,
-		source,
-		destination,
-		earliestDepartureTime,
-		latestArrivalTime,
-		maxWalkingDurationMinutes,
-		numberOfRiders,
-		preference,
-	)
-}
-
-func createPath(offer *model.Offer, matchedRequests []*MatchedRequest, engine routing.Engine) []model.PathPoint {
-	path := make([]model.PathPoint, len(matchedRequests)*2+2) // 2 points for the offer source and destination, 2 points for each request pickup and dropoff
-	path[0] = *model.NewPathPoint(*offer.Source(), enums.Source, offer.DepartureTime(), offer, 0)
-	path[len(path)-1] = *model.NewPathPoint(*offer.Destination(), enums.Destination, offer.MaxEstimatedArrivalTime(), offer, 0)
-	walkingTimeCalculator := pickupdropoffservice.NewWalkingTimeCalculator(engine)
-	for _, matchedReq := range matchedRequests {
-		pickupPoint := model.NewPathPoint(
-			*matchedReq.pickupCoord, enums.Pickup, matchedReq.request.EarliestDepartureTime(), matchedReq.request, 0)
-		dropoffPoint := model.NewPathPoint(
-			*matchedReq.dropoffCoord, enums.Dropoff, matchedReq.request.LatestArrivalTime(), matchedReq.request, 0)
-		pickupWalkingDuration, dropoffWalkingDuration, err := walkingTimeCalculator.ComputeWalkingDurations(context.Background(), matchedReq.request, pickupPoint, dropoffPoint)
-		if err != nil {
-			panic("Failed to compute walking durations: " + err.Error())
-		}
-		pickupPoint.SetWalkingDuration(pickupWalkingDuration)
-		dropoffPoint.SetWalkingDuration(dropoffWalkingDuration)
-		path[matchedReq.pickupOrder] = *pickupPoint
-		path[matchedReq.dropoffOrder] = *dropoffPoint
-	}
-	// Calculate travel times for the path
-	path = calculateExpectedArrivalTimes(path, offer.DepartureTime(), engine)
-	return path
-}
-
-func calculateExpectedArrivalTimes(path []model.PathPoint, departureTime time.Time, engine routing.Engine) []model.PathPoint {
-	coords := make([]model.Coordinate, len(path))
-	for i, p := range path {
-		coords[i] = *p.Coordinate()
-	}
-	drivingTimes := correcteness_test.GetCumulativeTimes(coords, departureTime, engine)
-	for i := range path {
-		path[i].SetExpectedArrivalTime(departureTime.Add(drivingTimes[i]))
-	}
-	return path
-}
-
 func runMatcher(offers []*model.Offer, requests []*model.Request) ([]*model.MatchingResult, error) {
 
 	c := dig.New()
@@ -436,11 +258,4 @@ func runMatcher(offers []*model.Offer, requests []*model.Request) ([]*model.Matc
 		panic("Failed to invoke matcher in the container: " + err.Error())
 	}
 	return matches, matchErr
-}
-
-func must[T any](v T, err error) T {
-	if err != nil {
-		panic(err)
-	}
-	return v
 }

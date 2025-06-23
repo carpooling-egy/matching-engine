@@ -21,7 +21,7 @@ func getTest2aData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 	offerCurrentNumberOfRequests := 1
 	offerSameGender := false
 	offerGender := enums.Male
-	offerMaxEstimatedArrivalTime := getMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine)
+	offerMaxEstimatedArrivalTime := GetMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine)
 
 	// Create a matched request for this offer
 	matchedRequestSource, _ := model.NewCoordinate(31.22082087, 29.94795413)
@@ -34,13 +34,13 @@ func getTest2aData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 	matchedRequestNumberOfRiders := 1
 	matchedRequestSameGender := true
 	matchedRequestGender := enums.Male
-	matchedRequest := createRequest("2", "1", *matchedRequestSource, *matchedRequestDestination,
+	matchedRequest := CreateRequest("2", "1", *matchedRequestSource, *matchedRequestDestination,
 		matchedRequestEarliestDepartureTime, matchedRequestLatestArrivalTime,
 		matchedRequestMaxWalkingDuration, matchedRequestNumberOfRiders,
 		matchedRequestGender, matchedRequestSameGender)
 	offerRequests := []*model.Request{matchedRequest}
 
-	offer := createOffer("1", "1", *offerSource, *offerDestination, offerDepartureTime,
+	offer := CreateOffer("1", "1", *offerSource, *offerDestination, offerDepartureTime,
 		offerDetourDuration, offerCapacity, offerCurrentNumberOfRequests, offerGender,
 		offerSameGender, offerMaxEstimatedArrivalTime, offerRequests)
 
@@ -52,7 +52,7 @@ func getTest2aData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 		dropoffCoord: matchedRequestDropoff,
 		dropoffOrder: 2,
 	}
-	offer.SetPath(createPath(offer, []*MatchedRequest{matchedReq}, engine))
+	offer.SetPath(CreatePath(offer, []*MatchedRequest{matchedReq}, engine))
 	// Add the offer to the list of offers
 	offers = append(offers, offer)
 
@@ -66,7 +66,7 @@ func getTest2aData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 	requestSameGender := true
 	requestGender := enums.Male
 
-	request := createRequest("3", "2", *requestSource, *requestDestination,
+	request := CreateRequest("3", "2", *requestSource, *requestDestination,
 		requestEarliestDepartureTime, requestLatestArrivalTime,
 		requestMaxWalkingDuration, requestNumberOfRiders,
 		requestGender, requestSameGender)
@@ -76,12 +76,12 @@ func getTest2aData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 
 	// Create expected results
 	expectedResults := make(map[string]*model.MatchingResult)
-	pickupPoint, dropoffPoint := computeRequestPickupDropoffPoints(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination, requestEarliestDepartureTime, request, requestLatestArrivalTime)
+	pickupPoint, dropoffPoint := ComputeRequestPickupDropoffPoints(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination, requestEarliestDepartureTime, request, requestLatestArrivalTime)
 	pickupOrder, dropoffOrder := 3, 4
 	// Compute the offer path with the new pickup and dropoff points
 	points := []*model.PathPoint{pickupPoint, dropoffPoint}
 	pointsOrder := []int{pickupOrder, dropoffOrder}
-	offerPath := addPointsToPath(engine, offer, pointsOrder, points)
+	offerPath := AddPointsToPath(engine, offer, pointsOrder, points)
 
 	expectedResults[offer.ID()] = model.NewMatchingResult(
 		offer.ID(),

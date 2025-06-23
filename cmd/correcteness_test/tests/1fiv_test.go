@@ -36,13 +36,13 @@ func getTest1fivData(engine routing.Engine) ([]*model.Offer, []*model.Request, m
 	matchedRequestNumberOfRiders := 1
 	matchedRequestSameGender := true
 	matchedRequestGender := enums.Male
-	matchedRequest := createRequest("2", "1", *matchedRequestSource, *matchedRequestDestination,
+	matchedRequest := CreateRequest("2", "1", *matchedRequestSource, *matchedRequestDestination,
 		matchedRequestEarliestDepartureTime, matchedRequestLatestArrivalTime,
 		matchedRequestMaxWalkingDuration, matchedRequestNumberOfRiders,
 		matchedRequestGender, matchedRequestSameGender)
 	offerRequests := []*model.Request{matchedRequest}
 
-	offer := createOffer("1", "1", *offerSource, *offerDestination, offerDepartureTime,
+	offer := CreateOffer("1", "1", *offerSource, *offerDestination, offerDepartureTime,
 		offerDetourDuration, offerCapacity, offerCurrentNumberOfRequests, offerGender,
 		offerSameGender, offerMaxEstimatedArrivalTime, offerRequests)
 
@@ -54,7 +54,7 @@ func getTest1fivData(engine routing.Engine) ([]*model.Offer, []*model.Request, m
 		dropoffCoord: matchedRequestDropoff,
 		dropoffOrder: 2,
 	}
-	offer.SetPath(createPath(offer, []*MatchedRequest{matchedReq}, engine))
+	offer.SetPath(CreatePath(offer, []*MatchedRequest{matchedReq}, engine))
 	// Add the offer to the list of offers
 	offers = append(offers, offer)
 
@@ -63,7 +63,7 @@ func getTest1fivData(engine routing.Engine) ([]*model.Offer, []*model.Request, m
 	requestDestination, _ := model.NewCoordinate(31.2208208709376, 29.9479541306202)
 	requestMaxWalkingDuration := time.Duration(0) * time.Minute
 
-	pickup, _, dropoff, _ := getRequestPointsAndDurations(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
+	pickup, _, dropoff, _ := GetRequestPointsAndDurations(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
 	cumulativeTimesWithoutRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *offerDestination}, offerDepartureTime, engine)
 	cumulativeTimesWithMatchedRequest := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *matchedRequestSource, *matchedRequestDestination, *offerDestination}, offerDepartureTime, engine)
 	cumulativeTimesWithRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *pickup, *dropoff, *matchedRequestSource, *matchedRequestDestination, *offerDestination}, offerDepartureTime, engine)
@@ -90,7 +90,7 @@ func getTest1fivData(engine routing.Engine) ([]*model.Offer, []*model.Request, m
 	requestSameGender := true
 	requestGender := enums.Male
 
-	request := createRequest("3", "2", *requestSource, *requestDestination,
+	request := CreateRequest("3", "2", *requestSource, *requestDestination,
 		requestEarliestDepartureTime, requestLatestArrivalTime,
 		requestMaxWalkingDuration, requestNumberOfRiders,
 		requestGender, requestSameGender)

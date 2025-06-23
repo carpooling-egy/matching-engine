@@ -80,14 +80,14 @@ func getTest4(engine routing.Engine) ([]*model.Offer, []*model.Request, map[stri
 	request3LatestArrivalTime := offer1.MaxEstimatedArrivalTime()
 	request4LatestArrivalTime := offer1.MaxEstimatedArrivalTime()
 
-	request1 := createRequest("4", "1", *request1Source, *request1Destination,
+	request1 := CreateRequest("4", "1", *request1Source, *request1Destination,
 		request1EarliestDepartureTime, request1LatestArrivalTime,
 		request1MaxWalkingDuration, request1NumberOfRiders,
 		request1Gender, request1SameGender)
 
 	requests = append(requests, request1)
 
-	request2 := createRequest("5", "2", *request2Source, *request2Destination,
+	request2 := CreateRequest("5", "2", *request2Source, *request2Destination,
 		request2EarliestDepartureTime, request2LatestArrivalTime,
 		request2MaxWalkingDuration, request2NumberOfRiders,
 		request2Gender, request2SameGender)
@@ -95,13 +95,13 @@ func getTest4(engine routing.Engine) ([]*model.Offer, []*model.Request, map[stri
 	// Add request 2 to the list of requests
 	requests = append(requests, request2)
 
-	request3 := createRequest("6", "3", request3Source, request3Destination,
+	request3 := CreateRequest("6", "3", request3Source, request3Destination,
 		request3EarliestDepartureTime, request3LatestArrivalTime,
 		request3MaxWalkingDuration, request3NumberOfRiders,
 		request3Gender, request3SameGender)
 	requests = append(requests, request3)
 
-	request4 := createRequest("7", "4", request4Source, request4Destination,
+	request4 := CreateRequest("7", "4", request4Source, request4Destination,
 		request4EarliestDepartureTime, request4LatestArrivalTime,
 		request4MaxWalkingDuration, request4NumberOfRiders,
 		request4Gender, request4SameGender)
@@ -110,16 +110,16 @@ func getTest4(engine routing.Engine) ([]*model.Offer, []*model.Request, map[stri
 	expectedResults_a := make(map[string]*model.MatchingResult)
 	expectedResults_b := make(map[string]*model.MatchingResult)
 
-	pickupPoint1_a, dropoffPoint1_a := computeRequestPickupDropoffPoints(engine, offer1, request1Source, request1MaxWalkingDuration, request1Destination, request1EarliestDepartureTime, request1, request1LatestArrivalTime)
-	pickupPoint1_b, dropoffPoint1_b := computeRequestPickupDropoffPoints(engine, offer1, request1Source, request1MaxWalkingDuration, request1Destination, request1EarliestDepartureTime, request1, request1LatestArrivalTime)
+	pickupPoint1_a, dropoffPoint1_a := ComputeRequestPickupDropoffPoints(engine, offer1, request1Source, request1MaxWalkingDuration, request1Destination, request1EarliestDepartureTime, request1, request1LatestArrivalTime)
+	pickupPoint1_b, dropoffPoint1_b := ComputeRequestPickupDropoffPoints(engine, offer1, request1Source, request1MaxWalkingDuration, request1Destination, request1EarliestDepartureTime, request1, request1LatestArrivalTime)
 	pickupOrder1, dropoffOrder1 := 1, 2
 
-	pickupPoint2_a, dropoffPoint2_a := computeRequestPickupDropoffPoints(engine, offer1, request2Source, request2MaxWalkingDuration, request2Destination, request2EarliestDepartureTime, request2, request2LatestArrivalTime)
-	pickupPoint2_b, dropoffPoint2_b := computeRequestPickupDropoffPoints(engine, offer1, request2Source, request2MaxWalkingDuration, request2Destination, request2EarliestDepartureTime, request2, request2LatestArrivalTime)
+	pickupPoint2_a, dropoffPoint2_a := ComputeRequestPickupDropoffPoints(engine, offer1, request2Source, request2MaxWalkingDuration, request2Destination, request2EarliestDepartureTime, request2, request2LatestArrivalTime)
+	pickupPoint2_b, dropoffPoint2_b := ComputeRequestPickupDropoffPoints(engine, offer1, request2Source, request2MaxWalkingDuration, request2Destination, request2EarliestDepartureTime, request2, request2LatestArrivalTime)
 	pickupOrder2, dropoffOrder2 := 1, 2
 
-	pickupPoint3_a, dropoffPoint3_a := computeRequestPickupDropoffPoints(engine, offer1, &request3Source, request3MaxWalkingDuration, &request3Destination, request3EarliestDepartureTime, request3, request3LatestArrivalTime)
-	pickupPoint3_b, dropoffPoint3_b := computeRequestPickupDropoffPoints(engine, offer2, &request3Source, request3MaxWalkingDuration, &request3Destination, request3EarliestDepartureTime, request3, request3LatestArrivalTime)
+	pickupPoint3_a, dropoffPoint3_a := ComputeRequestPickupDropoffPoints(engine, offer1, &request3Source, request3MaxWalkingDuration, &request3Destination, request3EarliestDepartureTime, request3, request3LatestArrivalTime)
+	pickupPoint3_b, dropoffPoint3_b := ComputeRequestPickupDropoffPoints(engine, offer2, &request3Source, request3MaxWalkingDuration, &request3Destination, request3EarliestDepartureTime, request3, request3LatestArrivalTime)
 	pickupOrder3, dropoffOrder3 := 3, 4
 
 	cumulativeTimesForDriver1With3 := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offer1.Source(), *request1Source, *request1Destination, request3Source, request3Destination, *offer1.Destination()}, offer1.DepartureTime(), engine)
@@ -147,11 +147,11 @@ func getTest4(engine routing.Engine) ([]*model.Offer, []*model.Request, map[stri
 	fmt.Println("cumulativeTimesForDriver1With2:", cumulativeTimesForDriver1With2)
 
 	offer1.SetDetour(offerDetourDuration1 + 10*time.Second) // adding 10 seconds to ensure the detour is valid
-	offer1.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offer1.Source(), *offer1.Destination(), offer1.DepartureTime(), offerDetourDuration1, engine))
+	offer1.SetMaxEstimatedArrivalTime(GetMaxEstimatedArrivalTime(*offer1.Source(), *offer1.Destination(), offer1.DepartureTime(), offerDetourDuration1, engine))
 	offer2.SetDetour(offerDetourDuration2 + 10*time.Second) // adding 10 seconds to ensure the detour is valid
-	offer2.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offer2.Source(), *offer2.Destination(), offer2.DepartureTime(), offerDetourDuration2, engine))
+	offer2.SetMaxEstimatedArrivalTime(GetMaxEstimatedArrivalTime(*offer2.Source(), *offer2.Destination(), offer2.DepartureTime(), offerDetourDuration2, engine))
 	offer3.SetDetour(offerDetourDuration3)
-	offer3.SetMaxEstimatedArrivalTime(getMaxEstimatedArrivalTime(*offer3.Source(), *offer3.Destination(), offer3.DepartureTime(), offerDetourDuration3, engine))
+	offer3.SetMaxEstimatedArrivalTime(GetMaxEstimatedArrivalTime(*offer3.Source(), *offer3.Destination(), offer3.DepartureTime(), offerDetourDuration3, engine))
 
 	request1.SetLatestArrivalTime(offer1.DepartureTime().Add(request1MaxWalkingDuration).Add(cumulativeTimesForDriver1With3[2]).Add(10 * time.Second))
 	request2.SetLatestArrivalTime(offer2.DepartureTime().Add(request2MaxWalkingDuration).Add(cumulativeTimesForDriver2With3[2]).Add(1 * time.Second)) // so that driver 1 is not able to pickup rider 2
@@ -204,10 +204,10 @@ func getTest4(engine routing.Engine) ([]*model.Offer, []*model.Request, map[stri
 		dropoffOrder3,
 	}
 
-	offerPath1_a := addPointsToPath(engine, offer1, pointsOrder1_a, points1_a)
-	offerPath2_a := addPointsToPath(engine, offer2, pointsOrder2_a, points2_a)
-	offerPath1_b := addPointsToPath(engine, offer1, pointsOrder1_b, points1_b)
-	offerPath2_b := addPointsToPath(engine, offer2, pointsOrder2_b, points2_b)
+	offerPath1_a := AddPointsToPath(engine, offer1, pointsOrder1_a, points1_a)
+	offerPath2_a := AddPointsToPath(engine, offer2, pointsOrder2_a, points2_a)
+	offerPath1_b := AddPointsToPath(engine, offer1, pointsOrder1_b, points1_b)
+	offerPath2_b := AddPointsToPath(engine, offer2, pointsOrder2_b, points2_b)
 
 	expectedResults_a[offer1.ID()] = model.NewMatchingResult(
 		offer1.ID(),
@@ -255,9 +255,9 @@ func createAndAppendOffer(
 	offers *[]*model.Offer,
 ) *model.Offer {
 	// Will be overwritten later in the test
-	maxArrivalTime := getMaxEstimatedArrivalTime(source, destination, departureTime, detourDuration, engine)
+	maxArrivalTime := GetMaxEstimatedArrivalTime(source, destination, departureTime, detourDuration, engine)
 
-	offer := createOffer(id, driverID, source, destination, departureTime,
+	offer := CreateOffer(id, driverID, source, destination, departureTime,
 		detourDuration, capacity, currentRequests, gender,
 		sameGender, maxArrivalTime, []*model.Request{})
 
@@ -269,4 +269,11 @@ func createAndAppendOffer(
 	offer.SetPath(path)
 	*offers = append(*offers, offer)
 	return offer
+}
+
+func must[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
 }
