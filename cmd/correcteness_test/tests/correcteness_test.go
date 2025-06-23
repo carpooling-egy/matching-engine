@@ -14,11 +14,19 @@ import (
 	"time"
 )
 
-func TestCorrecteness(t *testing.T) {
+func setupTestingEnvironment() (routing.Engine, error) {
 	config.ConfigureLogging()
 
 	// Create a mock routing engine
 	engine, err := valhalla.NewValhalla()
+	if err != nil {
+		return nil, err
+	}
+	return engine, nil
+}
+
+func TestNoMatchTimeOverlap(t *testing.T) {
+	engine, err := setupTestingEnvironment()
 	if err != nil {
 		t.Fatalf("Failed to create Valhalla engine: %v", err)
 	}
@@ -27,67 +35,14 @@ func TestCorrecteness(t *testing.T) {
 		testFunc func(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult)
 	}{
 		{
-			name:     "Test1ai",
+			name:     "Latest arrival before driver departure",
 			testFunc: getTest1aiData,
 		},
 		{
-			name:     "Test1aii",
+			name:     "Earliest departure after driver max estimated arrival",
 			testFunc: getTest1aiiData,
 		},
-		{
-			name:     "Test1b",
-			testFunc: getTest1bData,
-		},
-		{
-			name:     "Test1ci",
-			testFunc: getTest1ciData,
-		},
-		{
-			name:     "Test1cii",
-			testFunc: getTest1ciiData,
-		},
-		{
-			name:     "Test1di",
-			testFunc: getTest1diData,
-		},
-		{
-			name:     "Test1dii",
-			testFunc: getTest1diiData,
-		},
-		{
-			name:     "Test1e",
-			testFunc: getTest1eData,
-		},
-		{
-			name:     "Test1fi",
-			testFunc: getTest1fiData,
-		},
-		{
-			name:     "Test1fii",
-			testFunc: getTest1fiiData,
-		},
-		{
-			name:     "Test1fiii",
-			testFunc: getTest1fiiiData,
-		},
-		{
-			name:     "Test1fiv",
-			testFunc: getTest1fivData,
-		},
-		{
-			name:     "Test2a",
-			testFunc: getTest2aData,
-		},
-		{
-			name:     "Test3a",
-			testFunc: getTest3aData,
-		},
-		{
-			name:     "Test3b",
-			testFunc: getTest3bData,
-		},
 	}
-
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			offers, requests, expectedResults := tt.testFunc(engine)
@@ -111,12 +66,305 @@ func TestCorrecteness(t *testing.T) {
 	}
 }
 
-func TestCorrecteness4(t *testing.T) {
-	testName := "TestCorrecteness4"
-	config.ConfigureLogging()
+func TestNoMatchCapacity(t *testing.T) {
+	engine, err := setupTestingEnvironment()
+	if err != nil {
+		t.Fatalf("Failed to create Valhalla engine: %v", err)
+	}
+	tests := []struct {
+		name     string
+		testFunc func(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult)
+	}{
+		{
+			name:     "Offer capacity less than request riders",
+			testFunc: getTest1bData,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			offers, requests, expectedResults := tt.testFunc(engine)
+			if len(offers) == 0 || len(requests) == 0 {
+				t.Fatalf("No offers or requests generated for test %s", tt.name)
+			}
+			results, err := runMatcher(offers, requests)
+			if err != nil {
+				t.Fatalf("Matcher failed for test %s: %v", tt.name, err)
+			}
+			if results == nil && expectedResults == nil {
+				return // Both results are nil, which is acceptable
+			}
+			if len(results) != len(expectedResults) {
+				t.Fatalf("Expected %d results, got %d for test %s", len(expectedResults), len(results), tt.name)
+			}
+			if !compareResults(results, expectedResults) {
+				t.Fatalf("Results do not match expected for test %s", tt.name)
+			}
+		})
+	}
+}
 
-	// Create a mock routing engine
-	engine, err := valhalla.NewValhalla()
+func TestNoMatchPreferenceMismatch(t *testing.T) {
+	engine, err := setupTestingEnvironment()
+	if err != nil {
+		t.Fatalf("Failed to create Valhalla engine: %v", err)
+	}
+	tests := []struct {
+		name     string
+		testFunc func(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult)
+	}{
+		{
+			name:     "Offer preference does not match request preference",
+			testFunc: getTest1ciData,
+		},
+		{
+			name:     "Matched request preference does not match request preference",
+			testFunc: getTest1ciiData,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			offers, requests, expectedResults := tt.testFunc(engine)
+			if len(offers) == 0 || len(requests) == 0 {
+				t.Fatalf("No offers or requests generated for test %s", tt.name)
+			}
+			results, err := runMatcher(offers, requests)
+			if err != nil {
+				t.Fatalf("Matcher failed for test %s: %v", tt.name, err)
+			}
+			if results == nil && expectedResults == nil {
+				return // Both results are nil, which is acceptable
+			}
+			if len(results) != len(expectedResults) {
+				t.Fatalf("Expected %d results, got %d for test %s", len(expectedResults), len(results), tt.name)
+			}
+			if !compareResults(results, expectedResults) {
+				t.Fatalf("Results do not match expected for test %s", tt.name)
+			}
+		})
+	}
+}
+
+func TestNoMatchPreDepartureArrival(t *testing.T) {
+	engine, err := setupTestingEnvironment()
+	if err != nil {
+		t.Fatalf("Failed to create Valhalla engine: %v", err)
+	}
+	tests := []struct {
+		name     string
+		testFunc func(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult)
+	}{
+		{
+			name:     "Driver arrives at pickup before request earliest departure",
+			testFunc: getTest1diData,
+		},
+		{
+			name:     "Driver arrives at dropoff after request latest arrival",
+			testFunc: getTest1diiData,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			offers, requests, expectedResults := tt.testFunc(engine)
+			if len(offers) == 0 || len(requests) == 0 {
+				t.Fatalf("No offers or requests generated for test %s", tt.name)
+			}
+			results, err := runMatcher(offers, requests)
+			if err != nil {
+				t.Fatalf("Matcher failed for test %s: %v", tt.name, err)
+			}
+			if results == nil && expectedResults == nil {
+				return // Both results are nil, which is acceptable
+			}
+			if len(results) != len(expectedResults) {
+				t.Fatalf("Expected %d results, got %d for test %s", len(expectedResults), len(results), tt.name)
+			}
+			if !compareResults(results, expectedResults) {
+				t.Fatalf("Results do not match expected for test %s", tt.name)
+			}
+		})
+	}
+}
+
+func TestNoMatchPreDetour(t *testing.T) {
+	engine, err := setupTestingEnvironment()
+	if err != nil {
+		t.Fatalf("Failed to create Valhalla engine: %v", err)
+	}
+	tests := []struct {
+		name     string
+		testFunc func(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult)
+	}{
+		{
+			name:     "Driver's trip with rider exceeds the driver's direct time with detour",
+			testFunc: getTest1eData,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			offers, requests, expectedResults := tt.testFunc(engine)
+			if len(offers) == 0 || len(requests) == 0 {
+				t.Fatalf("No offers or requests generated for test %s", tt.name)
+			}
+			results, err := runMatcher(offers, requests)
+			if err != nil {
+				t.Fatalf("Matcher failed for test %s: %v", tt.name, err)
+			}
+			if results == nil && expectedResults == nil {
+				return // Both results are nil, which is acceptable
+			}
+			if len(results) != len(expectedResults) {
+				t.Fatalf("Expected %d results, got %d for test %s", len(expectedResults), len(results), tt.name)
+			}
+			if !compareResults(results, expectedResults) {
+				t.Fatalf("Results do not match expected for test %s", tt.name)
+			}
+		})
+	}
+}
+
+func TestNoMatchFeasibiltyConstraints(t *testing.T) {
+	engine, err := setupTestingEnvironment()
+	if err != nil {
+		t.Fatalf("Failed to create Valhalla engine: %v", err)
+	}
+	tests := []struct {
+		name     string
+		testFunc func(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult)
+	}{
+		{
+			name:     "Detour passes but Dynamic Capacity constraint fails",
+			testFunc: getTest1fiData,
+		},
+		{
+			name:     "Detour fails but Dynamic Capacity constraint passes",
+			testFunc: getTest1fiiData,
+		},
+		{
+			name:     "Detour passes but rider doesn't reach before his latest arrival time",
+			testFunc: getTest1fiiiData,
+		},
+		{
+			name:     "The matched request's latest arrival time constraint is violated",
+			testFunc: getTest1fivData,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			offers, requests, expectedResults := tt.testFunc(engine)
+			if len(offers) == 0 || len(requests) == 0 {
+				t.Fatalf("No offers or requests generated for test %s", tt.name)
+			}
+			results, err := runMatcher(offers, requests)
+			if err != nil {
+				t.Fatalf("Matcher failed for test %s: %v", tt.name, err)
+			}
+			if results == nil && expectedResults == nil {
+				return // Both results are nil, which is acceptable
+			}
+			if len(results) != len(expectedResults) {
+				t.Fatalf("Expected %d results, got %d for test %s", len(expectedResults), len(results), tt.name)
+			}
+			if !compareResults(results, expectedResults) {
+				t.Fatalf("Results do not match expected for test %s", tt.name)
+			}
+		})
+	}
+}
+
+func TestMatch(t *testing.T) {
+	engine, err := setupTestingEnvironment()
+	if err != nil {
+		t.Fatalf("Failed to create Valhalla engine: %v", err)
+	}
+	tests := []struct {
+		name     string
+		testFunc func(engine routing.Engine) ([]*model.Offer, []*model.Request, map[string]*model.MatchingResult)
+	}{
+		{
+			name:     "Basic match",
+			testFunc: getTest2aData,
+		},
+		{
+			name:     "Match offer with multiple requests",
+			testFunc: getTest3aData,
+		},
+		{
+			name:     "Match offer with multiple requests checking dynamic capacity",
+			testFunc: getTest3bData,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			offers, requests, expectedResults := tt.testFunc(engine)
+			if len(offers) == 0 || len(requests) == 0 {
+				t.Fatalf("No offers or requests generated for test %s", tt.name)
+			}
+			results, err := runMatcher(offers, requests)
+			if err != nil {
+				t.Fatalf("Matcher failed for test %s: %v", tt.name, err)
+			}
+			if results == nil && expectedResults == nil {
+				return // Both results are nil, which is acceptable
+			}
+			if len(results) != len(expectedResults) {
+				t.Fatalf("Expected %d results, got %d for test %s", len(expectedResults), len(results), tt.name)
+			}
+			if !compareResults(results, expectedResults) {
+				t.Fatalf("Results do not match expected for test %s", tt.name)
+			}
+		})
+	}
+}
+
+func TestCorrecteness(t *testing.T) {
+	tests := []struct {
+		name     string
+		testFunc func(t2 *testing.T)
+	}{
+		{
+			name:     "Test No Match due to Overlap",
+			testFunc: TestNoMatchTimeOverlap,
+		},
+		{
+			name:     "Test No Match due to Capacity",
+			testFunc: TestNoMatchCapacity,
+		},
+		{
+			name:     "Test No Match due to Preference Mismatch",
+			testFunc: TestNoMatchPreferenceMismatch,
+		},
+		{
+			name:     "Test No Match due to Pre-Departure Arrival",
+			testFunc: TestNoMatchPreDepartureArrival,
+		},
+		{
+			name:     "Test No Match due to Pre-Detour",
+			testFunc: TestNoMatchPreDetour,
+		},
+		{
+			name:     "Test No Match due to Feasibility Constraints",
+			testFunc: TestNoMatchFeasibiltyConstraints,
+		},
+		{
+			name:     "Test Match",
+			testFunc: TestMatch,
+		},
+		{
+			name:     "Test Multiple Offers and Requests",
+			testFunc: TestMatchMultipleOffersMultipleRequests,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.testFunc(t)
+		})
+	}
+}
+
+func TestMatchMultipleOffersMultipleRequests(t *testing.T) {
+	testName := "Match Multiple Offers Multiple Requests"
+
+	engine, err := setupTestingEnvironment()
 	if err != nil {
 		t.Fatalf("[%s] Failed to create Valhalla engine: %v", testName, err)
 	}
