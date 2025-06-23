@@ -125,6 +125,41 @@ func TestCorrecteness(t *testing.T) {
 	}
 }
 
+func TestCorrecteness4(t *testing.T) {
+	testName := "TestCorrecteness4"
+	config.ConfigureLogging()
+
+	// Create a mock routing engine
+	engine, err := valhalla.NewValhalla()
+	if err != nil {
+		t.Fatalf("[%s] Failed to create Valhalla engine: %v", testName, err)
+	}
+
+	offers, requests, expectedResults_a, expectedResults_b := getTest4(engine)
+	if len(offers) == 0 || len(requests) == 0 {
+		t.Fatalf("[%s] No offers or requests generated", testName)
+	}
+	results, err := runMatcher(offers, requests)
+	if err != nil {
+		t.Fatalf("[%s] Matcher failed: %v", testName, err)
+	}
+	if results == nil && (expectedResults_a == nil || expectedResults_b == nil) {
+		return // Both results are nil, which is acceptable
+	}
+	fmt.Println("debugging results")
+
+	fmt.Println(len(results))
+	fmt.Println(len(results[0].AssignedMatchedRequests()))
+	fmt.Println(len(results[1].AssignedMatchedRequests()))
+
+	if len(results) != len(expectedResults_a) && len(results) != len(expectedResults_b) {
+		t.Fatalf("[%s] Expected %d or %d results, got %d", testName, len(expectedResults_a), len(expectedResults_b), len(results))
+	}
+	if !compareResults(results, expectedResults_a) && !compareResults(results, expectedResults_b) {
+		t.Fatalf("[%s] Results do not match expected", testName)
+	}
+}
+
 func addPointsToPath(engine routing.Engine, offer *model.Offer, pointsOrder []int, points []*model.PathPoint) []model.PathPoint {
 	if len(pointsOrder) != len(points) {
 		panic("pointsOrder and points must have the same length")
@@ -213,6 +248,7 @@ func computeRequestPickupDropoffPoints(engine routing.Engine, offer *model.Offer
 }
 
 func compareResults(results []*model.MatchingResult, expectedResults map[string]*model.MatchingResult) bool {
+	fmt.Println("calllledddddddd")
 	if len(results) != len(expectedResults) {
 		log.Debug().Msgf("Results length mismatch: got %d, expected %d\n", len(results), len(expectedResults))
 		return false

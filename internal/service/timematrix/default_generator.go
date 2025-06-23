@@ -25,12 +25,14 @@ func (ds *DefaultGenerator) Generate(offerNode *model.OfferNode, requestNodes []
 	}
 
 	pointToIdMap := make(map[model.PathPointID]int)
+	idToPoint := make(map[model.PathPointID]model.PathPoint)
 
 	var matrixPoints []model.Coordinate
 
 	for _, point := range offerNode.Offer().PathPoints() {
 		matrixPoints = append(matrixPoints, *point.Coordinate())
 		pointToIdMap[point.ID()] = len(matrixPoints) - 1
+		idToPoint[point.ID()] = point
 	}
 
 	// Add request pickup and dropoff points
@@ -45,9 +47,11 @@ func (ds *DefaultGenerator) Generate(offerNode *model.OfferNode, requestNodes []
 
 		matrixPoints = append(matrixPoints, *pickup.Coordinate())
 		pointToIdMap[pickup.ID()] = len(matrixPoints) - 1
+		idToPoint[pickup.ID()] = *pickup
 
 		matrixPoints = append(matrixPoints, *dropoff.Coordinate())
 		pointToIdMap[dropoff.ID()] = len(matrixPoints) - 1
+		idToPoint[dropoff.ID()] = *dropoff
 
 	}
 
@@ -71,5 +75,5 @@ func (ds *DefaultGenerator) Generate(offerNode *model.OfferNode, requestNodes []
 			offerNode.Offer().ID(), len(matrixPoints), err)
 	}
 
-	return cache.NewPathPointMappedTimeMatrix(distanceTimeMatrix.Times(), pointToIdMap), nil
+	return cache.NewPathPointMappedTimeMatrix(distanceTimeMatrix.Times(), pointToIdMap, idToPoint), nil
 }

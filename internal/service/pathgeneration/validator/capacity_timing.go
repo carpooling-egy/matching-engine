@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"fmt"
 	"time"
 
 	"matching-engine/internal/enums"
@@ -16,6 +17,8 @@ func (validator *DefaultPathValidator) validateCapacityAndTiming(
 ) (bool, error) {
 	currentCapacity := 0
 	extraAccumulatedDuration := time.Duration(0)
+
+	fmt.Println("cumulative", cumulativeDurations)
 	for i := range path {
 
 		// Get a reference to the actual point in the path slice.
