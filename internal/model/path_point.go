@@ -92,3 +92,16 @@ func (p *PathPoint) WalkingDuration() time.Duration {
 func (p *PathPoint) SetWalkingDuration(duration time.Duration) {
 	p.walkingDuration = duration
 }
+
+func (p *PathPoint) GetOwnerID() string {
+	if p.Owner() == nil {
+		return ""
+	}
+	if req, ok := p.Owner().AsRequest(); ok {
+		return req.ID()
+	}
+	if offer, ok := p.Owner().AsOffer(); ok {
+		return offer.ID()
+	}
+	return ""
+}

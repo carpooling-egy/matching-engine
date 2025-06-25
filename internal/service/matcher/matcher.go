@@ -64,6 +64,8 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 
 	for matcher.availableOffers.Size() > 0 && matcher.availableRequests.Size() > 0 {
 		// Build Matching Graph
+		log.Info().Msg("Building matching graph")
+		// Build the matching graph with potential edges between offers and requests
 		hasNewEdge, err := matcher.buildMatchingGraph(graph)
 		if err != nil {
 			return nil, fmt.Errorf("failed to build matching graph: %w", err)
@@ -77,8 +79,8 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 		// Process unmatched offers
 		matcher.processUnmatchedOffers(graph)
 
-		// Update the graph with potential requests
-		matcher.availableRequests = graph.RequestNodes()
+		// Update the graph with potential offers
+		matcher.availableOffers = graph.OfferNodes()
 
 		// Update the graph with potential requests
 		matcher.availableRequests = graph.RequestNodes()
@@ -89,6 +91,7 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 		}
 		// Clear the graph and edges for the next iteration
 		graph.Clear()
+
 	}
 
 	// Handle remaining matched offers

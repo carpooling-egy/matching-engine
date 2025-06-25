@@ -49,19 +49,52 @@ func (v *Valhalla) ComputeDrivingTime(
 	ctx context.Context,
 	routeParams *model.RouteParams,
 ) ([]time.Duration, error) {
-	durations, err := re.RunOperation(
-		ctx,
-		v.client,
-		"/route",
-		routeParams,
-		v.mapper.DrivingTimeMapper,
-	)
-
+	timeMatrix, err := v.getTimeMatrix(routeParams.Waypoints(), routeParams.DepartureTime())
 	if err != nil {
-		return nil, fmt.Errorf("failed to compute time: %w", err)
+		return nil, err
+	}
+	cumulativeDurations, err := v.getCumulativeDurations(timeMatrix, len(routeParams.Waypoints()))
+	if err != nil {
+		return nil, err
 	}
 
-	return durations, nil
+	return cumulativeDurations, nil
+}
+
+func (v *Valhalla) getCumulativeDurations(distanceTimeMatrix [][]time.Duration, pathLength int) ([]time.Duration, error) {
+	cumulativeDurations := make([]time.Duration, pathLength)
+	cumulativeDurations[0] = 0
+	for i := 0; i < pathLength-1; i++ {
+		duration := distanceTimeMatrix[i][i+1]
+		if duration < 0 {
+			return nil, fmt.Errorf("negative duration found between points %d and %d", i, i+1)
+		}
+		cumulativeDurations[i+1] = cumulativeDurations[i] + duration
+	}
+	return cumulativeDurations, nil
+}
+
+func (v *Valhalla) getTimeMatrix(matrixPoints []model.Coordinate, departureTime time.Time) ([][]time.Duration, error) {
+	// Validate the input points
+	if len(matrixPoints) < 2 {
+		return nil, fmt.Errorf("not enough points to generate a distance/time matrix")
+	}
+
+	// Call the routing engine to get the distance and time matrix
+	params, err := model.NewDistanceTimeMatrixParams(
+		matrixPoints,
+		model.ProfileAuto,
+		model.WithDepartureTime(departureTime),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create distance time matrix params: %w", err)
+	}
+
+	distanceTimeMatrix, err := v.ComputeDistanceTimeMatrix(nil, params)
+	if err != nil {
+		return nil, fmt.Errorf("failed to compute distance time matrix: %w", err)
+	}
+	return distanceTimeMatrix.Times(), nil
 }
 
 func (v *Valhalla) ComputeWalkingTime(

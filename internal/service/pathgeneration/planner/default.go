@@ -2,6 +2,7 @@ package planner
 
 import (
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"matching-engine/internal/model"
 	"matching-engine/internal/service/pathgeneration/generator"
 	"matching-engine/internal/service/pathgeneration/validator"
@@ -52,13 +53,16 @@ func (planner *DefaultPathPlanner) FindFirstFeasiblePath(offerNode *model.OfferN
 		if validateErr != nil {
 			return nil, false, fmt.Errorf("failed to validate path: %w", validateErr)
 		}
-
 		if isValidPath {
 			// Found a valid path, return it immediately
 			return candidatePath, true, nil
 		}
 	}
 
+	log.Debug().
+		Str("offer_id", offerNode.Offer().ID()).
+		Str("request_id", requestNode.Request().ID()).
+		Msg("No valid paths found for offer and request")
 	// No valid paths found
 	return nil, false, nil
 }

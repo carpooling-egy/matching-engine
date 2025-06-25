@@ -2,6 +2,7 @@ package checker
 
 import (
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"matching-engine/internal/model"
 )
 
@@ -19,6 +20,10 @@ func (oc *OverlapChecker) Check(offer *model.Offer, request *model.Request) (boo
 	}
 	// Check if the request and offer have overlapping time slots
 	if request.EarliestDepartureTime().After(offer.MaxEstimatedArrivalTime()) || request.LatestArrivalTime().Before(offer.DepartureTime()) {
+		log.Debug().
+			Str("offer_id", offer.ID()).
+			Str("request_id", request.ID()).
+			Msg("offer and request do not overlap in time")
 		return false, nil
 	}
 	return true, nil
