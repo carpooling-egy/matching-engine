@@ -1,7 +1,8 @@
 package pruning
 
 import (
-	"fmt"
+	"matching-engine/internal/collections"
+	"sort"
 	"time"
 
 	"matching-engine/internal/geo"
@@ -12,7 +13,8 @@ import (
 
 // RTreePruner implements the RoutePruner interface using R-tree spatial indexing
 type RTreePruner struct {
-	tree *rtreego.Rtree
+	tree     *rtreego.Rtree
+	indexMap map[string]int
 }
 
 // Prune filters the route to include only segments within the specified threshold
@@ -23,6 +25,7 @@ func (p *RTreePruner) Prune(origin *model.Coordinate, threshold time.Duration) (
 
 	// Convert time threshold to distance in degrees
 	thresholdDistance := geo.MetersToDegrees(float64(threshold.Seconds()) * geo.WalkingSpeedMPS)
+	thresholdDistanceSquared := thresholdDistance * thresholdDistance
 
 	// Create bounding box (square) around the circle for initial filtering
 	searchRect, err := rtreego.NewRect(
@@ -36,49 +39,45 @@ func (p *RTreePruner) Prune(origin *model.Coordinate, threshold time.Duration) (
 	// Get candidate segments using R-tree spatial index
 	results := p.tree.SearchIntersect(searchRect)
 
-	// Use a map to collect unique coordinates within the threshold
-	coordMap := make(map[string]model.Coordinate)
-	thresholdDistanceSquared := thresholdDistance * thresholdDistance
+	seen := make(map[string]bool)
+	var collected []collections.Tuple2[model.Coordinate, int]
 
-	// Process each segment found in the search area
 	for _, result := range results {
 		segment, ok := result.(*Segment)
 		if !ok {
 			continue // Skip if not a Segment
 		}
 
-		// Check if segment endpoints are within the threshold distance
-		if isWithinThreshold(origin, &segment.A, thresholdDistanceSquared) {
-			addToCoordinateMap(coordMap, segment.A)
-		}
+		for _, point := range []model.Coordinate{segment.A, segment.B} {
+			ptKey := point.Key()
+			if seen[ptKey] {
+				continue // Skip if already seen
+			}
 
-		if isWithinThreshold(origin, &segment.B, thresholdDistanceSquared) {
-			addToCoordinateMap(coordMap, segment.B)
+			if isWithinThreshold(origin, &point, thresholdDistanceSquared) {
+				if idx, exists := p.indexMap[ptKey]; exists {
+					seen[ptKey] = true
+					collected = append(collected, collections.NewTuple2(point, idx))
+				}
+			}
 		}
 	}
 
-	// Convert the map of unique coordinates to a LineString
-	return mapToLineString(coordMap), nil
+	sort.Slice(collected, func(i, j int) bool {
+		return collected[i].Second < collected[j].Second
+	})
+
+	subPath := make(model.LineString, 0, len(collected))
+	for _, tuple := range collected {
+		subPath = append(subPath, tuple.First)
+	}
+
+	return subPath, nil
 }
 
 // isWithinThreshold checks if a coordinate is within the squared threshold distance
 func isWithinThreshold(origin *model.Coordinate, point *model.Coordinate, thresholdDistanceSquared float64) bool {
 	return squaredDistance(origin, point) <= thresholdDistanceSquared
-}
-
-// addToCoordinateMap adds a coordinate to the map using a formatted string key
-func addToCoordinateMap(coordMap map[string]model.Coordinate, coord model.Coordinate) {
-	key := fmt.Sprintf("%.6f:%.6f", coord.Lat(), coord.Lng())
-	coordMap[key] = coord
-}
-
-// mapToLineString converts a map of coordinates to a LineString
-func mapToLineString(coordMap map[string]model.Coordinate) model.LineString {
-	coords := make([]model.Coordinate, 0, len(coordMap))
-	for _, coord := range coordMap {
-		coords = append(coords, coord)
-	}
-	return coords
 }
 
 // squaredDistance calculates the squared Euclidean distance between two coordinates

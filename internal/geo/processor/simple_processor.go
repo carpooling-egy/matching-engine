@@ -44,12 +44,7 @@ func NewGeospatialProcessor(
 		return nil, err
 	}
 
-	downSampledRoute, err := downSampler.DownSample(routeCoords)
-	if err != nil {
-		return nil, err
-	}
-
-	pruner, err := prunerFactory.NewRoutePruner(downSampledRoute)
+	pruner, err := prunerFactory.NewRoutePruner(routeCoords)
 	if err != nil {
 		return nil, err
 	}
@@ -68,15 +63,12 @@ func (p *processorImpl) ComputeClosestRoutePoint(
 ) (*model.Coordinate, time.Duration, error) {
 	ctx := context.Background()
 
-	// Note: The pruning step is currently skipped because it was giving incorrect results.
-	// It mainly serves as a performance optimization, so skipping it shouldn't affect the correctness
-	// of the output while testing. Safe to omit for now until the logic is fixed.
-	routeCoords, err := p.route.Polyline().Coordinates()
+	prunedRoute, err := p.Prune(point, walkingTime)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	downSampledRoute, err := p.DownSample(routeCoords)
+	downSampledRoute, err := p.DownSample(prunedRoute)
 	if err != nil {
 		return nil, 0, err
 	}

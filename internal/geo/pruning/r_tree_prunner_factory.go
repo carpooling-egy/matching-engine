@@ -33,14 +33,25 @@ func NewRTreePruner(route model.LineString) (*RTreePruner, error) {
 	}
 
 	tree := rtreego.NewTree(TreeDimension, MinNodeEntries, MaxNodeEntries)
+	indexMap := make(map[string]int, len(route))
 
-	// Index all segments from the route
 	for i := 0; i < len(route)-1; i++ {
-		seg := NewSegment(route[i], route[i+1])
+		a, b := route[i], route[i+1]
+
+		seg := NewSegment(a, b)
 		tree.Insert(seg)
+
+		ka, kb := a.Key(), b.Key()
+		if _, ok := indexMap[ka]; !ok {
+			indexMap[ka] = i
+		}
+		if _, ok := indexMap[kb]; !ok {
+			indexMap[kb] = i + 1
+		}
 	}
 
 	return &RTreePruner{
-		tree: tree,
+		tree:     tree,
+		indexMap: indexMap,
 	}, nil
 }

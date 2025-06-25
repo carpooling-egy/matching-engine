@@ -68,3 +68,7 @@ func (c *Coordinate) Equal(other *Coordinate) bool {
 	const tolerance = 1e-9
 	return math.Abs(c.Lat()-other.Lat()) < tolerance && math.Abs(c.Lng()-other.Lng()) < tolerance
 }
+
+func (c *Coordinate) Key() string {
+	return fmt.Sprintf("%.6f,%.6f", c.lat, c.lng)
+}
