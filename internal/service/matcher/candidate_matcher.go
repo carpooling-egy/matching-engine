@@ -15,6 +15,7 @@ func (matcher *Matcher) buildCandidateMatches(offers []*model.Offer, requests []
 		return err
 	}
 
+	// TODO: PARALLELIZE THIS
 	for candidate, err := range candidateIterator.Candidates() {
 		if err != nil {
 			return fmt.Errorf("error during candidate iteration: %w", err)
