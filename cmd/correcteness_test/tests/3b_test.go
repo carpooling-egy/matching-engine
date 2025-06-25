@@ -17,7 +17,7 @@ func getTest3bData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 	offerDestination, _ := model.NewCoordinate(31.196, 29.90127)
 	offerDepartureTime := correcteness_test.ParseTime("10:30")
 	offerDetourDuration := time.Duration(8) * time.Minute // will be overwritten later
-	offerCapacity := 3
+	offerCapacity := 1
 	offerCurrentNumberOfRequests := 1
 	offerSameGender := false
 	offerGender := enums.Male
@@ -78,7 +78,7 @@ func getTest3bData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 	request2Source, _ := model.NewCoordinate(31.19699, 29.90388)
 	request2Destination, _ := model.NewCoordinate(31.19661, 29.90294)
 	request2MaxWalkingDuration := time.Duration(0) * time.Minute
-	request2NumberOfRiders := 3
+	request2NumberOfRiders := 1
 	request2SameGender := false
 	request2Gender := enums.Male
 	pickup2, _, dropoff2, _ := GetRequestPointsAndDurations(engine, offer, request2Source, request2MaxWalkingDuration, request2Destination)
