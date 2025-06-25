@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"github.com/rs/zerolog/log"
 	"matching-engine/cmd/correcteness_test"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/enums"
@@ -59,9 +60,24 @@ func getTest2aData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 	// Create another request
 	requestSource, _ := model.NewCoordinate(31.208936, 29.933419)
 	requestDestination, _ := model.NewCoordinate(31.20773291, 29.92687263)
-	requestEarliestDepartureTime := correcteness_test.ParseTime("10:20:00")
-	requestLatestArrivalTime := correcteness_test.ParseTime("11:20")
 	requestMaxWalkingDuration := time.Duration(0) * time.Minute
+
+	pickup, _, dropoff, _ := GetRequestPointsAndDurations(engine, offer, requestSource, requestMaxWalkingDuration, requestDestination)
+	cumulativeTimesWithoutRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *offerDestination}, offerDepartureTime, engine)
+	cumulativeTimesWithRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *matchedRequestSource, *matchedRequestDestination, *pickup, *dropoff, *offerDestination}, offerDepartureTime, engine)
+
+	// overwrite offer detour, maxEstimated arrival time && matchedRequestLatestArrivalTime
+	offerDetourDuration = cumulativeTimesWithRider[5] - cumulativeTimesWithoutRider[1] + 5*time.Minute // adding 5 minutes to ensure the detour is valid
+	offer.SetDetour(offerDetourDuration)
+	offer.SetMaxEstimatedArrivalTime(offerDepartureTime.Add(cumulativeTimesWithoutRider[1]).Add(offerDetourDuration))
+	matchedRequest.SetLatestArrivalTime(offer.MaxEstimatedArrivalTime().Add(10 * time.Minute))
+	log.Debug().
+		Int("offerDetourDurationMinutes", int(offerDetourDuration.Minutes())).
+		Str("offerMaxEstimatedArrivalTime", offer.MaxEstimatedArrivalTime().Format(time.RFC3339)).
+		Str("matchedRequestLatestArrivalTime", matchedRequest.LatestArrivalTime().Format(time.RFC3339)).
+		Msg("Offer and matched request details after detour adjustment")
+	requestEarliestDepartureTime := offerDepartureTime.Add(-10 * time.Minute)
+	requestLatestArrivalTime := offerMaxEstimatedArrivalTime.Add(10 * time.Minute)
 	requestNumberOfRiders := 1
 	requestSameGender := true
 	requestGender := enums.Male
