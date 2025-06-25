@@ -28,7 +28,7 @@ func NewHopcroftKarp() MaximumMatching {
 
 // FindMaximumMatching finds maximum bipartite matching between offer and request nodes.
 func (hk *HopcroftKarp) FindMaximumMatching(
-	graph *model.Graph,
+	graph *model.MaximumMatchingGraph,
 ) ([]collections.Tuple2[*model.OfferNode, *model.Edge], error) {
 	if graph == nil {
 		return nil, fmt.Errorf("graph cannot be nil")
@@ -63,7 +63,7 @@ func (hk *HopcroftKarp) FindMaximumMatching(
 	return buildMatchingResult(graph, offers, requests, hk.offerMatches)
 }
 
-func initialize(graph *model.Graph) ([]*model.OfferNode, []*model.RequestNode, *collections.SyncMap[*model.RequestNode, int]) {
+func initialize(graph *model.MaximumMatchingGraph) ([]*model.OfferNode, []*model.RequestNode, *collections.SyncMap[*model.RequestNode, int]) {
 	offers := make([]*model.OfferNode, 0, graph.OfferNodes().Size())
 	graph.OfferNodes().Range(func(_ string, node *model.OfferNode) error {
 		offers = append(offers, node)
@@ -151,7 +151,7 @@ func (hk *HopcroftKarp) findAugmentingPath(offer int, adj [][]int) bool {
 	return false
 }
 
-func buildMatchingResult(graph *model.Graph, offers []*model.OfferNode, requests []*model.RequestNode, offerMatches []int) ([]collections.Tuple2[*model.OfferNode, *model.Edge], error) {
+func buildMatchingResult(graph *model.MaximumMatchingGraph, offers []*model.OfferNode, requests []*model.RequestNode, offerMatches []int) ([]collections.Tuple2[*model.OfferNode, *model.Edge], error) {
 	var result []collections.Tuple2[*model.OfferNode, *model.Edge]
 	for offerIndex, requestIndex := range offerMatches {
 		if offerIndex > 0 && requestIndex > 0 {

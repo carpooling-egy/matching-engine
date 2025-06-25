@@ -50,20 +50,20 @@ func minimalEdge(requestNode *model.RequestNode) *model.Edge {
 func TestHopcroftKarp_FindMaximumMatching(t *testing.T) {
 	tests := []struct {
 		name     string
-		graph    *model.Graph
+		graph    *model.MaximumMatchingGraph
 		wantSize int
 		wantErr  bool
 	}{
 		{
 			name:     "empty graph",
-			graph:    model.NewGraph(),
+			graph:    model.NewMaximumMatchingGraph(),
 			wantSize: 0,
 			wantErr:  false,
 		},
 		{
 			name: "single match",
-			graph: func() *model.Graph {
-				g := model.NewGraph()
+			graph: func() *model.MaximumMatchingGraph {
+				g := model.NewMaximumMatchingGraph()
 				offer := minimalOffer("offer1")
 				request := minimalRequest("request1")
 				offerNode := model.NewOfferNode(offer)
@@ -78,8 +78,8 @@ func TestHopcroftKarp_FindMaximumMatching(t *testing.T) {
 		},
 		{
 			name: "no possible matches",
-			graph: func() *model.Graph {
-				g := model.NewGraph()
+			graph: func() *model.MaximumMatchingGraph {
+				g := model.NewMaximumMatchingGraph()
 				offer := minimalOffer("offer1")
 				request := minimalRequest("request1")
 				offerNode := model.NewOfferNode(offer)
@@ -93,8 +93,8 @@ func TestHopcroftKarp_FindMaximumMatching(t *testing.T) {
 		},
 		{
 			name: "multiple possible matches",
-			graph: func() *model.Graph {
-				g := model.NewGraph()
+			graph: func() *model.MaximumMatchingGraph {
+				g := model.NewMaximumMatchingGraph()
 				offer1 := minimalOffer("offer1")
 				offer2 := minimalOffer("offer2")
 				request1 := minimalRequest("request1")
@@ -118,8 +118,8 @@ func TestHopcroftKarp_FindMaximumMatching(t *testing.T) {
 		},
 		{
 			name: "all possible matches",
-			graph: func() *model.Graph {
-				g := model.NewGraph()
+			graph: func() *model.MaximumMatchingGraph {
+				g := model.NewMaximumMatchingGraph()
 				offer1 := minimalOffer("offer1")
 				offer2 := minimalOffer("offer2")
 				request1 := minimalRequest("request1")
@@ -162,7 +162,7 @@ func TestHopcroftKarp_FindMaximumMatching(t *testing.T) {
 	}
 }
 
-func createSmallTestGraph() *model.Graph {
+func createSmallTestGraph() *model.MaximumMatchingGraph {
 	offer1 := minimalOffer("offer1")
 	offer2 := minimalOffer("offer2")
 	offer3 := minimalOffer("offer3")
@@ -187,7 +187,7 @@ func createSmallTestGraph() *model.Graph {
 	requestNode4 := model.NewRequestNode(request4)
 	requestNode5 := model.NewRequestNode(request5)
 	requestNode6 := model.NewRequestNode(request6)
-	g := model.NewGraph()
+	g := model.NewMaximumMatchingGraph()
 	g.AddOfferNode(offerNode1)
 	g.AddOfferNode(offerNode2)
 	g.AddOfferNode(offerNode3)
@@ -232,14 +232,14 @@ func TestHopcroftKarp_FindMaximumMatching_SmallCase(t *testing.T) {
 func TestHopcroftKarp_FindMaximumMatching_EdgeCases(t *testing.T) {
 	tests := []struct {
 		name     string
-		graph    *model.Graph
+		graph    *model.MaximumMatchingGraph
 		wantSize int
 		wantErr  bool
 	}{
 		{
 			name: "graph with missing edge",
-			graph: func() *model.Graph {
-				g := model.NewGraph()
+			graph: func() *model.MaximumMatchingGraph {
+				g := model.NewMaximumMatchingGraph()
 				offer := minimalOffer("offer1")
 				request := minimalRequest("request1")
 				offerNode := model.NewOfferNode(offer)
@@ -254,8 +254,8 @@ func TestHopcroftKarp_FindMaximumMatching_EdgeCases(t *testing.T) {
 		},
 		{
 			name: "graph with only offers",
-			graph: func() *model.Graph {
-				g := model.NewGraph()
+			graph: func() *model.MaximumMatchingGraph {
+				g := model.NewMaximumMatchingGraph()
 				offer1 := minimalOffer("offer1")
 				offer2 := minimalOffer("offer2")
 				g.AddOfferNode(model.NewOfferNode(offer1))
@@ -267,8 +267,8 @@ func TestHopcroftKarp_FindMaximumMatching_EdgeCases(t *testing.T) {
 		},
 		{
 			name: "graph with only requests",
-			graph: func() *model.Graph {
-				g := model.NewGraph()
+			graph: func() *model.MaximumMatchingGraph {
+				g := model.NewMaximumMatchingGraph()
 				request1 := minimalRequest("request1")
 				request2 := minimalRequest("request2")
 				g.AddRequestNode(model.NewRequestNode(request1))
@@ -317,7 +317,7 @@ func TestHopcroftKarp_LargeCase(t *testing.T) {
 		runtime.ReadMemStats(&m)
 		initialAlloc := m.TotalAlloc
 
-		g := model.NewGraph()
+		g := model.NewMaximumMatchingGraph()
 		offerNodes := make([]*model.OfferNode, nOffers)
 		requestNodes := make([]*model.RequestNode, nRequests)
 

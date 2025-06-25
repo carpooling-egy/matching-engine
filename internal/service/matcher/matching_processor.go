@@ -7,7 +7,7 @@ import (
 )
 
 // processMaximumMatching finds maximum matches and updates results.
-func (matcher *Matcher) processMaximumMatching(graph *model.Graph, limit int) error {
+func (matcher *Matcher) processMaximumMatching(graph *model.MaximumMatchingGraph, limit int) error {
 	maxPairs, err := matcher.maximumMatching.FindMaximumMatching(graph)
 	if err != nil {
 		return fmt.Errorf("failed to find maximum matching: %w", err)
