@@ -68,7 +68,7 @@ func getTest1fivData(engine routing.Engine) ([]*model.Offer, []*model.Request, m
 	cumulativeTimesWithRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *pickup, *dropoff, *matchedRequestSource, *matchedRequestDestination, *offerDestination}, offerDepartureTime, engine)
 
 	// overwrite offer detour, maxEstimated arrival time && matchedRequestLatestArrivalTime
-	offerDetourDuration = cumulativeTimesWithRider[5] - cumulativeTimesWithoutRider[1] + 5*time.Minute // adding 5 minutes to ensure the detour is valid
+	offerDetourDuration = cumulativeTimesWithRider[5] - cumulativeTimesWithoutRider[1] + 1*time.Minute // adding 1 minute to ensure the detour is valid
 	offer.SetDetour(offerDetourDuration)
 	offer.SetMaxEstimatedArrivalTime(offerDepartureTime.Add(cumulativeTimesWithoutRider[1]).Add(offerDetourDuration))
 	matchedRequest.SetLatestArrivalTime(offerDepartureTime.Add(cumulativeTimesWithMatchedRequest[2]).Add(1 * time.Minute)) // setting matchedRequestLatestArrivalTime to the arrival time before adding a new request to ensure it will not arrive before it's latest arrival time
