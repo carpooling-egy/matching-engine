@@ -25,7 +25,6 @@ func getTest3bData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 	offerMaxEstimatedArrivalTime := GetMaxEstimatedArrivalTime(*offerSource, *offerDestination, offerDepartureTime, offerDetourDuration, engine)
 
 	// Create a matched request for this offer
-	// TODO correct pick up and dropoff coordinates
 	matchedRequestSource, _ := model.NewCoordinate(31.23985, 29.96469)
 	matchedRequestDestination, _ := model.NewCoordinate(31.23213, 29.9517)
 

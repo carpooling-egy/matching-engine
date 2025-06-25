@@ -6,7 +6,6 @@ import (
 	"matching-engine/internal/model"
 	"matching-engine/internal/repository"
 	"matching-engine/internal/repository/postgres"
-	"time"
 )
 
 type PostgresInputReader struct {
@@ -28,8 +27,13 @@ func NewPostgresInputReader(db *postgres.Database, requestsRepo repository.Rider
 func (r *PostgresInputReader) GetOffersAndRequests(ctx context.Context) ([]*model.Request, []*model.Offer, bool, error) {
 
 	// TODO - check if we need to add a timeout to the context
-	// TODO - Read start and end time from config
-	requests, err := r.requestsRepository.GetUnmatched(ctx, time.Now(), time.Now().Add(24*time.Hour))
+
+	cfg, err := LoadConfig()
+	if err != nil {
+		return nil, nil, false, fmt.Errorf("failed to load reader config: %w", err)
+	}
+
+	requests, err := r.requestsRepository.GetUnmatched(ctx, cfg.start, cfg.end, cfg.datasetId)
 
 	if err != nil {
 		return nil, nil, false, fmt.Errorf("failed to get requests %w", err)
@@ -38,7 +42,7 @@ func (r *PostgresInputReader) GetOffersAndRequests(ctx context.Context) ([]*mode
 		return nil, nil, false, nil
 	}
 
-	offers, err := r.offersRepository.GetAvailable(ctx, time.Now(), time.Now().Add(24*time.Hour))
+	offers, err := r.offersRepository.GetAvailable(ctx, cfg.start, cfg.end, cfg.datasetId)
 	if err != nil {
 		return nil, nil, false, fmt.Errorf("failed to get offers %w", err)
 	}
