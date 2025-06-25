@@ -8,38 +8,41 @@ import (
 	"strconv"
 )
 
-type Config struct {
-	samplesK int
-}
+const (
+	// DefaultK is the default number of random samples to generate
+	DefaultK = 1000
+)
 
-func loadEnv() {
+func initEnv() {
 	// IMPORTANT NOTE: replace it with your actual path to the .env file
 	if err := godotenv.Load("/home/husseinkhaled/GolandProjects/matching-engine/.env"); err != nil {
 		fmt.Println("Error loading .env:", err)
 	}
 }
 
-func LoadConfig() *Config {
-	c := defaultConfig()
-	loadEnv()
+func getNumberOfSamples() int {
+	numberOfSamples := DefaultK // Default number of samples
+	initEnv()
 	if v, ok := os.LookupEnv("SAMPLES_K"); ok && v != "" {
 		k, err := strconv.Atoi(v)
 		if err != nil {
-			log.Error().Msgf("PATHGEN_K environment variable must be an integer." +
-				"Using the default k instead")
+			log.Error().Msgf("Invalid SAMPLES_K value: %s, using default: %d", v, DefaultK)
 		} else {
-			c.samplesK = k
+			numberOfSamples = k
 		}
+	} else {
+		log.Warn().Msgf("SAMPLES_K environment variable is not set. Using default: %d", DefaultK)
 	}
-	return c
+	return numberOfSamples
 }
 
-func defaultConfig() *Config {
-	return &Config{
-		samplesK: DefaultK,
+func getPathGeneratorType() string {
+	initEnv()
+	pathGeneratorType := "insertion" // Default path generator type
+	if v, ok := os.LookupEnv("PATH_GENERATOR_TYPE"); ok && v != "" {
+		pathGeneratorType = v
+	} else {
+		log.Warn().Msgf("PATH_GENERATOR_TYPE environment variable is not set. Using default: %s", pathGeneratorType)
 	}
-}
-
-func (c *Config) K() int {
-	return c.samplesK
+	return pathGeneratorType
 }

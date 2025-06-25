@@ -9,11 +9,6 @@ import (
 	"time"
 )
 
-const (
-	// DefaultK is the default number of random samples to generate
-	DefaultK = 1000
-)
-
 type RandomTopologicalGenerator struct {
 	// RandomTopologicalGenerator is a path generator that generates paths using random sampling
 	k     int                         // Number of random samples to generate
@@ -21,9 +16,9 @@ type RandomTopologicalGenerator struct {
 }
 
 func NewRandomTopologicalGenerator() PathGenerator {
-	c := LoadConfig()
+	k := getNumberOfSamples()
 	return &RandomTopologicalGenerator{
-		k:     c.samplesK,
+		k:     k,
 		graph: model.NewTopologicalPathGraph(),
 	}
 }
