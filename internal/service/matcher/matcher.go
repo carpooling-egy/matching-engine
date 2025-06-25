@@ -60,7 +60,7 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 		return nil, fmt.Errorf("failed to build candidate matches: %w", err)
 	}
 
-	graph := model.NewGraph()
+	graph := model.NewMaximumMatchingGraph()
 
 	for matcher.availableOffers.Size() > 0 && matcher.availableRequests.Size() > 0 {
 		// Build Matching Graph
