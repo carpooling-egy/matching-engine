@@ -12,3 +12,15 @@ type RoutePruner interface {
 type RoutePrunerFactory interface {
 	NewRoutePruner(route model.LineString) (RoutePruner, error)
 }
+
+type NoOpPruner struct {
+	fullRoute model.LineString
+}
+
+func NewNoOpPruner(route model.LineString) RoutePruner {
+	return &NoOpPruner{fullRoute: route}
+}
+
+func (n *NoOpPruner) Prune(origin *model.Coordinate, threshold time.Duration) (model.LineString, error) {
+	return n.fullRoute, nil
+}

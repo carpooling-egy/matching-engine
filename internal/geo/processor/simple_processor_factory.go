@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"matching-engine/internal/adapter/routing"
-	"matching-engine/internal/geo/downsampling"
 	"matching-engine/internal/geo/pruning"
 	"matching-engine/internal/model"
 )
@@ -12,15 +11,16 @@ import (
 // Factory implements the ProcessorFactory interface.
 type Factory struct {
 	prunerFactory pruning.RoutePrunerFactory
-	downSampler   downsampling.RouteDownSampler
 	engine        routing.Engine
 }
 
 // NewProcessorFactory creates a new ProcessorFactory instance.
-func NewProcessorFactory(prunerFactory pruning.RoutePrunerFactory, downSampler downsampling.RouteDownSampler, engine routing.Engine) ProcessorFactory {
+func NewProcessorFactory(
+	prunerFactory pruning.RoutePrunerFactory,
+	engine routing.Engine,
+) ProcessorFactory {
 	return &Factory{
 		prunerFactory: prunerFactory,
-		downSampler:   downSampler,
 		engine:        engine,
 	}
 }
@@ -39,7 +39,7 @@ func (f *Factory) CreateProcessor(offer *model.Offer) (GeospatialProcessor, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to plan route: %w", err)
 	}
-	geospatialProcessor, err := NewGeospatialProcessor(route, f.prunerFactory, f.downSampler, f.engine)
+	geospatialProcessor, err := NewGeospatialProcessor(route, f.prunerFactory, f.engine)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create geospatial processor: %w", err)
 	}
