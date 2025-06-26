@@ -164,6 +164,12 @@ func checkTimeOverlap(time1, time2 time.Time, tolerance time.Duration) bool {
 
 func runMatcher(offers []*model.Offer, requests []*model.Request) ([]*model.MatchingResult, error) {
 
+	// TODO set the env variable with correct variable to test different approaches
+	// TODO use a better mechanism to test all variations
+	//envPath := ""
+	//
+	//err := godotenv.Load(envPath)
+
 	c := dig.New()
 
 	// register all dependencies for matching services
