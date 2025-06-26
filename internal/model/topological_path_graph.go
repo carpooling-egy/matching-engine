@@ -134,6 +134,8 @@ func (g *TopologicalPathGraph) InitPathGraph(
 	endNode *PathPoint,
 ) {
 
+	g.Clear()
+
 	// Add the start and end nodes to the graph that guarantees that any order of the path can be generated
 	// will start with the startNode and end with the endNode
 	g.SetStartNode(startNode)
