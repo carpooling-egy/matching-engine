@@ -12,7 +12,6 @@ import (
 
 // RegisterPickupDropoffServices registers pickup/dropoff services
 func RegisterPickupDropoffServices(c *dig.Container) {
-	utils.Must(c.Provide(pickupdropoffservice.NewWalkingTimeCalculator))
 	utils.Must(c.Provide(pickupdropoffservice.NewIntersectionBasedGenerator))
 	utils.Must(c.Provide(pickupdropoffcache.NewPickupDropoffCache))
 	utils.Must(c.Provide(pickupdropoffservice.NewPickupDropoffSelector))

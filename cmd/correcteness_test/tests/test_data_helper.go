@@ -6,17 +6,18 @@ import (
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/enums"
 	"matching-engine/internal/model"
-	"matching-engine/internal/service/pickupdropoffservice"
 	"sort"
 	"time"
 )
 
 type MatchedRequest struct {
-	request      *model.Request
-	pickupCoord  *model.Coordinate
-	pickupOrder  int
-	dropoffCoord *model.Coordinate
-	dropoffOrder int
+	request         *model.Request
+	pickupCoord     *model.Coordinate
+	pickupDuration  time.Duration
+	pickupOrder     int
+	dropoffCoord    *model.Coordinate
+	dropoffDuration time.Duration
+	dropoffOrder    int
 }
 
 func AddPointsToPath(engine routing.Engine, offer *model.Offer, pointsOrder []int, points []*model.PathPoint) []model.PathPoint {
@@ -147,18 +148,11 @@ func CreatePath(offer *model.Offer, matchedRequests []*MatchedRequest, engine ro
 	path := make([]model.PathPoint, len(matchedRequests)*2+2) // 2 points for the offer source and destination, 2 points for each request pickup and dropoff
 	path[0] = *model.NewPathPoint(*offer.Source(), enums.Source, offer.DepartureTime(), offer, 0)
 	path[len(path)-1] = *model.NewPathPoint(*offer.Destination(), enums.Destination, offer.MaxEstimatedArrivalTime(), offer, 0)
-	walkingTimeCalculator := pickupdropoffservice.NewWalkingTimeCalculator(engine)
 	for _, matchedReq := range matchedRequests {
 		pickupPoint := model.NewPathPoint(
-			*matchedReq.pickupCoord, enums.Pickup, matchedReq.request.EarliestDepartureTime(), matchedReq.request, 0)
+			*matchedReq.pickupCoord, enums.Pickup, matchedReq.request.EarliestDepartureTime(), matchedReq.request, matchedReq.pickupDuration)
 		dropoffPoint := model.NewPathPoint(
-			*matchedReq.dropoffCoord, enums.Dropoff, matchedReq.request.LatestArrivalTime(), matchedReq.request, 0)
-		pickupWalkingDuration, dropoffWalkingDuration, err := walkingTimeCalculator.ComputeWalkingDurations(context.Background(), matchedReq.request, pickupPoint, dropoffPoint)
-		if err != nil {
-			panic("Failed to compute walking durations: " + err.Error())
-		}
-		pickupPoint.SetWalkingDuration(pickupWalkingDuration)
-		dropoffPoint.SetWalkingDuration(dropoffWalkingDuration)
+			*matchedReq.dropoffCoord, enums.Dropoff, matchedReq.request.LatestArrivalTime(), matchedReq.request, matchedReq.dropoffDuration)
 		path[matchedReq.pickupOrder] = *pickupPoint
 		path[matchedReq.dropoffOrder] = *dropoffPoint
 	}

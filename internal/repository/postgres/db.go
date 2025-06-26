@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -38,9 +37,6 @@ type Config struct {
 
 // NewDatabase creates a database connection using environment variables
 func NewDatabase(ctx context.Context) (*Database, error) {
-	if err := loadEnv(); err != nil {
-		return nil, errors.Wrap(err, "failed to load environment variables")
-	}
 
 	config, err := loadConfigFromEnv()
 	if err != nil {
@@ -49,15 +45,6 @@ func NewDatabase(ctx context.Context) (*Database, error) {
 
 	connString := buildConnString(config)
 	return NewDatabaseFromConnString(ctx, connString, config)
-}
-
-// LoadEnv loads environment variables from .env file
-func loadEnv() error {
-	// Try to load from .env file, but don't fail if file is missing
-	if err := godotenv.Load(); err != nil {
-		log.Println("Warning: .env file not found, using system environment variables")
-	}
-	return nil
 }
 
 // loadConfigFromEnv loads database configuration from environment variables

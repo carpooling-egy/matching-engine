@@ -18,6 +18,11 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	shutdown.Setup(cancel)
 
+	// Load environment variables
+	if err := config.LoadEnv(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to load environment variables")
+	}
+
 	// Create and run the application
 	newApp := app.NewApp()
 	if err := newApp.Run(ctx); err != nil {
