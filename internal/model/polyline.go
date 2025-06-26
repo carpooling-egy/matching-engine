@@ -5,12 +5,16 @@ import (
 	"fmt"
 	"math"
 	"strings"
+	"sync"
 )
 
 type Polyline struct {
 	encoded     string
 	precision   int
 	coordinates LineString
+
+	once      sync.Once
+	decodeErr error
 }
 
 type Option func(*Polyline) error
@@ -53,16 +57,10 @@ func (p *Polyline) Precision() int {
 }
 
 func (p *Polyline) Coordinates() (LineString, error) {
-	if p.coordinates != nil {
-		return p.coordinates, nil
-	}
-
-	coords, err := p.decode()
-	if err != nil {
-		return nil, err
-	}
-	p.coordinates = coords
-	return p.coordinates, nil
+	p.once.Do(func() {
+		p.coordinates, p.decodeErr = p.decode()
+	})
+	return p.coordinates, p.decodeErr
 }
 
 func (p *Polyline) decode() (LineString, error) {
