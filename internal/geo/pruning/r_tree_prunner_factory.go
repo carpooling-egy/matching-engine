@@ -8,9 +8,10 @@ import (
 
 // R-tree configuration constants
 const (
-	TreeDimension  = 2
-	MinNodeEntries = 25
-	MaxNodeEntries = 50
+	TreeDimension                = 2
+	MinNodeEntries               = 25
+	MaxNodeEntries               = 50
+	MinThresholdDistanceInMeters = 50
 )
 
 // RTreePrunerFactory implements the RoutePrunerFactory interface

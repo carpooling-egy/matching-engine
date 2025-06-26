@@ -27,7 +27,11 @@ func (p *RTreePruner) Prune(origin *model.Coordinate, threshold time.Duration) (
 	query := rtreego.Point{origin.Lat(), origin.Lng()}
 
 	// Convert time threshold to distance in degrees
-	thresholdDistance := geo.MetersToDegrees(float64(threshold.Seconds()) * geo.WalkingSpeedMPS)
+	thresholdDistance := max(
+		geo.MetersToDegrees(float64(threshold.Seconds())*geo.WalkingSpeedMPS),
+		geo.MetersToDegrees(float64(MinThresholdDistanceInMeters)),
+	)
+
 	thresholdDistanceSquared := thresholdDistance * thresholdDistance
 
 	// Create bounding box (square) around the circle for initial filtering

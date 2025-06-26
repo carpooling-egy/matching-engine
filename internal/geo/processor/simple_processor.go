@@ -67,6 +67,10 @@ func (p *processorImpl) ComputeClosestRoutePoint(
 		return nil, 0, err
 	}
 
+	if len(prunedRoute) == 0 {
+		return nil, walkingTime + time.Minute, nil
+	}
+
 	downSampledRoute, err := p.DownSample(prunedRoute)
 	if err != nil {
 		return nil, 0, err
