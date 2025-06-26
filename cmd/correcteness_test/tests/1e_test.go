@@ -76,7 +76,7 @@ func getTest1eData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 
 	// overwrite offer detour, maxEstimated arrival time && matchedRequestLatestArrivalTime
 	offer.SetDetour((cumulativeTimesWithRider[3] - cumulativeTimesWithoutRider[1]) / 2)
-	offer.SetMaxEstimatedArrivalTime(offerDepartureTime.Add(cumulativeTimesWithoutRider[1]).Add(offerDetourDuration))
+	offer.SetMaxEstimatedArrivalTime(offerDepartureTime.Add(cumulativeTimesWithoutRider[1]).Add(offer.DetourDurationMinutes()))
 	matchedRequest.SetLatestArrivalTime(offer.MaxEstimatedArrivalTime().Add(10 * time.Minute))
 
 	requestEarliestDepartureTime := offerDepartureTime.Add(-requestMaxWalkingDuration).Add(-1 * time.Minute)
