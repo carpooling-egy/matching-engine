@@ -75,5 +75,5 @@ func (ds *DefaultGenerator) Generate(offerNode *model.OfferNode, requestNodes []
 			offerNode.Offer().ID(), len(matrixPoints), err)
 	}
 
-	return cache.NewPathPointMappedTimeMatrix(distanceTimeMatrix.Times(), pointToIdMap, idToPoint), nil
+	return cache.NewPathPointMappedTimeMatrix(distanceTimeMatrix.Times(), pointToIdMap), nil
 }
