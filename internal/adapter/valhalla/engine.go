@@ -3,6 +3,7 @@ package valhalla
 import (
 	"context"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	re "matching-engine/internal/adapter/routing"
 	"matching-engine/internal/adapter/valhalla/client"
 	"matching-engine/internal/model"
@@ -167,7 +168,9 @@ func (v *Valhalla) SnapPointToRoad(
 	)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to snap point to road: %w", err)
+		log.Error().Err(err).Msg("failed to snap point to road")
+		log.Info().Msg("Returning original point as fallback")
+		return point, nil
 	}
 
 	return snappedPoint, nil

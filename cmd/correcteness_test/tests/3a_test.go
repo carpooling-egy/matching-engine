@@ -51,15 +51,17 @@ func getTest3aData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 
 	offer.SetPath(path)
 
-	matchedRequestPickup, _, matchedRequestDropoff, _ := GetRequestPointsAndDurations(engine, offer, matchedRequestSource, matchedRequestMaxWalkingDuration, matchedRequestDestination)
+	matchedRequestPickup, pickupDuration, matchedRequestDropoff, dropoffDuration := GetRequestPointsAndDurations(engine, offer, matchedRequestSource, matchedRequestMaxWalkingDuration, matchedRequestDestination)
 
 	// Create a matched request with pickup and dropoff coordinates
 	matchedReq := &MatchedRequest{
-		request:      matchedRequest,
-		pickupCoord:  matchedRequestPickup,
-		pickupOrder:  1,
-		dropoffCoord: matchedRequestDropoff,
-		dropoffOrder: 2,
+		request:         matchedRequest,
+		pickupCoord:     matchedRequestPickup,
+		pickupDuration:  pickupDuration,
+		pickupOrder:     1,
+		dropoffCoord:    matchedRequestDropoff,
+		dropoffDuration: dropoffDuration,
+		dropoffOrder:    2,
 	}
 	offer.SetPath(CreatePath(offer, []*MatchedRequest{matchedReq}, engine))
 	// Add the offer to the list of offers

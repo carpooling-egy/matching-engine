@@ -27,8 +27,6 @@ func getTest1fiiiData(engine routing.Engine) ([]*model.Offer, []*model.Request, 
 	// Create a matched request for this offer
 	matchedRequestSource, _ := model.NewCoordinate(31.232139, 29.951709)
 	matchedRequestDestination, _ := model.NewCoordinate(31.2208208709376, 29.9479541306202)
-	matchedRequestPickup, _ := model.NewCoordinate(31.232139, 29.951709)
-	matchedRequestDropoff, _ := model.NewCoordinate(31.2208208709376, 29.9479541306202)
 	matchedRequestEarliestDepartureTime := offerDepartureTime.Add(-10 * time.Minute)
 	matchedRequestLatestArrivalTime := offerMaxEstimatedArrivalTime.Add(10 * time.Minute)
 	matchedRequestMaxWalkingDuration := time.Duration(0) * time.Minute
@@ -45,13 +43,23 @@ func getTest1fiiiData(engine routing.Engine) ([]*model.Offer, []*model.Request, 
 		offerDetourDuration, offerCapacity, offerCurrentNumberOfRequests, offerGender,
 		offerSameGender, offerMaxEstimatedArrivalTime, offerRequests)
 
+	path := []model.PathPoint{
+		*model.NewPathPoint(*offerSource, enums.Source, offerDepartureTime, offer, 0),
+		*model.NewPathPoint(*offerDestination, enums.Destination, offerMaxEstimatedArrivalTime, offer, 0)}
+
+	offer.SetPath(path)
+
+	matchedRequestPickup, pickupDuration, matchedRequestDropoff, dropoffDuartion := GetRequestPointsAndDurations(engine, offer, matchedRequestSource, matchedRequestMaxWalkingDuration, matchedRequestDestination)
+
 	// Create a matched request with pickup and dropoff coordinates
 	matchedReq := &MatchedRequest{
-		request:      matchedRequest,
-		pickupCoord:  matchedRequestPickup,
-		pickupOrder:  1,
-		dropoffCoord: matchedRequestDropoff,
-		dropoffOrder: 2,
+		request:         matchedRequest,
+		pickupCoord:     matchedRequestPickup,
+		pickupDuration:  pickupDuration,
+		pickupOrder:     1,
+		dropoffCoord:    matchedRequestDropoff,
+		dropoffDuration: dropoffDuartion,
+		dropoffOrder:    2,
 	}
 	offer.SetPath(CreatePath(offer, []*MatchedRequest{matchedReq}, engine))
 	// Add the offer to the list of offers

@@ -1,9 +1,7 @@
 package tests
 
 import (
-	"context"
 	"errors"
-	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/enums"
 	"matching-engine/internal/model"
 	"matching-engine/internal/service/pickupdropoffservice"
@@ -35,46 +33,16 @@ func (m *MockPickupDropoffGenerator) GeneratePickupDropoffPoints(request *model.
 	return m.pickup, m.dropoff, m.err
 }
 
-// MockRoutingEngine_pickup_dropoff_selector is a mock implementation of the routing.Engine interface
-type MockRoutingEngine_pickup_dropoff_selector struct {
-	walkingDuration time.Duration
-	err             error
-	// Add a field to track calls
-	callCount int
-}
-
-func NewMockRoutingEngine_pickup_dropoff_selector(walkingDuration time.Duration, err error) *MockRoutingEngine_pickup_dropoff_selector {
-	return &MockRoutingEngine_pickup_dropoff_selector{
-		walkingDuration: walkingDuration,
-		err:             err,
-		callCount:       0,
+func (m *MockPickupDropoffGenerator) setPickupWalkingDuration(pickupWalkingDuration time.Duration) {
+	if m.pickup != nil {
+		m.pickup.SetWalkingDuration(pickupWalkingDuration)
 	}
 }
 
-func (m *MockRoutingEngine_pickup_dropoff_selector) ComputeWalkingTime(ctx context.Context, walkParams *model.WalkParams) (time.Duration, error) {
-	m.callCount++
-	return m.walkingDuration, m.err
-}
-
-// Implement other methods of the routing.Engine interface with empty implementations
-func (m *MockRoutingEngine_pickup_dropoff_selector) ComputeDrivingTime(ctx context.Context, routeParams *model.RouteParams) ([]time.Duration, error) {
-	return nil, errors.New("not implemented")
-}
-
-func (m *MockRoutingEngine_pickup_dropoff_selector) PlanDrivingRoute(ctx context.Context, routeParams *model.RouteParams) (*model.Route, error) {
-	return nil, errors.New("not implemented")
-}
-
-func (m *MockRoutingEngine_pickup_dropoff_selector) ComputeIsochrone(ctx context.Context, req *model.IsochroneParams) (*model.Isochrone, error) {
-	return nil, errors.New("not implemented")
-}
-
-func (m *MockRoutingEngine_pickup_dropoff_selector) ComputeDistanceTimeMatrix(ctx context.Context, req *model.DistanceTimeMatrixParams) (*model.DistanceTimeMatrix, error) {
-	return nil, errors.New("not implemented")
-}
-
-func (m *MockRoutingEngine_pickup_dropoff_selector) SnapPointToRoad(ctx context.Context, point *model.Coordinate) (*model.Coordinate, error) {
-	return nil, errors.New("not implemented")
+func (m *MockPickupDropoffGenerator) setDropoffWalkingDuration(dropoffWalkingDuration time.Duration) {
+	if m.dropoff != nil {
+		m.dropoff.SetWalkingDuration(dropoffWalkingDuration)
+	}
 }
 
 func TestPickupDropoffSelector_GetPickupDropoffPointsAndDurations(t *testing.T) {
@@ -117,14 +85,13 @@ func TestPickupDropoffSelector_GetPickupDropoffPointsAndDurations(t *testing.T) 
 	)
 
 	// Create test path points
-	pickup := model.NewPathPoint(*pickupCoord, enums.Pickup, now, nil, 0)
-	dropoff := model.NewPathPoint(*dropoffCoord, enums.Dropoff, later, nil, 0)
+	pickup := model.NewPathPoint(*pickupCoord, enums.Pickup, now, nil, 5*time.Minute)
+	dropoff := model.NewPathPoint(*dropoffCoord, enums.Dropoff, later, nil, 5*time.Minute)
 
 	// Define test cases
 	tests := []struct {
 		name                   string
 		generator              pickupdropoffservice.PickupDropoffGenerator
-		routingEngine          routing.Engine
 		cache                  *pickupdropoffcache.PickupDropoffCache
 		request                *model.Request
 		offer                  *model.Offer
@@ -139,7 +106,6 @@ func TestPickupDropoffSelector_GetPickupDropoffPointsAndDurations(t *testing.T) 
 		{
 			name:                   "Success - Generate new points",
 			generator:              NewMockPickupDropoffGenerator(pickup, dropoff, nil),
-			routingEngine:          NewMockRoutingEngine_pickup_dropoff_selector(5*time.Minute, nil),
 			cache:                  pickupdropoffcache.NewPickupDropoffCache(),
 			request:                request,
 			offer:                  offer,
@@ -154,7 +120,6 @@ func TestPickupDropoffSelector_GetPickupDropoffPointsAndDurations(t *testing.T) 
 		{
 			name:                   "Success - Cache hit",
 			generator:              NewMockPickupDropoffGenerator(pickup, dropoff, nil),
-			routingEngine:          NewMockRoutingEngine_pickup_dropoff_selector(5*time.Minute, nil),
 			cache:                  pickupdropoffcache.NewPickupDropoffCache(),
 			request:                request,
 			offer:                  offer,
@@ -169,22 +134,6 @@ func TestPickupDropoffSelector_GetPickupDropoffPointsAndDurations(t *testing.T) 
 		{
 			name:                   "Error - Generator fails",
 			generator:              NewMockPickupDropoffGenerator(nil, nil, errors.New("generator error")),
-			routingEngine:          NewMockRoutingEngine_pickup_dropoff_selector(5*time.Minute, nil),
-			cache:                  pickupdropoffcache.NewPickupDropoffCache(),
-			request:                request,
-			offer:                  offer,
-			expectedPickup:         nil,
-			expectedDropoff:        nil,
-			expectedPickupWalking:  0,
-			expectedDropoffWalking: 0,
-			expectError:            true,
-			expectCacheHit:         false,
-			prePopulateCache:       false,
-		},
-		{
-			name:                   "Error - Walking time calculator fails",
-			generator:              NewMockPickupDropoffGenerator(pickup, dropoff, nil),
-			routingEngine:          NewMockRoutingEngine_pickup_dropoff_selector(0, errors.New("walking time calculator error")),
 			cache:                  pickupdropoffcache.NewPickupDropoffCache(),
 			request:                request,
 			offer:                  offer,
@@ -210,11 +159,12 @@ func TestPickupDropoffSelector_GetPickupDropoffPointsAndDurations(t *testing.T) 
 				tc.cache.Set(cacheKey, cacheValue)
 			}
 
-			// Create walking time calculator with the mock routing engine
-			walkingTimeCalculator := pickupdropoffservice.NewWalkingTimeCalculator(tc.routingEngine)
+			// Set the walking durations in the generator
+			tc.generator.(*MockPickupDropoffGenerator).setPickupWalkingDuration(tc.expectedPickupWalking)
+			tc.generator.(*MockPickupDropoffGenerator).setDropoffWalkingDuration(tc.expectedDropoffWalking)
 
 			// Create selector
-			selector := pickupdropoffservice.NewPickupDropoffSelector(tc.generator, walkingTimeCalculator, tc.cache)
+			selector := pickupdropoffservice.NewPickupDropoffSelector(tc.generator, tc.cache)
 
 			// Call the method
 			result, err := selector.GetPickupDropoffPointsAndDurations(tc.request, tc.offer)
@@ -307,28 +257,19 @@ func TestPickupDropoffSelector_GetPickupDropoffPointsAndDurations_CacheUsage(t *
 	// Create a generator that counts calls
 	generator := NewMockPickupDropoffGenerator(pickup, dropoff, nil)
 
-	// Create a routing engine that counts calls
-	routingEngine := NewMockRoutingEngine_pickup_dropoff_selector(5*time.Minute, nil)
-
-	// Create walking time calculator with the mock routing engine
-	walkingTimeCalculator := pickupdropoffservice.NewWalkingTimeCalculator(routingEngine)
-
 	// Create cache
 	cache := pickupdropoffcache.NewPickupDropoffCache()
 
 	// Create selector
-	selector := pickupdropoffservice.NewPickupDropoffSelector(generator, walkingTimeCalculator, cache)
+	selector := pickupdropoffservice.NewPickupDropoffSelector(generator, cache)
 
-	// First call should generate new points
+	// The First call should generate new points
 	result1, err := selector.GetPickupDropoffPointsAndDurations(request, offer)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
 	if generator.callCount != 1 {
 		t.Errorf("Expected generator to be called once, but was called %d times", generator.callCount)
-	}
-	if routingEngine.callCount != 2 { // Called twice, once for pickup and once for dropoff
-		t.Errorf("Expected routing engine to be called twice, but was called %d times", routingEngine.callCount)
 	}
 
 	// Second call should use cache
@@ -338,9 +279,6 @@ func TestPickupDropoffSelector_GetPickupDropoffPointsAndDurations_CacheUsage(t *
 	}
 	if generator.callCount != 1 {
 		t.Errorf("Expected generator to still be called once, but was called %d times", generator.callCount)
-	}
-	if routingEngine.callCount != 2 {
-		t.Errorf("Expected routing engine to still be called twice, but was called %d times", routingEngine.callCount)
 	}
 
 	// Results should be the same
