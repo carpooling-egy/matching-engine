@@ -16,12 +16,10 @@ type Factory struct {
 
 // NewProcessorFactory creates a new ProcessorFactory instance.
 func NewProcessorFactory(
-	prunerFactory pruning.RoutePrunerFactory,
 	engine routing.Engine,
 ) ProcessorFactory {
 	return &Factory{
-		prunerFactory: prunerFactory,
-		engine:        engine,
+		engine: engine,
 	}
 }
 
@@ -39,7 +37,7 @@ func (f *Factory) CreateProcessor(offer *model.Offer) (GeospatialProcessor, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to plan route: %w", err)
 	}
-	geospatialProcessor, err := NewGeospatialProcessor(route, f.prunerFactory, f.engine)
+	geospatialProcessor, err := NewGeospatialProcessor(route, f.engine)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create geospatial processor: %w", err)
 	}

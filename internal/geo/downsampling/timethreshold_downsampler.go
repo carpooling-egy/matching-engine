@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/golang/geo/s1"
 	"github.com/golang/geo/s2"
+	"github.com/rs/zerolog/log"
 	"matching-engine/internal/geo"
 	"matching-engine/internal/model"
 	"time"
@@ -36,6 +37,7 @@ func NewTimeThresholdDownSampler(opts ...TimeThresholdDownSamplerOption) RouteDo
 func (t *TimeThresholdDownSampler) DownSample(
 	route model.LineString,
 ) (model.LineString, error) {
+	log.Debug().Msg("TimeThresholdDownSampler.DownSample called")
 	n := len(route)
 	if n == 0 {
 		return nil, errors.New("empty route")

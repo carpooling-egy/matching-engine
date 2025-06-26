@@ -2,7 +2,6 @@ package tests
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/rs/zerolog/log"
@@ -10,17 +9,9 @@ import (
 	"matching-engine/internal/geo/downsampling"
 	"matching-engine/internal/model"
 	"math"
-	"os"
 	"testing"
 	"time"
 )
-
-func must[T any](v T, err error) T {
-	if err != nil {
-		panic(err)
-	}
-	return v
-}
 
 func generateHugePolyline(numPoints int) model.LineString {
 	coords := make([]model.Coordinate, numPoints)
@@ -72,43 +63,6 @@ func TestGenerateGeoJSON(t *testing.T) {
 	}
 
 	log.Info().Msg("GeoJSON written to simplified_routes.json")
-}
-
-type feature struct {
-	coords []model.Coordinate
-	name   string
-	color  string
-}
-
-func writeGeoJSON(filename string, features []feature) error {
-	geoJSONFeatures := make([]map[string]interface{}, len(features))
-	for i, f := range features {
-		pts := make([][2]float64, len(f.coords))
-		for j, c := range f.coords {
-			pts[j] = [2]float64{c.Lng(), c.Lat()}
-		}
-		geoJSONFeatures[i] = map[string]interface{}{
-			"type": "Feature",
-			"geometry": map[string]interface{}{
-				"type":        "LineString",
-				"coordinates": pts,
-			},
-			"properties": map[string]interface{}{
-				"name":  f.name,
-				"color": f.color,
-			},
-		}
-	}
-
-	gj := map[string]interface{}{
-		"type":     "FeatureCollection",
-		"features": geoJSONFeatures,
-	}
-	data, err := json.MarshalIndent(gj, "", "  ")
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(filename, data, 0644)
 }
 
 func GenerateGeoJSON(

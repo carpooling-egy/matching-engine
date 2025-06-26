@@ -3,6 +3,7 @@ package processor
 import (
 	"context"
 	"errors"
+	"github.com/rs/zerolog/log"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/geo/downsampling"
 	"matching-engine/internal/geo/pruning"
@@ -21,28 +22,26 @@ type processorImpl struct {
 
 func NewGeospatialProcessor(
 	route *model.Route,
-	prunerFactory pruning.RoutePrunerFactory,
 	engine routing.Engine,
 ) (GeospatialProcessor, error) {
 
 	if route == nil {
 		return nil, errors.New("route cannot be nil")
 	}
-	if prunerFactory == nil {
-		return nil, errors.New("pruner cannot be nil")
-	}
+
 	if engine == nil {
 		return nil, errors.New("engine cannot be nil")
 	}
 
 	config := Load()
+	log.Debug().Msg(config.String())
 
 	routeCoords, err := route.Polyline().Coordinates()
 	if err != nil {
 		return nil, err
 	}
 
-	pruner, err := SelectPruner(routeCoords, config.EnablePruning, prunerFactory)
+	pruner, err := SelectPruner(routeCoords, config.EnablePruning)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package pruning
 
 import (
+	"github.com/rs/zerolog/log"
 	"matching-engine/internal/collections"
 	"sort"
 	"time"
@@ -20,6 +21,8 @@ type RTreePruner struct {
 // Prune filters the route to include only segments within the specified threshold
 // from the origin point, implementing the RoutePruner interface
 func (p *RTreePruner) Prune(origin *model.Coordinate, threshold time.Duration) (model.LineString, error) {
+	log.Debug().Msg("RTreePruner.Prune called")
+
 	// Convert query point to rtreego.Point
 	query := rtreego.Point{origin.Lat(), origin.Lng()}
 

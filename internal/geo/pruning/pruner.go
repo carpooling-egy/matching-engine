@@ -1,6 +1,7 @@
 package pruning
 
 import (
+	"github.com/rs/zerolog/log"
 	"matching-engine/internal/model"
 	"time"
 )
@@ -22,5 +23,6 @@ func NewNoOpPruner(route model.LineString) RoutePruner {
 }
 
 func (n *NoOpPruner) Prune(origin *model.Coordinate, threshold time.Duration) (model.LineString, error) {
+	log.Debug().Msg("NoOpPruner.Prune called")
 	return n.fullRoute, nil
 }

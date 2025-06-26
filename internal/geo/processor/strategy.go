@@ -10,12 +10,11 @@ import (
 func SelectPruner(
 	routeCoords model.LineString,
 	enabled bool,
-	factory pruning.RoutePrunerFactory,
 ) (pruning.RoutePruner, error) {
 	if !enabled {
 		return pruning.NewNoOpPruner(routeCoords), nil
 	}
-	return factory.NewRoutePruner(routeCoords)
+	return pruning.NewRTreePrunerFactory().NewRoutePruner(routeCoords)
 }
 
 func SelectDownsampler(enabled bool, typ enums.DownsamplerType) downsampling.RouteDownSampler {

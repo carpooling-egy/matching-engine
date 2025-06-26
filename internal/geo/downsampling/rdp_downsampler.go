@@ -3,6 +3,7 @@ package downsampling
 import (
 	"github.com/golang/geo/s1"
 	"github.com/golang/geo/s2"
+	"github.com/rs/zerolog/log"
 	"matching-engine/internal/collections"
 	"matching-engine/internal/geo"
 	"matching-engine/internal/model"
@@ -40,6 +41,7 @@ var _ RouteDownSampler = (*RDPDownSampler)(nil)
 func (r *RDPDownSampler) DownSample(
 	route model.LineString,
 ) (model.LineString, error) {
+	log.Debug().Msg("RDPDownSampler.DownSample called")
 	n := len(route)
 	if n <= DefaultMinRoutePoints {
 		out := make(model.LineString, n)
