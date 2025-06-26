@@ -10,6 +10,7 @@ import (
 	"matching-engine/internal/service/matchevaluator"
 	"matching-engine/internal/service/maximummatching"
 	"matching-engine/internal/service/timematrix"
+	"time"
 )
 
 const (
@@ -56,9 +57,13 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 	}
 
 	// Generate Candidates
+	startTime := time.Now()
 	if err := matcher.buildCandidateMatches(offers, requests); err != nil {
 		return nil, fmt.Errorf("failed to build candidate matches: %w", err)
 	}
+	log.Info().Msgf("Candidate generation took %s", time.Since(startTime))
+	buildingGraphTime, maximummatchingTime := time.Duration(0), time.Duration(0)
+	matcherStartTime := time.Now()
 
 	graph := model.NewMaximumMatchingGraph()
 
@@ -66,7 +71,10 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 		// Build Matching Graph
 		log.Info().Msg("Building matching graph")
 		// Build the matching graph with potential edges between offers and requests
+		startTime = time.Now()
 		hasNewEdge, err := matcher.buildMatchingGraph(graph)
+		log.Info().Msgf("Graph building took %s", time.Since(startTime))
+		buildingGraphTime += time.Since(startTime)
 		if err != nil {
 			return nil, fmt.Errorf("failed to build matching graph: %w", err)
 		}
@@ -86,18 +94,25 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 		matcher.availableRequests = graph.RequestNodes()
 
 		// Find Maximum Matching
+		log.Info().Msg("Processing maximum matching")
+		startTime = time.Now()
 		if err = matcher.processMaximumMatching(graph, matcher.limit); err != nil {
 			return nil, fmt.Errorf("failed to process maximum matching: %w", err)
 		}
+		log.Info().Msgf("Maximum matching processing took %s", time.Since(startTime))
+		maximummatchingTime += time.Since(startTime)
 		// Clear the graph and edges for the next iteration
 		graph.Clear()
 
 	}
+	log.Info().Msgf("Matcher loop completed in %s (Graph building: %s, Maximum matching: %s)", time.Since(matcherStartTime), buildingGraphTime, maximummatchingTime)
 
 	// Handle remaining matched offers
+	startTime = time.Now()
 	if err := matcher.processRemainingOffers(); err != nil {
 		return nil, fmt.Errorf("failed to process remaining offers: %w", err)
 	}
+	log.Info().Msgf("Processing remaining offers took %s", time.Since(startTime))
 
 	return matcher.results, nil
 }

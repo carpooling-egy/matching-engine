@@ -7,6 +7,7 @@ import (
 	"matching-engine/internal/app/config"
 	"matching-engine/internal/app/shutdown"
 	"os"
+	"runtime/trace"
 )
 
 func main() {
@@ -22,6 +23,17 @@ func main() {
 	if err := config.LoadEnv(); err != nil {
 		log.Fatal().Err(err).Msg("Failed to load environment variables")
 	}
+
+	// Initialize environment variables
+	if err := config.LoadEnv(); err != nil {
+		log.Error().Err(err).Msg("Failed to load environment variables")
+		os.Exit(1)
+	}
+
+	f, _ := os.Create("trace.out")
+	defer f.Close()
+	trace.Start(f)
+	defer trace.Stop()
 
 	// Create and run the application
 	newApp := app.NewApp()
