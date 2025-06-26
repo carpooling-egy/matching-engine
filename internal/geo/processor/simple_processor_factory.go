@@ -31,7 +31,6 @@ func (f *Factory) CreateProcessor(offer *model.Offer) (GeospatialProcessor, erro
 	for i, point := range offer.PathPoints() {
 		coords[i] = *point.Coordinate()
 	}
-	fmt.Println(coords)
 	routeParams, err := model.NewRouteParams(coords, offer.DepartureTime())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create route params: %w", err)
