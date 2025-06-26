@@ -38,6 +38,10 @@ func (s *Set[T]) Size() int {
 	return count
 }
 
+// Note: This is thread-safe, but if other goroutines are concurrently iterating
+// over or accessing the old map, they may still see stale data briefly, since the old map
+// is not explicitly locked or cleared.
+
 // Clear removes all elements from the set
 func (s *Set[T]) Clear() {
 	s.elements = sync.Map{}

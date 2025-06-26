@@ -1,10 +1,12 @@
 package earlypruning
 
 import (
+	"context"
 	"fmt"
-	"iter"
+	"golang.org/x/sync/errgroup"
 	"matching-engine/internal/model"
 	"matching-engine/internal/service/checker"
+	"sync"
 )
 
 type CandidateIterator struct {
@@ -21,26 +23,56 @@ func NewCandidateIterator(offers []*model.Offer, requests []*model.Request, chec
 	}
 }
 
-func (ci *CandidateIterator) Candidates() iter.Seq2[*model.MatchCandidate, error] {
-	return func(yield func(*model.MatchCandidate, error) bool) {
-		for _, offer := range ci.offers {
-			for _, request := range ci.requests {
-				// Check if the offer and request can be matched
+const maxGenConcurrency = 8
+const channelBufferSize = 1024
+
+func (ci *CandidateIterator) Candidates(
+	ctx context.Context,
+	g *errgroup.Group,
+) <-chan *model.MatchCandidate {
+	candidatesChannel := make(chan *model.MatchCandidate, channelBufferSize)
+	sem := make(chan struct{}, maxGenConcurrency)
+	var generatorWaitGroup sync.WaitGroup
+
+	for _, offer := range ci.offers {
+		for _, request := range ci.requests {
+			generatorWaitGroup.Add(1)
+
+			g.Go(func() error {
+				defer generatorWaitGroup.Done()
+
+				select {
+				case <-ctx.Done():
+					return ctx.Err()
+				case sem <- struct{}{}:
+				}
+				defer func() { <-sem }()
+
 				isPotential, err := ci.checker.Check(offer, request)
 				if err != nil {
-					if !yield(nil, fmt.Errorf("checker failed: %w", err)) {
-						// If the yield function returns false, stop iterating
-						return
-					}
-					continue
+					return fmt.Errorf("checker failed for %s/%s: %w", offer.ID(), request.ID(), err)
 				}
-				if isPotential {
-					if !yield(model.NewMatchCandidate(request, offer), nil) {
-						// If the yield function returns false, stop iterating
-						return
-					}
+
+				if !isPotential {
+					return nil
 				}
-			}
+
+				matchCandidate := model.NewMatchCandidate(request, offer)
+				select {
+				case <-ctx.Done():
+					return ctx.Err()
+				case candidatesChannel <- matchCandidate:
+					return nil
+				}
+			})
 		}
 	}
+
+	g.Go(func() error {
+		generatorWaitGroup.Wait()
+		close(candidatesChannel)
+		return nil
+	})
+
+	return candidatesChannel
 }
