@@ -15,7 +15,7 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.MaximumMatchingGraph) (b
 			matcher.potentialOfferRequests.Delete(offerID)
 			return nil
 		}
-
+		// TODO: PARALLELIZE THIS
 		requestNodes := make([]*model.RequestNode, 0, requestSet.Size())
 		requestSetSlice := requestSet.ToSlice()
 		for _, requestID := range requestSetSlice {
@@ -31,6 +31,7 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.MaximumMatchingGraph) (b
 			return err
 		}
 
+		// TODO: PARALLELIZE THIS
 		for _, requestNode := range requestNodes {
 
 			path, valid, err := matcher.matchEvaluator.Evaluate(offerNode, requestNode)
