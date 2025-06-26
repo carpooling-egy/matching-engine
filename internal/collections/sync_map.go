@@ -64,6 +64,21 @@ func (sm *SyncMap[K, V]) Get(key K) (V, bool) {
 	return value, true
 }
 
+// GetOrStore returns the existing value for the key if present,
+// or stores and returns the given value if not.
+// The returned boolean is true if the value was already present.
+func (sm *SyncMap[K, V]) GetOrStore(key K, value V) (V, bool) {
+	actual, loaded := sm.store.LoadOrStore(key, value)
+
+	// Safe type assertion
+	v, ok := actual.(V)
+	if !ok {
+		var zero V
+		return zero, false
+	}
+	return v, loaded
+}
+
 // Range processes key-value pairs, stopping at the first error.
 // Returns the first error encountered, or nil if none.
 // Safely handles type assertions to prevent panics.

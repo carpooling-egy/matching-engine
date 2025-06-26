@@ -10,6 +10,25 @@ import (
 	"time"
 )
 
+// Valhalla Note:
+// This implementation is mostly thread-safe in practice, but has performance caveats:
+//
+//   - The `mapper` field is stateless and only performs protobuf serialization/deserialization.
+//     It does not maintain any shared state, making it safe for concurrent use.
+//
+//   - The `client` field (*ValhallaClient) is safe in terms of concurrency because it holds
+//     no internal state. However, it currently uses `http.Post`, which creates a new connection
+//     for every request and does not reuse TCP connections which can lead to poor performance
+//     and resource exhaustion under load.
+//
+//     A better solution is to use a shared `http.Client` with connection pooling
+//     (i.e., `http.DefaultClient` or a custom `http.Client` with a tuned Transport).
+//     `http.Client` is designed to be reused and is safe for concurrent access,
+//     allowing efficient TCP connection reuse via Keep-Alive.
+//
+// Therefore, while the current implementation is thread-safe,
+// it is recommended to refactor the client to use a persistent `http.Client`
+// to benefit from connection pooling and avoid repeated TCP handshakes.
 type Valhalla struct {
 	client *client.ValhallaClient
 	mapper *Mapper
