@@ -22,7 +22,6 @@ type processorImpl struct {
 func NewGeospatialProcessor(
 	route *model.Route,
 	prunerFactory pruning.RoutePrunerFactory,
-	downSampler downsampling.RouteDownSampler,
 	engine routing.Engine,
 ) (GeospatialProcessor, error) {
 
@@ -32,22 +31,23 @@ func NewGeospatialProcessor(
 	if prunerFactory == nil {
 		return nil, errors.New("pruner cannot be nil")
 	}
-	if downSampler == nil {
-		return nil, errors.New("downSampler cannot be nil")
-	}
 	if engine == nil {
 		return nil, errors.New("engine cannot be nil")
 	}
+
+	config := Load()
 
 	routeCoords, err := route.Polyline().Coordinates()
 	if err != nil {
 		return nil, err
 	}
 
-	pruner, err := prunerFactory.NewRoutePruner(routeCoords)
+	pruner, err := SelectPruner(routeCoords, config.EnablePruning, prunerFactory)
 	if err != nil {
 		return nil, err
 	}
+
+	downSampler := SelectDownsampler(config.EnableDownsampling, config.DownsamplerType)
 
 	return &processorImpl{
 		route:            route,
