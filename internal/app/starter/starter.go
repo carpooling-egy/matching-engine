@@ -83,17 +83,16 @@ func (s *StarterService) Start(ctx context.Context) error {
 	overall_matching := float64(totalMatchedRequests + matchedDrivers)
 
 	log.Info().
-		Dur("duration", elapsed).
+		Str("duration", elapsed.String()).
 		Int("matches", len(matchingResults)).
 		Msg("Matching process completed")
 
 	log.Info().
-		Dur("duration", elapsed/60).
+		Str("duration", elapsed.String()).
 		Int("matched_requests", totalMatchedRequests).
 		Int("matched_drivers", matchedDrivers).
 		Float64("overall_matching", overall_matching).
 		Int("max_matched_requests", max_matched_requests).
-		Int("total_number_of_riders", totalNumberOfRiders).
 		Msg("Matching process completed")
 
 	// Publish results

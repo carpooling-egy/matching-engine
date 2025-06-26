@@ -61,7 +61,7 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 	if err := matcher.buildCandidateMatches(offers, requests); err != nil {
 		return nil, fmt.Errorf("failed to build candidate matches: %w", err)
 	}
-	log.Info().Msgf("Candidate generation took %s", time.Since(startTime))
+	candidateGenerationTime := time.Since(startTime)
 	buildingGraphTime, maximummatchingTime := time.Duration(0), time.Duration(0)
 	matcherStartTime := time.Now()
 
@@ -105,8 +105,10 @@ func (matcher *Matcher) Match(offers []*model.Offer, requests []*model.Request) 
 		graph.Clear()
 
 	}
+	// Log the time taken for candidate generation
+	log.Info().Msgf("Candidate generation took %s", candidateGenerationTime)
+	// Log the total time taken for the matcher loop
 	log.Info().Msgf("Matcher loop completed in %s (Graph building: %s, Maximum matching: %s)", time.Since(matcherStartTime), buildingGraphTime, maximummatchingTime)
-
 	// Handle remaining matched offers
 	startTime = time.Now()
 	if err := matcher.processRemainingOffers(); err != nil {
