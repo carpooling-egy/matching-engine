@@ -13,7 +13,7 @@ import (
 
 // RegisterPathServices registers path generation services
 func RegisterPathServices(c *dig.Container) {
-	utils.Must(c.Provide(generator.NewInsertionPathGenerator))
+	utils.Must(c.Provide(generator.NewPathGenerator))
 	utils.Must(c.Provide(validator.NewDefaultPathValidator))
 	utils.Must(c.Provide(planner.NewDefaultPathPlanner))
 }

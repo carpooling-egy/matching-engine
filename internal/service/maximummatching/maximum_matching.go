@@ -7,5 +7,5 @@ import (
 
 type MaximumMatching interface {
 	// FindMaximumMatching finds the maximum matching in a bipartite graph.
-	FindMaximumMatching(graph *model.Graph) ([]collections.Tuple2[*model.OfferNode, *model.Edge], error)
+	FindMaximumMatching(graph *model.MaximumMatchingGraph) ([]collections.Tuple2[*model.OfferNode, *model.Edge], error)
 }

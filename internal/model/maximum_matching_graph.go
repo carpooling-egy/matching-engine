@@ -4,14 +4,14 @@ import (
 	"matching-engine/internal/collections"
 )
 
-type Graph struct {
+type MaximumMatchingGraph struct {
 	offerNodes   *collections.SyncMap[string, *OfferNode]
 	requestNodes *collections.SyncMap[string, *RequestNode]
 	edges        *collections.SyncMap[OfferRequestKey, *Edge]
 }
 
-func NewGraph() *Graph {
-	return &Graph{
+func NewMaximumMatchingGraph() *MaximumMatchingGraph {
+	return &MaximumMatchingGraph{
 		offerNodes:   collections.NewSyncMap[string, *OfferNode](),
 		requestNodes: collections.NewSyncMap[string, *RequestNode](),
 		edges:        collections.NewSyncMap[OfferRequestKey, *Edge](),
@@ -19,36 +19,36 @@ func NewGraph() *Graph {
 }
 
 // OfferNodes returns the offer nodes
-func (g *Graph) OfferNodes() *collections.SyncMap[string, *OfferNode] {
+func (g *MaximumMatchingGraph) OfferNodes() *collections.SyncMap[string, *OfferNode] {
 	return g.offerNodes
 }
 
 // SetOfferNodes sets the offer nodes
-func (g *Graph) SetOfferNodes(offerNodes *collections.SyncMap[string, *OfferNode]) {
+func (g *MaximumMatchingGraph) SetOfferNodes(offerNodes *collections.SyncMap[string, *OfferNode]) {
 	g.offerNodes = offerNodes
 
 }
 
-func (g *Graph) AddOfferNode(offerNode *OfferNode) {
+func (g *MaximumMatchingGraph) AddOfferNode(offerNode *OfferNode) {
 	g.offerNodes.Set(offerNode.Offer().ID(), offerNode)
 }
 
 // RequestNodes returns the request nodes
-func (g *Graph) RequestNodes() *collections.SyncMap[string, *RequestNode] {
+func (g *MaximumMatchingGraph) RequestNodes() *collections.SyncMap[string, *RequestNode] {
 	return g.requestNodes
 }
 
 // SetRequestNodes sets the request nodes
-func (g *Graph) SetRequestNodes(requestNodes *collections.SyncMap[string, *RequestNode]) {
+func (g *MaximumMatchingGraph) SetRequestNodes(requestNodes *collections.SyncMap[string, *RequestNode]) {
 	g.requestNodes = requestNodes
 }
 
-func (g *Graph) AddRequestNode(requestNode *RequestNode) {
+func (g *MaximumMatchingGraph) AddRequestNode(requestNode *RequestNode) {
 	g.requestNodes.Set(requestNode.request.id, requestNode)
 }
 
 // Clear clears the graph
-func (g *Graph) Clear() {
+func (g *MaximumMatchingGraph) Clear() {
 	g.offerNodes.ForEach(func(_ string, node *OfferNode) error {
 		node.ClearEdges()
 		return nil
@@ -59,16 +59,16 @@ func (g *Graph) Clear() {
 }
 
 // Edges returns the edges
-func (g *Graph) Edges() *collections.SyncMap[OfferRequestKey, *Edge] {
+func (g *MaximumMatchingGraph) Edges() *collections.SyncMap[OfferRequestKey, *Edge] {
 	return g.edges
 }
 
 // SetEdges sets the edges
-func (g *Graph) SetEdges(edges *collections.SyncMap[OfferRequestKey, *Edge]) {
+func (g *MaximumMatchingGraph) SetEdges(edges *collections.SyncMap[OfferRequestKey, *Edge]) {
 	g.edges = edges
 }
 
-func (g *Graph) AddEdge(offerNode *OfferNode, requestNode *RequestNode, edge *Edge) {
+func (g *MaximumMatchingGraph) AddEdge(offerNode *OfferNode, requestNode *RequestNode, edge *Edge) {
 	// Set the edge in the offer node
 	offerNode.AddEdge(edge)
 
@@ -79,7 +79,7 @@ func (g *Graph) AddEdge(offerNode *OfferNode, requestNode *RequestNode, edge *Ed
 	g.edges.Set(key, edge)
 }
 
-func (g *Graph) GetEdge(offer *Offer, request *Request) (*Edge, bool) {
+func (g *MaximumMatchingGraph) GetEdge(offer *Offer, request *Request) (*Edge, bool) {
 	key := NewOfferRequestKey(
 		offer.id,
 		request.id,

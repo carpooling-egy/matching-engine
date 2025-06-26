@@ -3,7 +3,7 @@ package matcher
 import "matching-engine/internal/model"
 
 // processUnmatchedOffers processes offers that are not in the graph and updates results
-func (matcher *Matcher) processUnmatchedOffers(graph *model.Graph) {
+func (matcher *Matcher) processUnmatchedOffers(graph *model.MaximumMatchingGraph) {
 	potentialOffers := graph.OfferNodes()
 	matcher.availableOffers.ForEach(func(offerID string, offerNode *model.OfferNode) error {
 		if potentialOffers.Contains(offerNode.Offer().ID()) {
