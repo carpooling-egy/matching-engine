@@ -26,7 +26,6 @@ func (p *CacheWithOfferIdPopulator) Populate(offer *model.OfferNode, requestNode
 	if len(requestNodes) > p.cachingBound {
 		return nil
 	}
-	fmt.Println("called 1 start")
 	// Check if the time matrix is already cached
 	_, exists := p.cacheWithOfferId.Get(offer.Offer().ID())
 	if exists {
@@ -39,10 +38,8 @@ func (p *CacheWithOfferIdPopulator) Populate(offer *model.OfferNode, requestNode
 		return fmt.Errorf("could not generate time matrix for offer %s: %w", offer.Offer().ID(), err)
 	}
 
-	fmt.Printf("Populating time matrix cache with offer ID: %s\n", offer.Offer().ID())
 	// Store the time matrix in the cacheWithOfferIdAndRequestId
 	p.cacheWithOfferId.Set(offer.Offer().ID(), timeMatrix)
-	fmt.Println("called 1")
 	return nil
 }
 

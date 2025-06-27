@@ -2,8 +2,8 @@ package processor
 
 import (
 	"github.com/rs/zerolog/log"
+	"matching-engine/internal/app/config"
 	"matching-engine/internal/enums"
-	"os"
 	"strconv"
 )
 
@@ -15,11 +15,11 @@ type Config struct {
 
 func Load() Config {
 	cfg := Config{
-		EnablePruning:      getEnvBool("ENABLE_PRUNING", true),
-		EnableDownsampling: getEnvBool("ENABLE_DOWNSAMPLING", true),
+		EnablePruning:      config.GetEnvBool("ENABLE_PRUNING", true),
+		EnableDownsampling: config.GetEnvBool("ENABLE_DOWNSAMPLING", true),
 	}
 
-	raw := getEnv("DOWNSAMPLER_TYPE", string(enums.DownsamplerRDP))
+	raw := config.GetEnv("DOWNSAMPLER_TYPE", string(enums.DownsamplerRDP))
 	log.Debug().Msgf("DOWNSAMPLER_TYPE set to: %s", raw)
 
 	dsType := enums.DownsamplerType(raw)
@@ -30,29 +30,6 @@ func Load() Config {
 	cfg.DownsamplerType = dsType
 
 	return cfg
-}
-
-func getEnv(key, def string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	log.Debug().Msgf("%s not set, using default %q", key, def)
-	return def
-}
-
-func getEnvBool(key string, def bool) bool {
-	val := os.Getenv(key)
-	if val == "" {
-		log.Debug().Msgf("%s not set, using default: %t", key, def)
-		return def
-	}
-	parsed, err := strconv.ParseBool(val)
-	if err != nil {
-		log.Warn().Msgf("Invalid %s value %q, using default: %t", key, val, def)
-		return def
-	}
-	log.Debug().Msgf("%s set to: %t", key, parsed)
-	return parsed
 }
 
 func (c Config) String() string {
