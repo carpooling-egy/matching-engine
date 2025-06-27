@@ -19,8 +19,8 @@ type MockTimeMatrixSelector struct {
 	mock.Mock
 }
 
-func (m *MockTimeMatrixSelector) GetTimeMatrix(offer *model.OfferNode) (*cache.PathPointMappedTimeMatrix, error) {
-	args := m.Called(offer)
+func (m *MockTimeMatrixSelector) GetTimeMatrix(offer *model.OfferNode, requestNode *model.RequestNode) (*cache.PathPointMappedTimeMatrix, error) {
+	args := m.Called(offer, requestNode)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -101,7 +101,7 @@ func TestORToolPlanner_validPath(t *testing.T) {
 	}
 
 	mappedMatrix := cache.NewPathPointMappedTimeMatrix(timeMatrix, pointIdToIndex)
-	mockTimeMatrixSelector.On("GetTimeMatrix", offerNode).Return(mappedMatrix, nil)
+	mockTimeMatrixSelector.On("GetTimeMatrix", offerNode, requestNode).Return(mappedMatrix, nil)
 
 	client, _ := ortool.NewORToolClient()
 	planner := planner2.NewORToolPlanner(mockPickupDropoffSelector, mockTimeMatrixSelector, client)
@@ -190,7 +190,7 @@ func TestORToolPlanner_validPath_checkingMatrixOperation(t *testing.T) {
 	}
 
 	mappedMatrix := cache.NewPathPointMappedTimeMatrix(timeMatrix, pointIdToIndex)
-	mockTimeMatrixSelector.On("GetTimeMatrix", offerNode).Return(mappedMatrix, nil)
+	mockTimeMatrixSelector.On("GetTimeMatrix", offerNode, requestNode).Return(mappedMatrix, nil)
 
 	client, _ := ortool.NewORToolClient()
 	planner := planner2.NewORToolPlanner(mockPickupDropoffSelector, mockTimeMatrixSelector, client)
@@ -276,7 +276,7 @@ func TestORToolPlanner_inValidPathDueToInvalidCapacity(t *testing.T) {
 	}
 
 	mappedMatrix := cache.NewPathPointMappedTimeMatrix(timeMatrix, pointIdToIndex)
-	mockTimeMatrixSelector.On("GetTimeMatrix", offerNode).Return(mappedMatrix, nil)
+	mockTimeMatrixSelector.On("GetTimeMatrix", offerNode, requestNode).Return(mappedMatrix, nil)
 
 	client, _ := ortool.NewORToolClient()
 	planner := planner2.NewORToolPlanner(mockPickupDropoffSelector, mockTimeMatrixSelector, client)
@@ -348,7 +348,7 @@ func TestORToolPlanner_inValidPathDueToInvalidDetour(t *testing.T) {
 	}
 
 	mappedMatrix := cache.NewPathPointMappedTimeMatrix(timeMatrix, pointIdToIndex)
-	mockTimeMatrixSelector.On("GetTimeMatrix", offerNode).Return(mappedMatrix, nil)
+	mockTimeMatrixSelector.On("GetTimeMatrix", offerNode, requestNode).Return(mappedMatrix, nil)
 
 	client, _ := ortool.NewORToolClient()
 	planner := planner2.NewORToolPlanner(mockPickupDropoffSelector, mockTimeMatrixSelector, client)

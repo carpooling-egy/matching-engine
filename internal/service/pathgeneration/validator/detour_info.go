@@ -11,6 +11,7 @@ import (
 // calculateDetourInfo determines if the path is within detour constraints
 func (validator *DefaultPathValidator) calculateDetourInfo(
 	offerNode *model.OfferNode,
+	requestNode *model.RequestNode,
 	path []model.PathPoint,
 	cumulativeDurations []time.Duration,
 ) (bool, time.Duration, error) {
@@ -18,7 +19,7 @@ func (validator *DefaultPathValidator) calculateDetourInfo(
 
 	totalTripDuration := cumulativeDurations[len(cumulativeDurations)-1]
 	directTripDuration, err := validator.timeMatrixService.GetTravelDuration(
-		offerNode, path[0].ID(), path[len(path)-1].ID(),
+		offerNode, requestNode, path[0].ID(), path[len(path)-1].ID(),
 	)
 
 	if err != nil {

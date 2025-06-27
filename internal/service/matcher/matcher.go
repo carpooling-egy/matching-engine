@@ -25,12 +25,12 @@ type Matcher struct {
 	matchEvaluator           matchevaluator.Evaluator
 	candidateGenerator       earlypruning.CandidateGenerator
 	maximumMatching          maximummatching.MaximumMatching
-	timeMatrixCachePopulator timematrix.Populator
+	timeMatrixCachePopulator *timematrix.CacheWithOfferIdPopulator
 	limit                    int
 }
 
 // NewMatcher creates and initializes a new Matcher instance.
-func NewMatcher(evaluator matchevaluator.Evaluator, generator earlypruning.CandidateGenerator, matching maximummatching.MaximumMatching, cachePopulator timematrix.Populator) *Matcher {
+func NewMatcher(evaluator matchevaluator.Evaluator, generator earlypruning.CandidateGenerator, matching maximummatching.MaximumMatching, cachePopulator *timematrix.CacheWithOfferIdPopulator) *Matcher {
 	if evaluator == nil {
 		log.Error().Msg("Matcher: Evaluator is nil")
 		panic("Matcher: Evaluator is nil")

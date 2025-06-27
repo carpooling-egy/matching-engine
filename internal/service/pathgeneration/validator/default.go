@@ -24,6 +24,7 @@ func NewDefaultPathValidator(timeMatrixService timematrix.Service) PathValidator
 // NOTE: THIS FUNCTION MODIFIES THE PATH POINTS TO SET EXPECTED ARRIVAL TIMES
 func (validator *DefaultPathValidator) ValidatePath(
 	offerNode *model.OfferNode,
+	requestNode *model.RequestNode,
 	path []model.PathPoint,
 ) (bool, error) {
 	if len(path) < 2 {
@@ -33,13 +34,13 @@ func (validator *DefaultPathValidator) ValidatePath(
 	offer := offerNode.Offer()
 
 	// Get travel duration information
-	cumulativeDurations, err := validator.timeMatrixService.GetCumulativeTravelDurations(offerNode, path)
+	cumulativeDurations, err := validator.timeMatrixService.GetCumulativeTravelDurations(offerNode, requestNode, path)
 	if err != nil {
 		return false, fmt.Errorf("failed to calculate travel durations: %w", err)
 	}
 
 	// Check if path satisfies detour constraints
-	isWithinDetourLimit, availableExtraDetour, err := validator.calculateDetourInfo(offerNode, path, cumulativeDurations)
+	isWithinDetourLimit, availableExtraDetour, err := validator.calculateDetourInfo(offerNode, requestNode, path, cumulativeDurations)
 	if err != nil {
 		return false, err
 	}

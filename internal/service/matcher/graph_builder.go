@@ -26,7 +26,12 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.MaximumMatchingGraph) (b
 			}
 		}
 
+		if len(requestNodes) == 0 {
+			return nil
+		}
+
 		err := matcher.timeMatrixCachePopulator.Populate(offerNode, requestNodes)
+
 		if err != nil {
 			return err
 		}

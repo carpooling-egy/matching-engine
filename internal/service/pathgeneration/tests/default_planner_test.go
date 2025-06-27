@@ -40,8 +40,8 @@ type MockPathValidator struct {
 	mock.Mock
 }
 
-func (m *MockPathValidator) ValidatePath(offerNode *model.OfferNode, path []model.PathPoint) (bool, error) {
-	args := m.Called(offerNode, path)
+func (m *MockPathValidator) ValidatePath(offerNode *model.OfferNode, requestNode *model.RequestNode, path []model.PathPoint) (bool, error) {
+	args := m.Called(offerNode, requestNode, path)
 	return args.Bool(0), args.Error(1)
 }
 
@@ -64,7 +64,7 @@ func TestFindFirstFeasiblePath_SimpleSuccess(t *testing.T) {
 	pickupDropoff := pickupdropoffcache.NewValue(pickup, dropoff)
 	mockSelector.On("GetPickupDropoffPointsAndDurations", request, offer).Return(pickupDropoff, nil)
 	mockGenerator.On("GeneratePaths", offer.Path(), pickup, dropoff).Return(validPaths, nil)
-	mockValidator.On("ValidatePath", offerNode, validPath).Return(true, nil)
+	mockValidator.On("ValidatePath", offerNode, requestNode, validPath).Return(true, nil)
 
 	planner := planner.NewDefaultPathPlanner(mockGenerator, mockValidator, mockSelector)
 	resultPath, found, err := planner.FindFirstFeasiblePath(offerNode, requestNode)
@@ -185,8 +185,8 @@ func TestFindFirstFeasiblePath_NoValidPaths(t *testing.T) {
 	mockGenerator.On("GeneratePaths", offer.Path(), pickup, dropoff).Return(candidatePaths, nil)
 
 	// Setup mock validator to reject all paths
-	mockValidator.On("ValidatePath", offerNode, path1).Return(false, nil)
-	mockValidator.On("ValidatePath", offerNode, path2).Return(false, nil)
+	mockValidator.On("ValidatePath", offerNode, requestNode, path1).Return(false, nil)
+	mockValidator.On("ValidatePath", offerNode, requestNode, path2).Return(false, nil)
 
 	// Create planner and run test
 	planner := planner.NewDefaultPathPlanner(mockGenerator, mockValidator, mockSelector)
@@ -232,7 +232,7 @@ func TestFindFirstFeasiblePath_ValidatorError(t *testing.T) {
 
 	// Setup mock validator to return an error
 	expectedErr := errors.New("validation error")
-	mockValidator.On("ValidatePath", offerNode, candidatePath).Return(false, expectedErr)
+	mockValidator.On("ValidatePath", offerNode, requestNode, candidatePath).Return(false, expectedErr)
 
 	// Create planner and run test
 	planner := planner.NewDefaultPathPlanner(mockGenerator, mockValidator, mockSelector)
@@ -283,8 +283,8 @@ func TestFindFirstFeasiblePath_MultiplePathsFirstInvalid(t *testing.T) {
 	mockGenerator.On("GeneratePaths", offer.Path(), pickup, dropoff).Return(candidatePaths, nil)
 
 	// Setup mock validator - first path invalid, second path valid
-	mockValidator.On("ValidatePath", offerNode, invalidPath).Return(false, nil)
-	mockValidator.On("ValidatePath", offerNode, validPath).Return(true, nil)
+	mockValidator.On("ValidatePath", offerNode, requestNode, invalidPath).Return(false, nil)
+	mockValidator.On("ValidatePath", offerNode, requestNode, validPath).Return(true, nil)
 
 	// Create planner and run test
 	planner := planner.NewDefaultPathPlanner(mockGenerator, mockValidator, mockSelector)
