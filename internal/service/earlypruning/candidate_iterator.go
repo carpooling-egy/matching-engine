@@ -6,6 +6,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"matching-engine/internal/model"
 	"matching-engine/internal/service/checker"
+	"runtime"
 	"sync"
 )
 
@@ -23,15 +24,17 @@ func NewCandidateIterator(offers []*model.Offer, requests []*model.Request, chec
 	}
 }
 
-const maxGenConcurrency = 8
-const channelBufferSize = 1024
+var (
+	workerCount       = runtime.GOMAXPROCS(0) * 4
+	channelBufferSize = 2000
+)
 
 func (ci *CandidateIterator) Candidates(
 	ctx context.Context,
 	g *errgroup.Group,
 ) <-chan *model.MatchCandidate {
 	candidatesChannel := make(chan *model.MatchCandidate, channelBufferSize)
-	sem := make(chan struct{}, maxGenConcurrency)
+	sem := make(chan struct{}, workerCount)
 	var generatorWaitGroup sync.WaitGroup
 
 	for _, offer := range ci.offers {
