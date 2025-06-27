@@ -16,7 +16,11 @@ import (
 
 func setupTestingEnvironment() (routing.Engine, error) {
 	config.ConfigureLogging()
-
+	// Load environment variables
+	if err := config.LoadEnv(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to load environment variables")
+		return nil, err
+	}
 	// Create a mock routing engine
 	engine, err := valhalla.NewValhalla()
 	if err != nil {

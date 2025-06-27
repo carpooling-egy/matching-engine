@@ -42,11 +42,9 @@ func (p *CacheWithOfferIdRequestIdPopulator) Populate(offer *model.OfferNode, re
 	if err != nil {
 		return fmt.Errorf("could not generate time matrix for offer %s: %w", offer.Offer().ID(), err)
 	}
-	fmt.Printf("Populating time matrix cache with offer ID: %s and request ID: %s\n", offer.Offer().ID(), requestNodes[0].Request().ID())
 
 	// Store the time matrix in the cacheWithOfferIdAndRequestId
 	p.cacheWithOfferIdAndRequestId.Set(offer.Offer().ID(), requestNodes[0].Request().ID(), timeMatrix)
-	fmt.Println("called 2")
 	return nil
 }
 
