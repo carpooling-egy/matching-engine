@@ -52,7 +52,6 @@ func (rsg *RandomTopologicalGenerator) GeneratePaths(
 		log.Debug().Msgf("RandomTopologicalGenerator: generating paths with k = %d", rsg.k)
 		if !rsg.randomBacktrack(graph, tempInDegree, visited, newPath, yield, &count, rsg.k, r) {
 			log.Debug().Msgf("RandomTopologicalGenerator: stopped generating paths after %d samples", count)
-			graph.Clear()
 			return // Stop generating paths if yield returns false or count exceeds k
 		}
 	}, nil
