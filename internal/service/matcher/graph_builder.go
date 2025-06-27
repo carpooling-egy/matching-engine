@@ -43,10 +43,11 @@ func (matcher *Matcher) buildMatchingGraph(
 			return matcher.flattenAndPopulate(ctx, offersChannel, offerRequestNodePairsChannel)
 		})
 	}
-	go func() {
+	eg.Go(func() error {
 		filterWG.Wait()
 		close(offerRequestNodePairsChannel)
-	}()
+		return nil
+	})
 
 	for i := 0; i < stage3WorkerCount; i++ {
 		eg.Go(func() error {
