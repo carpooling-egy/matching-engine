@@ -26,6 +26,18 @@ func ConfigureLogging() {
 	}
 }
 
+func ConfigureWithLogger(logger zerolog.Logger) {
+	// Set global logging level
+	level := getLogLevel()
+	zerolog.SetGlobalLevel(level)
+
+	// Configure time format
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+
+	// Set output format
+	log.Logger = logger
+}
+
 // getLogLevel returns the appropriate log level based on environment
 func getLogLevel() zerolog.Level {
 	levelStr, ok := os.LookupEnv("LOG_LEVEL")
