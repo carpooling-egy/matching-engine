@@ -11,6 +11,10 @@ import (
 	"runtime"
 )
 
+var (
+	workerCount = runtime.GOMAXPROCS(0) * 4
+)
+
 // buildCandidateMatches is responsible for matching offers and requests.
 func (matcher *Matcher) buildCandidateMatches(offers []*model.Offer, requests []*model.Request) error {
 	candidateIterator, err := matcher.candidateGenerator.GenerateCandidates(offers, requests)
@@ -24,8 +28,7 @@ func (matcher *Matcher) buildCandidateMatches(offers []*model.Offer, requests []
 
 	candidatesChannel := candidateIterator.Candidates(ctx, g)
 
-	workerCount := runtime.GOMAXPROCS(0)
-	matcher.runCandidateProcessors(ctx, g, candidatesChannel, workerCount)
+	matcher.runCandidateProcessors(ctx, g, candidatesChannel)
 
 	if err := g.Wait(); err != nil {
 		return fmt.Errorf("matching failed: %w", err)
@@ -37,7 +40,6 @@ func (matcher *Matcher) runCandidateProcessors(
 	ctx context.Context,
 	g *errgroup.Group,
 	candidatesChannel <-chan *model.MatchCandidate,
-	workerCount int,
 ) {
 	for i := 0; i < workerCount; i++ {
 		g.Go(func() error {
