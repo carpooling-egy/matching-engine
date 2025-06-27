@@ -30,6 +30,10 @@ func (planner *DefaultPathPlanner) FindFirstFeasiblePath(offerNode *model.OfferN
 		return nil, false, fmt.Errorf("FindFirstFeasiblePath: error getting pickup & dropoff points: %w", err)
 	}
 
+	// NOTE:
+	// The path generator is expected to yield a *new slice* for each path iteration.
+	// This ensures that modifying the returned slice (e.g., setting ExpectedArrivalTime)
+	// inside validation logic is safe and does not affect other iterations.
 	pathIter, err := planner.pathGenerator.GeneratePaths(
 		offerNode.Offer().Path(),
 		pickupAndDropOffs.Pickup(),
