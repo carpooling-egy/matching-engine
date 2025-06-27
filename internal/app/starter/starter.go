@@ -4,23 +4,24 @@ import (
 	"context"
 	"fmt"
 	"github.com/rs/zerolog/log"
-	"matching-engine/internal/publisher"
+	"matching-engine/cmd/appmetrics"
 	"matching-engine/internal/reader"
 	"matching-engine/internal/service/matcher"
+	"time"
 )
 
 type StarterService struct {
-	reader    reader.MatchInputReader
-	matcher   *matcher.Matcher
-	publisher publisher.Publisher
+	reader  reader.MatchInputReader
+	matcher *matcher.Matcher
+	//publisher publisher.Publisher
 }
 
 // NewStarterService creates a new starter service
-func NewStarterService(reader reader.MatchInputReader, matcher *matcher.Matcher, publisher publisher.Publisher) *StarterService {
+func NewStarterService(reader reader.MatchInputReader, matcher *matcher.Matcher /*, publisher publisher.Publisher*/) *StarterService {
 	return &StarterService{
-		reader:    reader,
-		matcher:   matcher,
-		publisher: publisher,
+		reader:  reader,
+		matcher: matcher,
+		//publisher: publisher,
 	}
 }
 
@@ -47,19 +48,75 @@ func (s *StarterService) Start(ctx context.Context) error {
 	}
 
 	// Process matching
+	startTime := time.Now()
 	matchingResults, err := s.matcher.Match(offers, requests)
 	if err != nil {
 		return fmt.Errorf("failed to match offers and requests: %w", err)
 	}
+	elapsed := time.Since(startTime)
 
 	if len(matchingResults) == 0 {
 		log.Info().Msg("No matches found")
 		return nil
 	}
 	// Publish results
-	if err = s.publisher.Publish(matchingResults); err != nil {
-		return fmt.Errorf("failed to publish matching results: %w", err)
+	//if err = s.publisher.Publish(matchingResults); err != nil {
+	//	return fmt.Errorf("failed to publish matching results: %w", err)
+	//}
+
+	max_matched_requests := 0
+	totalMatchedRequests := 0
+	totalNumberOfRiders := 0
+	for _, match := range matchingResults {
+		totalMatchedRequests += match.CurrentNumberOfRequests()
+		max_matched_requests = max(max_matched_requests, match.CurrentNumberOfRequests())
+		for _, request := range match.AssignedMatchedRequests() {
+			totalNumberOfRiders += request.NumberOfRiders()
+		}
 	}
+	// / Calculate the request fulfillment rate
+	// requestFulfillmentRate := float64(totalMatchedRequests) / float64(len(requests)) * 100
+
+	// The number of matched drivers is simply the number of matching results
+	matchedDrivers := len(matchingResults)
+	// driverUtilizationRate := float64(matchedDrivers) / float64(len(offers)) * 100
+
+	overall_matching := float64(totalMatchedRequests + matchedDrivers)
+
+	log.Info().
+		Int("matches", len(matchingResults)).
+		Msg("Matching process completed")
+
+	log.Info().
+		Str("duration", elapsed.String()).
+		Int("matched_requests", totalMatchedRequests).
+		Int("matched_drivers", matchedDrivers).
+		Float64("overall_matching", overall_matching).
+		Int("max_matched_requests", max_matched_requests).
+		Msg("Matching process completed")
+
+	log.Info().
+		Float64("Requests Matching Percentage", float64(totalMatchedRequests)/float64(len(requests))*100).
+		Float64("Drivers Matching Percentage", float64(matchedDrivers)/float64(len(offers))*100).
+		Float64("Overall Matching Percentage", overall_matching/float64(len(requests)+len(offers))*100).
+		Int("Total Number of Riders", totalNumberOfRiders).
+		Msg("Matching statistics")
+
+	appmetrics.IncrementCount("Average matches count", float64(len(matchingResults)))
+	appmetrics.TrackTime("Average matching duration", elapsed)
+	appmetrics.IncrementCount("Average total matched requests", float64(totalMatchedRequests))
+	appmetrics.IncrementCount("Average total matched drivers", float64(matchedDrivers))
+	appmetrics.IncrementCount("Average max matched requests", float64(max_matched_requests))
+	appmetrics.IncrementCount("Average total number of riders", float64(totalNumberOfRiders))
+	appmetrics.IncrementCount("Average overall matching", overall_matching)
+	appmetrics.IncrementCount("Average matching percentage requests", float64(totalMatchedRequests)/float64(len(requests))*100)
+	appmetrics.IncrementCount("Average matching percentage drivers", float64(matchedDrivers)/float64(len(offers))*100)
+	appmetrics.IncrementCount("Average overall matching percentage", overall_matching/float64(len(requests)+len(offers))*100)
+
+	// Publish results
+	// if err = s.publisher.Publish(matchingResults); err != nil {
+	//     return fmt.Errorf("failed to publish matching results: %w", err)
+	// }
 
 	log.Info().
 		Int("offers", len(offers)).
