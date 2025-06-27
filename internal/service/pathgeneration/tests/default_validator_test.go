@@ -17,19 +17,19 @@ type MockTimeMatrixService struct {
 	mock.Mock
 }
 
-func (m *MockTimeMatrixService) GetCumulativeTravelDurations(offerNode *model.OfferNode, path []model.PathPoint) ([]time.Duration, error) {
-	args := m.Called(offerNode, path)
+func (m *MockTimeMatrixService) GetCumulativeTravelDurations(offerNode *model.OfferNode, requestNode *model.RequestNode, path []model.PathPoint) ([]time.Duration, error) {
+	args := m.Called(offerNode, requestNode, path)
 	if err := args.Error(1); err != nil {
 		return nil, err
 	}
 	return args.Get(0).([]time.Duration), nil
 }
-func (m *MockTimeMatrixService) GetTravelDuration(offerNode *model.OfferNode, startID, endID model.PathPointID) (time.Duration, error) {
-	args := m.Called(offerNode, startID, endID)
+func (m *MockTimeMatrixService) GetTravelDuration(offerNode *model.OfferNode, requestNode *model.RequestNode, startID, endID model.PathPointID) (time.Duration, error) {
+	args := m.Called(offerNode, requestNode, startID, endID)
 	return args.Get(0).(time.Duration), args.Error(1)
 }
 
-func (m *MockTimeMatrixService) GetCumulativeTravelTimes(offerNode *model.OfferNode, path []model.PathPoint) ([]time.Time, error) {
+func (m *MockTimeMatrixService) GetCumulativeTravelTimes(offerNode *model.OfferNode, requestNode *model.RequestNode, path []model.PathPoint) ([]time.Time, error) {
 	panic("GetCumulativeTravelTimes should not be called in these tests")
 }
 
@@ -94,6 +94,8 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 	t.Run("Valid - no walking durations set", func(t *testing.T) {
 
 		offerNode := createTestOfferNode(timeNow, 15*time.Minute)
+		requestNode := model.NewRequestNode(createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)) // dummy values
+
 		sourcePoint := createPathPoint(offerNode.Offer(), enums.Source, timeNow, 0)
 		destinationPoint := createPathPoint(offerNode.Offer(), enums.Destination, timeNow.Add(1*time.Hour), 0)
 
@@ -105,10 +107,10 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 		d2 := createPathPoint(r2, enums.Dropoff, timeNow.Add(25*time.Minute), 0)
 		path := []model.PathPoint{*sourcePoint, *p1, *d1, *p2, *d2, *destinationPoint}
 
-		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, path).Return(createCumulativeTravelDurations(), nil)
-		mockTimeMatrix.On("GetTravelDuration", offerNode, path[0].ID(), path[5].ID()).Return(15*time.Minute, nil)
+		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, requestNode, path).Return(createCumulativeTravelDurations(), nil)
+		mockTimeMatrix.On("GetTravelDuration", offerNode, requestNode, path[0].ID(), path[5].ID()).Return(15*time.Minute, nil)
 
-		valid, err := pathValidator.ValidatePath(offerNode, path)
+		valid, err := pathValidator.ValidatePath(offerNode, requestNode, path)
 
 		assert.NoError(t, err)
 		assert.True(t, valid)
@@ -134,12 +136,14 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 		p2 := createPathPoint(r2, enums.Pickup, timeNow.Add(10*time.Minute), 10*time.Minute) //associated expected arrival time should change
 		d2 := createPathPoint(r2, enums.Dropoff, timeNow.Add(25*time.Minute).Add(-5*time.Minute), 5*time.Minute)
 
+		requestNode := model.NewRequestNode(createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)) // dummy values
+
 		path := []model.PathPoint{*sourcePoint, *p1, *d1, *p2, *d2, *destinationPoint}
 
-		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, path).Return(createCumulativeTravelDurations(), nil)
-		mockTimeMatrix.On("GetTravelDuration", offerNode, path[0].ID(), path[5].ID()).Return(15*time.Minute, nil)
+		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, requestNode, path).Return(createCumulativeTravelDurations(), nil)
+		mockTimeMatrix.On("GetTravelDuration", offerNode, requestNode, path[0].ID(), path[5].ID()).Return(15*time.Minute, nil)
 
-		valid, err := pathValidator.ValidatePath(offerNode, path)
+		valid, err := pathValidator.ValidatePath(offerNode, requestNode, path)
 
 		assert.NoError(t, err)
 		assert.True(t, valid)
@@ -159,12 +163,14 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 		p2 := createPathPoint(r2, enums.Pickup, timeNow, 0) //associated expected arrival time should change
 		d2 := createPathPoint(r2, enums.Dropoff, timeNow.Add(25*time.Minute), 0)
 
+		requestNode := model.NewRequestNode(createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)) // dummy values
+
 		path := []model.PathPoint{*sourcePoint, *p1, *d1, *p2, *d2, *destinationPoint}
 
-		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, path).Return(createCumulativeTravelDurations(), nil)
-		mockTimeMatrix.On("GetTravelDuration", offerNode, path[0].ID(), path[5].ID()).Return(15*time.Minute, nil)
+		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, requestNode, path).Return(createCumulativeTravelDurations(), nil)
+		mockTimeMatrix.On("GetTravelDuration", offerNode, requestNode, path[0].ID(), path[5].ID()).Return(15*time.Minute, nil)
 
-		valid, err := pathValidator.ValidatePath(offerNode, path)
+		valid, err := pathValidator.ValidatePath(offerNode, requestNode, path)
 
 		assert.NoError(t, err)
 		assert.False(t, valid)
@@ -185,10 +191,12 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 		d2 := createPathPoint(r2, enums.Dropoff, timeNow.Add(25*time.Minute), 0)
 		path := []model.PathPoint{*sourcePoint, *p1, *d1, *p2, *d2, *destinationPoint}
 
-		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, path).Return(createCumulativeTravelDurations(), nil)
-		mockTimeMatrix.On("GetTravelDuration", offerNode, path[0].ID(), path[5].ID()).Return(15*time.Minute, nil)
+		requestNode := model.NewRequestNode(createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)) // dummy values
 
-		valid, err := pathValidator.ValidatePath(offerNode, path)
+		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, requestNode, path).Return(createCumulativeTravelDurations(), nil)
+		mockTimeMatrix.On("GetTravelDuration", offerNode, requestNode, path[0].ID(), path[5].ID()).Return(15*time.Minute, nil)
+
+		valid, err := pathValidator.ValidatePath(offerNode, requestNode, path)
 
 		assert.False(t, valid)
 		assert.Nil(t, err)
@@ -210,10 +218,12 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 
 		path := []model.PathPoint{*sourcePoint, *p1, *d1, *p2, *d2, *destinationPoint}
 
-		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, path).Return(createCumulativeTravelDurations(), nil)
-		mockTimeMatrix.On("GetTravelDuration", offerNode, path[0].ID(), path[5].ID()).Return(15*time.Minute, nil)
+		requestNode := model.NewRequestNode(createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)) // dummy values
 
-		valid, err := pathValidator.ValidatePath(offerNode, path)
+		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, requestNode, path).Return(createCumulativeTravelDurations(), nil)
+		mockTimeMatrix.On("GetTravelDuration", offerNode, requestNode, path[0].ID(), path[5].ID()).Return(15*time.Minute, nil)
+
+		valid, err := pathValidator.ValidatePath(offerNode, requestNode, path)
 
 		assert.NoError(t, err)
 		assert.False(t, valid)
@@ -226,6 +236,8 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 		sourcePoint := createPathPoint(offerNode.Offer(), enums.Source, timeNow, 0)
 		destinationPoint := createPathPoint(offerNode.Offer(), enums.Destination, timeNow.Add(1*time.Hour), 0)
 
+		requestNode := model.NewRequestNode(createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)) // dummy values
+
 		r1 := createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)
 		r2 := createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)
 		p1 := createPathPoint(r1, enums.Pickup, timeNow, 0) //associated expected arrival time should change
@@ -235,10 +247,10 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 
 		path := []model.PathPoint{*sourcePoint, *p1, *p2, *d1, *d2, *destinationPoint}
 
-		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, path).Return(createCumulativeTravelDurations(), nil)
-		mockTimeMatrix.On("GetTravelDuration", offerNode, path[0].ID(), path[5].ID()).Return(15*time.Minute, nil)
+		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, requestNode, path).Return(createCumulativeTravelDurations(), nil)
+		mockTimeMatrix.On("GetTravelDuration", offerNode, requestNode, path[0].ID(), path[5].ID()).Return(15*time.Minute, nil)
 
-		valid, err := pathValidator.ValidatePath(offerNode, path)
+		valid, err := pathValidator.ValidatePath(offerNode, requestNode, path)
 
 		assert.NoError(t, err)
 		assert.False(t, valid)
@@ -251,6 +263,8 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 		sourcePoint := createPathPoint(offerNode.Offer(), enums.Source, timeNow, 0)
 		destinationPoint := createPathPoint(offerNode.Offer(), enums.Destination, timeNow.Add(1*time.Hour), 0)
 
+		requestNode := model.NewRequestNode(createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)) // dummy values
+
 		r1 := createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)
 		r2 := createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)
 		p1 := createPathPoint(r1, enums.Pickup, timeNow, 0) //associated expected arrival time should change
@@ -259,9 +273,9 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 		d2 := createPathPoint(r2, enums.Dropoff, timeNow.Add(25*time.Minute), 0)
 		path := []model.PathPoint{*sourcePoint, *p1, *d1, *p2, *d2, *destinationPoint}
 
-		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, path).Return(nil, errors.New("service error"))
+		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, requestNode, path).Return(nil, errors.New("service error"))
 
-		valid, err := pathValidator.ValidatePath(offerNode, path)
+		valid, err := pathValidator.ValidatePath(offerNode, requestNode, path)
 
 		assert.Error(t, err)
 		assert.False(t, valid)
@@ -273,6 +287,8 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 		sourcePoint := createPathPoint(offerNode.Offer(), enums.Source, timeNow, 0)
 		destinationPoint := createPathPoint(offerNode.Offer(), enums.Destination, timeNow.Add(1*time.Hour), 0)
 
+		requestNode := model.NewRequestNode(createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)) // dummy values
+
 		r1 := createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)
 		r2 := createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)
 		p1 := createPathPoint(r1, enums.Pickup, timeNow, 0) //associated expected arrival time should change
@@ -281,10 +297,10 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 		d2 := createPathPoint(r2, enums.Dropoff, timeNow, 0)
 		path := []model.PathPoint{*sourcePoint, *p1, *d1, *p2, *d2, *destinationPoint}
 
-		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, path).Return(createCumulativeTravelDurations(), nil)
-		mockTimeMatrix.On("GetTravelDuration", offerNode, path[0].ID(), path[5].ID()).Return(time.Duration(0), errors.New("service error"))
+		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, requestNode, path).Return(createCumulativeTravelDurations(), nil)
+		mockTimeMatrix.On("GetTravelDuration", offerNode, requestNode, path[0].ID(), path[5].ID()).Return(time.Duration(0), errors.New("service error"))
 
-		valid, err := pathValidator.ValidatePath(offerNode, path)
+		valid, err := pathValidator.ValidatePath(offerNode, requestNode, path)
 
 		assert.Error(t, err)
 		assert.False(t, valid)
@@ -297,6 +313,8 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 		sourcePoint := createPathPoint(offerNode.Offer(), enums.Source, timeNow, 0)
 		destinationPoint := createPathPoint(offerNode.Offer(), enums.Destination, timeNow.Add(1*time.Hour), 0)
 
+		requestNode := model.NewRequestNode(createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)) // dummy values
+
 		r1 := createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)
 		r2 := createTestRequest(timeNow, timeNow.Add(25*time.Minute), 1)
 		p1 := createPathPoint(offerNode.Offer(), enums.Pickup, timeNow, 0) //associated expected arrival time should change
@@ -305,10 +323,10 @@ func TestDefaultPathValidator_ValidatePath(t *testing.T) {
 		d2 := createPathPoint(r2, enums.Dropoff, timeNow, 0)
 		path := []model.PathPoint{*sourcePoint, *p1, *d1, *p2, *d2, *destinationPoint}
 
-		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, path).Return(createCumulativeTravelDurations(), nil)
-		mockTimeMatrix.On("GetTravelDuration", offerNode, path[0].ID(), path[5].ID()).Return(15*time.Minute, nil)
+		mockTimeMatrix.On("GetCumulativeTravelDurations", offerNode, requestNode, path).Return(createCumulativeTravelDurations(), nil)
+		mockTimeMatrix.On("GetTravelDuration", offerNode, requestNode, path[0].ID(), path[5].ID()).Return(15*time.Minute, nil)
 
-		valid, err := pathValidator.ValidatePath(offerNode, path)
+		valid, err := pathValidator.ValidatePath(offerNode, requestNode, path)
 
 		assert.Error(t, err)
 		assert.False(t, valid)

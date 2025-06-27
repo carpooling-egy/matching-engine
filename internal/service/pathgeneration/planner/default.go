@@ -49,7 +49,7 @@ func (planner *DefaultPathPlanner) FindFirstFeasiblePath(offerNode *model.OfferN
 		// Validate the candidate path
 		// NOTE THAT THE FOLLOWING FUNCTION UPDATES THE POINTS IN THE CANDIDATE PATH ITSELF!!
 		// (it updates the points with the expected arrival times)
-		isValidPath, validateErr := planner.pathValidator.ValidatePath(offerNode, candidatePath)
+		isValidPath, validateErr := planner.pathValidator.ValidatePath(offerNode, requestNode, candidatePath)
 		if validateErr != nil {
 			return nil, false, fmt.Errorf("failed to validate path: %w", validateErr)
 		}
