@@ -3,17 +3,19 @@ package client
 import (
 	"bytes"
 	"fmt"
-	"github.com/rs/zerolog/log"
-	"google.golang.org/protobuf/proto"
 	"io"
 	re "matching-engine/internal/adapter/routing"
 	"matching-engine/internal/adapter/valhalla/client/pb"
 	"net/http"
 	"net/url"
+
+	"github.com/rs/zerolog/log"
+	"google.golang.org/protobuf/proto"
 )
 
 type ValhallaClient struct {
-	cfg *Config
+	cfg        *Config
+	httpClient *http.Client
 }
 
 type Option func(*ValhallaClient)
@@ -34,8 +36,15 @@ func NewValhallaClient(opts ...Option) (*ValhallaClient, error) {
 			Msg("Failed to load configuration for ValhallaClient")
 		return nil, fmt.Errorf("failed to load config: %w", err)
 	}
-
-	vc := &ValhallaClient{cfg: cfg}
+	httpClient := &http.Client{
+		Transport: &http.Transport{
+			MaxIdleConnsPerHost: 50,
+		},
+	}
+	vc := &ValhallaClient{
+		cfg:        cfg,
+		httpClient: httpClient,
+	}
 
 	for _, opt := range opts {
 		opt(vc)
@@ -89,19 +98,30 @@ func (vc *ValhallaClient) Post(endpoint string, request *pb.Api) (*pb.Api, error
 		return nil, fmt.Errorf("failed to deserialize response: %w", err)
 	}
 
-	log.Debug().
-		Str("endpoint", endpoint).
-		Msg("Successfully received and processed response from Valhalla")
+	// log.Debug().
+	// 	Str("endpoint", endpoint).
+	// 	Msg("Successfully received and processed response from Valhalla")
 
 	return response, nil
 }
 
 func (vc *ValhallaClient) doPost(endpoint string, data []byte) ([]byte, error) {
-	resp, err := http.Post(
+	req, err := http.NewRequest(
+		http.MethodPost,
 		fmt.Sprintf("%v%v?format=proto", vc.cfg.ValhallaURL(), endpoint),
-		"application/x-protobuf",
 		bytes.NewReader(data),
 	)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("endpoint", endpoint).
+			Msg("Failed to create HTTP request")
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/x-protobuf")
+
+	resp, err := vc.httpClient.Do(req)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -141,10 +161,10 @@ func (vc *ValhallaClient) doPost(endpoint string, data []byte) ([]byte, error) {
 		return nil, fmt.Errorf("reading response: %w", err)
 	}
 
-	log.Debug().
-		Str("endpoint", endpoint).
-		Int("statusCode", resp.StatusCode).
-		Msg("Successfully received HTTP response from Valhalla")
+	// log.Debug().
+	// 	Str("endpoint", endpoint).
+	// 	Int("statusCode", resp.StatusCode).
+	// 	Msg("Successfully received HTTP response from Valhalla")
 
 	return body, nil
 }
@@ -158,8 +178,8 @@ func (vc *ValhallaClient) serializeRequest(request *pb.Api) ([]byte, error) {
 		return nil, fmt.Errorf("failed to serialize request: %w", err)
 	}
 
-	log.Debug().
-		Msg("Protobuf request serialized successfully")
+	// log.Debug().
+	// 	Msg("Protobuf request serialized successfully")
 	return data, nil
 }
 
@@ -172,7 +192,7 @@ func (vc *ValhallaClient) deserializeResponse(body []byte) (*pb.Api, error) {
 		return nil, fmt.Errorf("failed to deserialize response: %w", err)
 	}
 
-	log.Debug().
-		Msg("Response successfully unmarshalled from protobuf format")
+	// log.Debug().
+	// 	Msg("Response successfully unmarshalled from protobuf format")
 	return response, nil
 }

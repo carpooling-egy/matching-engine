@@ -19,6 +19,7 @@ var DefaultAutoCosting = &pb2.Costing{
 			HasShortest: &pb2.Costing_Options_Shortest{
 				Shortest: true,
 			},
+			FixedSpeed: 27, // 27 km/h
 		},
 	},
 }
