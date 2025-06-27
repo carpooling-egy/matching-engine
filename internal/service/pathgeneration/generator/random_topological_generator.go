@@ -11,15 +11,13 @@ import (
 
 type RandomTopologicalGenerator struct {
 	// RandomTopologicalGenerator is a path generator that generates paths using random sampling
-	k     int                         // Number of random samples to generate
-	graph *model.TopologicalPathGraph // Graph representing the paths
+	k int // Number of random samples to generate
 }
 
 func NewRandomTopologicalGenerator() PathGenerator {
 	k := getNumberOfSamples()
 	return &RandomTopologicalGenerator{
-		k:     k,
-		graph: model.NewTopologicalPathGraph(),
+		k: k,
 	}
 }
 
@@ -42,25 +40,34 @@ func (rsg *RandomTopologicalGenerator) GeneratePaths(
 	// We are initializing the graph with the provided path, pickup, and drop off points.
 	// We are adding the start node of the graph as the first point in the path which is the driver source
 	// and the end node as the last point which is the driver destination.
-	rsg.graph.InitPathGraph(path, pickup, dropoff, &path[0], &path[len(path)-1])
+	graph := model.NewTopologicalPathGraph()
+	graph.InitPathGraph(path, pickup, dropoff, &path[0], &path[len(path)-1])
 	return func(yield func([]model.PathPoint, error) bool) {
 		r := rand.New(rand.NewSource(time.Now().UnixNano())) // Initialize random seed
 		count := 0
-		newPath := []model.PathPoint{*rsg.graph.StartNode()}
+		newPath := []model.PathPoint{*graph.StartNode()}
 		visited := make(map[model.PathPointID]bool)
-		visited[rsg.graph.StartNode().ID()] = true
-		tempInDegree := rsg.graph.CopyInDegree()
+		visited[graph.StartNode().ID()] = true
+		tempInDegree := graph.CopyInDegree()
 		log.Debug().Msgf("RandomTopologicalGenerator: generating paths with k = %d", rsg.k)
-		if !rsg.randomBacktrack(tempInDegree, visited, newPath, yield, &count, rsg.k, r) {
+		if !rsg.randomBacktrack(graph, tempInDegree, visited, newPath, yield, &count, rsg.k, r) {
 			log.Debug().Msgf("RandomTopologicalGenerator: stopped generating paths after %d samples", count)
-			rsg.graph.Clear()
 			return // Stop generating paths if yield returns false or count exceeds k
 		}
 	}, nil
 }
 
-func (rsg *RandomTopologicalGenerator) randomBacktrack(tempInDegree map[model.PathPointID]int, visited map[model.PathPointID]bool, path []model.PathPoint, yield func([]model.PathPoint, error) bool, count *int, k int, r *rand.Rand) bool {
-	if len(path) == int(rsg.graph.Nodes().Size()) && path[len(path)-1].ID() == rsg.graph.EndNode().ID() {
+func (rsg *RandomTopologicalGenerator) randomBacktrack(
+	graph *model.TopologicalPathGraph,
+	tempInDegree map[model.PathPointID]int,
+	visited map[model.PathPointID]bool,
+	path []model.PathPoint,
+	yield func([]model.PathPoint, error) bool,
+	count *int,
+	k int,
+	r *rand.Rand,
+) bool {
+	if len(path) == int(graph.Nodes().Size()) && path[len(path)-1].ID() == graph.EndNode().ID() {
 		cp := make([]model.PathPoint, len(path))
 		copy(cp, path)
 		*count++
@@ -70,7 +77,7 @@ func (rsg *RandomTopologicalGenerator) randomBacktrack(tempInDegree map[model.Pa
 	}
 
 	var candidates []model.PathPointID
-	err := rsg.graph.Nodes().Range(func(nodeID model.PathPointID, node *model.PathPoint) error {
+	err := graph.Nodes().Range(func(nodeID model.PathPointID, node *model.PathPoint) error {
 		nodeInDegree := tempInDegree[nodeID]
 		nodeVisited := visited[nodeID]
 		if !nodeVisited && nodeInDegree == 0 {
@@ -89,19 +96,19 @@ func (rsg *RandomTopologicalGenerator) randomBacktrack(tempInDegree map[model.Pa
 
 	for _, nodeID := range candidates {
 		visited[nodeID] = true
-		node, exists := rsg.graph.GetNode(nodeID)
+		node, exists := graph.GetNode(nodeID)
 		if !exists {
 			log.Error().Msgf("node %s does not exist in the graph", nodeID)
 			return false // Node does not exist in the graph
 		}
 		path = append(path, *node)
-		for _, neigh := range rsg.graph.GetEdges(nodeID) {
+		for _, neigh := range graph.GetEdges(nodeID) {
 			tempInDegree[neigh]--
 		}
-		if !rsg.randomBacktrack(tempInDegree, visited, path, yield, count, k, r) {
+		if !rsg.randomBacktrack(graph, tempInDegree, visited, path, yield, count, k, r) {
 			return false // Stop if yield returns false or count exceeds k
 		}
-		for _, neigh := range rsg.graph.GetEdges(nodeID) {
+		for _, neigh := range graph.GetEdges(nodeID) {
 			tempInDegree[neigh]++
 		}
 		path = path[:len(path)-1]
