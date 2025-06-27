@@ -110,6 +110,10 @@ func (matcher *Matcher) flattenAndPopulate(
 			}
 		}
 
+		if len(requestNodes) == 0 {
+			return nil
+		}
+
 		if err := matcher.timeMatrixCachePopulator.Populate(offerNode, requestNodes); err != nil {
 			return err
 		}
