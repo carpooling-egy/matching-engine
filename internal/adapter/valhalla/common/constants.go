@@ -20,7 +20,7 @@ var DefaultAutoCosting = &pb2.Costing{
 			HasShortest: &pb2.Costing_Options_Shortest{
 				Shortest: true,
 			},
-			FixedSpeed: uint32(config.GetEnvFloat("FIXED_SPEED_KMG", 27.0)),
+			FixedSpeed: uint32(config.GetEnvFloat("FIXED_SPEED_KMH", 27.0)),
 		},
 	},
 }
