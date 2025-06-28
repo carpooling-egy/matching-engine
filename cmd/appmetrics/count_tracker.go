@@ -13,6 +13,13 @@ func IncrementCount(key string, increment float64) {
 	}
 }
 
+func GetCount(key string) float64 {
+	if count, exists := Counts.Get(key); exists {
+		return count
+	}
+	return 0.0
+}
+
 // ResetCounts clears all tracked counts.
 func ResetCounts() {
 	Counts.Clear()

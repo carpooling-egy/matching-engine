@@ -16,6 +16,14 @@ func TrackTime(key string, duration time.Duration) {
 	}
 }
 
+// GetTime retrieves the total time tracked for a specific key.
+func GetTime(key string) time.Duration {
+	if duration, exists := Timings.Get(key); exists {
+		return duration
+	}
+	return 0
+}
+
 // ResetTimings clears all tracked timings.
 func ResetTimings() {
 	Timings.Clear()
