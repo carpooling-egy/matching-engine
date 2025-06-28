@@ -66,7 +66,7 @@ func (matcher *Matcher) produceOffers(
 	ctx context.Context,
 	offersChannel chan<- collections.Tuple2[*model.OfferNode, *collections.Set[string]],
 ) error {
-	log.Error().Msg("Stage 1: Producing offers")
+	log.Debug().Msg("Stage 1: Producing offers")
 	return matcher.potentialOfferRequests.Range(func(offerID string, requestSet *collections.Set[string]) error {
 		select {
 		case <-ctx.Done():
