@@ -10,6 +10,12 @@ import (
 )
 
 func main() {
+
+	// Load environment variables
+	if err := config.LoadEnv(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to load environment variables")
+	}
+
 	// Configure logging
 	config.ConfigureLogging()
 	log.Info().Msg("Starting ride matcher service...")
@@ -17,11 +23,6 @@ func main() {
 	// TODO: setup an actual graceful shutdown, this is a placeholder
 	ctx, cancel := context.WithCancel(context.Background())
 	shutdown.Setup(cancel)
-
-	// Load environment variables
-	if err := config.LoadEnv(); err != nil {
-		log.Fatal().Err(err).Msg("Failed to load environment variables")
-	}
 
 	// Create and run the application
 	newApp := app.NewApp()

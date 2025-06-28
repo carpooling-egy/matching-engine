@@ -9,7 +9,7 @@ import (
 
 func LoadEnv() error {
 	// Try to load from .env file, but don't fail if a file is missing
-	if err := godotenv.Load("/home/husseinkhaled/matching-engine/.env"); err != nil {
+	if err := godotenv.Load(); err != nil {
 		log.Warn().Msg("No .env file found, proceeding with environment variables")
 	} else {
 		log.Info().Msg("Loaded environment variables from .env file")
