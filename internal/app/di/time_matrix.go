@@ -12,9 +12,11 @@ import (
 
 // RegisterTimeMatrixServices registers time matrix services
 func RegisterTimeMatrixServices(c *dig.Container) {
-	utils.Must(c.Provide(cache.NewTimeMatrixCache))
+	utils.Must(c.Provide(cache.NewTimeMatrixCacheWithOfferId))
+	utils.Must(c.Provide(cache.NewTimeMatrixCacheWithOfferIdAndRequestId))
 	utils.Must(c.Provide(timematrix.NewDefaultSelector))
 	utils.Must(c.Provide(timematrix.NewService))
 	utils.Must(c.Provide(timematrix.NewDefaultGenerator))
-	utils.Must(c.Provide(timematrix.NewDefaultPopulator))
+	utils.Must(c.Provide(timematrix.NewCacheWithOfferIdPopulator))
+	utils.Must(c.Provide(timematrix.NewCacheWithOfferIdRequestIdPopulator))
 }

@@ -3,6 +3,7 @@ package di
 import (
 	"go.uber.org/dig"
 	"matching-engine/internal/app/di/utils"
+	"matching-engine/internal/service/timematrix"
 
 	"matching-engine/internal/service/checker"
 	"matching-engine/internal/service/earlypruning"
@@ -26,11 +27,12 @@ func RegisterMatchingServices(c *dig.Container) {
 type MatchEvaluatorParams struct {
 	dig.In
 
-	PathPlanner       planner.PathPlanner
-	PreferenceChecker checker.Checker `name:"preference_checker"`
+	PathPlanner                                           planner.PathPlanner
+	PreferenceChecker                                     checker.Checker `name:"preference_checker"`
+	TimeMatrixCacheWithDriverOfferIdAndRequestIdPopulator *timematrix.CacheWithOfferIdRequestIdPopulator
 }
 
 // provideMatchEvaluator provides a match evaluator
 func provideMatchEvaluator(params MatchEvaluatorParams) matchevaluator.Evaluator {
-	return matchevaluator.NewMatchEvaluator(params.PathPlanner, params.PreferenceChecker)
+	return matchevaluator.NewMatchEvaluator(params.PathPlanner, params.PreferenceChecker, params.TimeMatrixCacheWithDriverOfferIdAndRequestIdPopulator)
 }

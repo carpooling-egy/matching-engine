@@ -28,7 +28,10 @@ func ConfigureLogging() {
 
 // getLogLevel returns the appropriate log level based on environment
 func getLogLevel() zerolog.Level {
-	levelStr := os.Getenv("LOG_LEVEL")
+	levelStr, ok := os.LookupEnv("LOG_LEVEL")
+	if !ok {
+		levelStr = ""
+	}
 	switch levelStr {
 	case "debug":
 		return zerolog.DebugLevel

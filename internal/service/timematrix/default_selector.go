@@ -8,21 +8,26 @@ import (
 )
 
 type DefaultSelector struct {
-	cache *cache.TimeMatrixCache
+	cacheWithOfferId             *cache.TimeMatrixCacheWithOfferId
+	cacheWithOfferIdAndRequestId *cache.TimeMatrixCacheWithOfferIdAndRequestId
 }
 
-func NewDefaultSelector(cache *cache.TimeMatrixCache) Selector {
+func NewDefaultSelector(cacheWithOfferId *cache.TimeMatrixCacheWithOfferId, cacheWithOfferIdAndRequestId *cache.TimeMatrixCacheWithOfferIdAndRequestId) Selector {
 	return &DefaultSelector{
-		cache: cache,
+		cacheWithOfferId:             cacheWithOfferId,
+		cacheWithOfferIdAndRequestId: cacheWithOfferIdAndRequestId,
 	}
 }
 
-func (selector *DefaultSelector) GetTimeMatrix(offer *model.OfferNode) (*cache.PathPointMappedTimeMatrix, error) {
+func (selector *DefaultSelector) GetTimeMatrix(offer *model.OfferNode, requestNode *model.RequestNode) (*cache.PathPointMappedTimeMatrix, error) {
 
 	// Check if the time matrix is already cached
-	cachedValue, exists := selector.cache.Get(offer.Offer().ID())
+	cachedValue, exists := selector.cacheWithOfferId.Get(offer.Offer().ID())
 	if !exists {
-		return nil, fmt.Errorf("offer %s not found in cache, should have been populated", offer.Offer().ID())
+		cachedValue, exists = selector.cacheWithOfferIdAndRequestId.Get(offer.Offer().ID(), requestNode.Request().ID())
+		if !exists {
+			return nil, fmt.Errorf("requestNode with request ID %s and offer ID %s not found in cache", requestNode.Request().ID(), offer.Offer().ID())
+		}
 	}
 	return cachedValue, nil
 }

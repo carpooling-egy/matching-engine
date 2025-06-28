@@ -2,6 +2,7 @@ package common
 
 import (
 	pb2 "matching-engine/internal/adapter/valhalla/client/pb"
+	"matching-engine/internal/app/config"
 )
 
 const (
@@ -19,7 +20,7 @@ var DefaultAutoCosting = &pb2.Costing{
 			HasShortest: &pb2.Costing_Options_Shortest{
 				Shortest: true,
 			},
-			FixedSpeed: 27, // 27 km/h
+			FixedSpeed: uint32(config.GetEnvFloat("FIXED_SPEED_KMG", 27.0)),
 		},
 	},
 }

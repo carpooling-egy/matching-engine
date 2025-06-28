@@ -8,5 +8,5 @@ import (
 type Selector interface {
 	// GetTimeMatrix retrieves the time matrix for a given offer.
 	// It may return a cached result or generate a new one if not available.
-	GetTimeMatrix(offer *model.OfferNode) (*cache.PathPointMappedTimeMatrix, error)
+	GetTimeMatrix(offer *model.OfferNode, request *model.RequestNode) (*cache.PathPointMappedTimeMatrix, error)
 }

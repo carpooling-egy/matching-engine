@@ -1,8 +1,6 @@
 package tests
 
 import (
-	"github.com/rs/zerolog/log"
-	"go.uber.org/dig"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/adapter/valhalla"
 	"matching-engine/internal/app/config"
@@ -12,11 +10,19 @@ import (
 	matcher2 "matching-engine/internal/service/matcher"
 	"testing"
 	"time"
+
+	// "github.com/joho/godotenv"
+	"github.com/rs/zerolog/log"
+	"go.uber.org/dig"
 )
 
 func setupTestingEnvironment() (routing.Engine, error) {
 	config.ConfigureLogging()
-
+	// Load environment variables
+	if err := config.LoadEnv(); err != nil {
+		log.Fatal().Err(err).Msg("Failed to load environment variables")
+		return nil, err
+	}
 	// Create a mock routing engine
 	engine, err := valhalla.NewValhalla()
 	if err != nil {
@@ -166,9 +172,13 @@ func runMatcher(offers []*model.Offer, requests []*model.Request) ([]*model.Matc
 
 	// TODO set the env variable with correct variable to test different approaches
 	// TODO use a better mechanism to test all variations
-	//envPath := ""
-	//
-	//err := godotenv.Load(envPath)
+	// envPath := ""
+
+	// err := godotenv.Load(envPath)
+	// if err != nil {
+	// 	log.Error().Msgf("Error loading .env file: %v", err)
+	// 	return nil, err
+	// }
 
 	c := dig.New()
 

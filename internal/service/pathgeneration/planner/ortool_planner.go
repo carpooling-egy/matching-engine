@@ -45,7 +45,7 @@ func (p *ORToolPlanner) FindFirstFeasiblePath(
 	}
 
 	// Step 2: Get time matrix and index map
-	timeMatrixData, err := p.timeMatrixSelector.GetTimeMatrix(offerNode)
+	timeMatrixData, err := p.timeMatrixSelector.GetTimeMatrix(offerNode, requestNode)
 	if err != nil {
 		return nil, false, fmt.Errorf("time matrix: %w", err)
 	}

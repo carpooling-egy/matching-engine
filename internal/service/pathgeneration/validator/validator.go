@@ -9,5 +9,5 @@ type PathValidator interface {
 	// An error is returned only for system errors, not for validation failures.
 	//
 	// Note: This method may modify the provided path by setting expected arrival times.
-	ValidatePath(offerNode *model.OfferNode, path []model.PathPoint) (bool, error)
+	ValidatePath(offerNode *model.OfferNode, requestNode *model.RequestNode, path []model.PathPoint) (bool, error)
 }

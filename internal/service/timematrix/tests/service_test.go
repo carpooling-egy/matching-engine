@@ -19,7 +19,7 @@ type MockTimeMatrixSelector struct {
 	mock.Mock
 }
 
-func (m *MockTimeMatrixSelector) GetTimeMatrix(offer *model.OfferNode) (*cache.PathPointMappedTimeMatrix, error) {
+func (m *MockTimeMatrixSelector) GetTimeMatrix(offer *model.OfferNode, request *model.RequestNode) (*cache.PathPointMappedTimeMatrix, error) {
 	args := m.Called(offer)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -34,6 +34,9 @@ func TestTimeMatrixService_GetTravelDuration_Success(t *testing.T) {
 	// Setup
 	offer := createTestOffer()
 	offerNode := model.NewOfferNode(offer)
+
+	request := createTestRequest()
+	requestNode := model.NewRequestNode(request)
 
 	// Create mock selector
 	mockSelector := new(MockTimeMatrixSelector)
@@ -58,7 +61,7 @@ func TestTimeMatrixService_GetTravelDuration_Success(t *testing.T) {
 	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
-	duration, err := service.GetTravelDuration(offerNode, 1, 3)
+	duration, err := service.GetTravelDuration(offerNode, requestNode, 1, 3)
 
 	// Assertions
 	require.NoError(t, err)
@@ -76,6 +79,9 @@ func TestTimeMatrixService_GetTravelDuration_SelectorError(t *testing.T) {
 	offer := createTestOffer()
 	offerNode := model.NewOfferNode(offer)
 
+	request := createTestRequest()
+	requestNode := model.NewRequestNode(request)
+
 	// Create mock selector with error
 	mockSelector := new(MockTimeMatrixSelector)
 	mockSelector.On("GetTimeMatrix", offerNode).Return(nil, errors.New("failed to get time matrix"))
@@ -84,7 +90,7 @@ func TestTimeMatrixService_GetTravelDuration_SelectorError(t *testing.T) {
 	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
-	duration, err := service.GetTravelDuration(offerNode, 1, 3)
+	duration, err := service.GetTravelDuration(offerNode, requestNode, 1, 3)
 
 	// Assertions
 	require.Error(t, err)
@@ -102,6 +108,9 @@ func TestTimeMatrixService_GetTravelDuration_InvalidPointID(t *testing.T) {
 	// Setup
 	offer := createTestOffer()
 	offerNode := model.NewOfferNode(offer)
+
+	request := createTestRequest()
+	requestNode := model.NewRequestNode(request)
 
 	// Create mock selector
 	mockSelector := new(MockTimeMatrixSelector)
@@ -126,7 +135,7 @@ func TestTimeMatrixService_GetTravelDuration_InvalidPointID(t *testing.T) {
 	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test with invalid point ID
-	duration, err := service.GetTravelDuration(offerNode, 1, 4)
+	duration, err := service.GetTravelDuration(offerNode, requestNode, 1, 4)
 
 	// Assertions
 	require.Error(t, err)
@@ -144,6 +153,9 @@ func TestTimeMatrixService_GetTravelDuration_IndexOutOfBounds(t *testing.T) {
 	// Setup
 	offer := createTestOffer()
 	offerNode := model.NewOfferNode(offer)
+
+	request := createTestRequest()
+	requestNode := model.NewRequestNode(request)
 
 	// Create mock selector
 	mockSelector := new(MockTimeMatrixSelector)
@@ -166,7 +178,7 @@ func TestTimeMatrixService_GetTravelDuration_IndexOutOfBounds(t *testing.T) {
 	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
-	duration, err := service.GetTravelDuration(offerNode, 1, 2)
+	duration, err := service.GetTravelDuration(offerNode, requestNode, 1, 2)
 
 	// Assertions
 	require.Error(t, err)
@@ -184,6 +196,9 @@ func TestTimeMatrixService_GetCumulativeTravelDurations_Success(t *testing.T) {
 	// Setup
 	offer := createTestOffer()
 	offerNode := model.NewOfferNode(offer)
+
+	request := createTestRequest()
+	requestNode := model.NewRequestNode(request)
 
 	// Create mock selector
 	mockSelector := new(MockTimeMatrixSelector)
@@ -225,7 +240,7 @@ func TestTimeMatrixService_GetCumulativeTravelDurations_Success(t *testing.T) {
 	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
-	cumulativeDurations, err := service.GetCumulativeTravelDurations(offerNode, pathPoints)
+	cumulativeDurations, err := service.GetCumulativeTravelDurations(offerNode, requestNode, pathPoints)
 
 	// Assertions
 	require.NoError(t, err)
@@ -247,6 +262,9 @@ func TestTimeMatrixService_GetCumulativeTravelDurations_SelectorError(t *testing
 	offer := createTestOffer()
 	offerNode := model.NewOfferNode(offer)
 
+	request := createTestRequest()
+	requestNode := model.NewRequestNode(request)
+
 	// Create mock selector with error
 	mockSelector := new(MockTimeMatrixSelector)
 	mockSelector.On("GetTimeMatrix", offerNode).Return(nil, errors.New("failed to get time matrix"))
@@ -264,7 +282,7 @@ func TestTimeMatrixService_GetCumulativeTravelDurations_SelectorError(t *testing
 	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
-	cumulativeDurations, err := service.GetCumulativeTravelDurations(offerNode, pathPoints)
+	cumulativeDurations, err := service.GetCumulativeTravelDurations(offerNode, requestNode, pathPoints)
 
 	// Assertions
 	require.Error(t, err)
@@ -283,6 +301,9 @@ func TestTimeMatrixService_GetCumulativeTravelDurations_TooFewPoints(t *testing.
 	offer := createTestOffer()
 	offerNode := model.NewOfferNode(offer)
 
+	request := createTestRequest()
+	requestNode := model.NewRequestNode(request)
+
 	// Create mock selector
 	mockSelector := new(MockTimeMatrixSelector)
 
@@ -296,7 +317,7 @@ func TestTimeMatrixService_GetCumulativeTravelDurations_TooFewPoints(t *testing.
 	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
-	cumulativeDurations, err := service.GetCumulativeTravelDurations(offerNode, pathPoints)
+	cumulativeDurations, err := service.GetCumulativeTravelDurations(offerNode, requestNode, pathPoints)
 
 	// Assertions
 	require.Error(t, err)
@@ -311,6 +332,9 @@ func TestTimeMatrixService_GetCumulativeTravelDurations_InvalidPointID(t *testin
 	// Setup
 	offer := createTestOffer()
 	offerNode := model.NewOfferNode(offer)
+
+	request := createTestRequest()
+	requestNode := model.NewRequestNode(request)
 
 	// Create mock selector
 	mockSelector := new(MockTimeMatrixSelector)
@@ -345,7 +369,7 @@ func TestTimeMatrixService_GetCumulativeTravelDurations_InvalidPointID(t *testin
 	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
-	cumulativeDurations, err := service.GetCumulativeTravelDurations(offerNode, pathPoints)
+	cumulativeDurations, err := service.GetCumulativeTravelDurations(offerNode, requestNode, pathPoints)
 
 	// Assertions
 	require.Error(t, err)
@@ -380,6 +404,9 @@ func TestTimeMatrixService_GetCumulativeTravelTimes_Success(t *testing.T) {
 		nil,
 	)
 	offerNode := model.NewOfferNode(offer)
+
+	request := createTestRequest()
+	requestNode := model.NewRequestNode(request)
 
 	// Create mock selector
 	mockSelector := new(MockTimeMatrixSelector)
@@ -419,7 +446,7 @@ func TestTimeMatrixService_GetCumulativeTravelTimes_Success(t *testing.T) {
 	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
-	cumulativeTimes, err := service.GetCumulativeTravelTimes(offerNode, pathPoints)
+	cumulativeTimes, err := service.GetCumulativeTravelTimes(offerNode, requestNode, pathPoints)
 
 	// Assertions
 	require.NoError(t, err)
@@ -441,6 +468,9 @@ func TestTimeMatrixService_GetCumulativeTravelTimes_SelectorError(t *testing.T) 
 	offer := createTestOffer()
 	offerNode := model.NewOfferNode(offer)
 
+	request := createTestRequest()
+	requestNode := model.NewRequestNode(request)
+
 	// Create mock selector with error
 	mockSelector := new(MockTimeMatrixSelector)
 	mockSelector.On("GetTimeMatrix", offerNode).Return(nil, errors.New("failed to get time matrix"))
@@ -458,7 +488,7 @@ func TestTimeMatrixService_GetCumulativeTravelTimes_SelectorError(t *testing.T) 
 	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
-	cumulativeTimes, err := service.GetCumulativeTravelTimes(offerNode, pathPoints)
+	cumulativeTimes, err := service.GetCumulativeTravelTimes(offerNode, requestNode, pathPoints)
 
 	// Assertions
 	require.Error(t, err)
@@ -477,6 +507,9 @@ func TestTimeMatrixService_GetCumulativeTravelTimes_TooFewPoints(t *testing.T) {
 	offer := createTestOffer()
 	offerNode := model.NewOfferNode(offer)
 
+	request := createTestRequest()
+	requestNode := model.NewRequestNode(request)
+
 	// Create mock selector
 	mockSelector := new(MockTimeMatrixSelector)
 
@@ -490,7 +523,7 @@ func TestTimeMatrixService_GetCumulativeTravelTimes_TooFewPoints(t *testing.T) {
 	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
-	cumulativeTimes, err := service.GetCumulativeTravelTimes(offerNode, pathPoints)
+	cumulativeTimes, err := service.GetCumulativeTravelTimes(offerNode, requestNode, pathPoints)
 
 	// Assertions
 	require.Error(t, err)
@@ -508,6 +541,9 @@ func TestTimeMatrixService_GetCumulativeTravelTimes_InvalidPointID(t *testing.T)
 	// Setup
 	offer := createTestOffer()
 	offerNode := model.NewOfferNode(offer)
+
+	request := createTestRequest()
+	requestNode := model.NewRequestNode(request)
 
 	// Create mock selector
 	mockSelector := new(MockTimeMatrixSelector)
@@ -542,7 +578,7 @@ func TestTimeMatrixService_GetCumulativeTravelTimes_InvalidPointID(t *testing.T)
 	service := timematrix.NewService(mockSelector)
 
 	// Call the method to test
-	cumulativeTimes, err := service.GetCumulativeTravelTimes(offerNode, pathPoints)
+	cumulativeTimes, err := service.GetCumulativeTravelTimes(offerNode, requestNode, pathPoints)
 
 	// Assertions
 	require.Error(t, err)
