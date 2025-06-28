@@ -17,11 +17,12 @@ type StarterService struct {
 }
 
 // NewStarterService creates a new starter service
-func NewStarterService(reader reader.MatchInputReader, matcher *matcher.Matcher /*, publisher publisher.Publisher*/) *StarterService {
+
+func NewStarterService(reader reader.MatchInputReader, matcher *matcher.Matcher/*, publisher publisher.Publisher*/) *StarterService {
 	return &StarterService{
-		reader:  reader,
-		matcher: matcher,
-		//publisher: publisher,
+		reader:    reader,
+		matcher:   matcher,
+		// publisher: publisher,
 	}
 }
 
@@ -59,6 +60,7 @@ func (s *StarterService) Start(ctx context.Context) error {
 		log.Info().Msg("No matches found")
 		return nil
 	}
+
 	// Publish results
 	//if err = s.publisher.Publish(matchingResults); err != nil {
 	//	return fmt.Errorf("failed to publish matching results: %w", err)

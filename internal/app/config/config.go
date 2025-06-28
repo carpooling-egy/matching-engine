@@ -41,6 +41,7 @@ func GetEnv(key, def string) string {
 }
 
 func GetEnvFloat(key string, def float64) float64 {
+	LoadEnv()
 	val := os.Getenv(key)
 	if val == "" {
 		log.Debug().Msgf("%s not set, using default: %f", key, def)

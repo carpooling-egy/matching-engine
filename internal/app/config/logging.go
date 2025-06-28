@@ -42,7 +42,7 @@ func ConfigureWithLogger(logger zerolog.Logger) {
 func getLogLevel() zerolog.Level {
 	levelStr, ok := os.LookupEnv("LOG_LEVEL")
 	if !ok {
-		levelStr = ""
+		levelStr = "info"
 	}
 	switch levelStr {
 	case "debug":
