@@ -61,8 +61,8 @@ func TestOSRM_PlanDrivingRoute(t *testing.T) {
 			name: "valid route",
 			routeParam: must(model.NewRouteParams(
 				[]model.Coordinate{
-					*must(model.NewCoordinate(31.219824800885945, 29.94221584806283)),
-					*must(model.NewCoordinate(31.2279084030221, 29.94136620165611)),
+					*must(model.NewCoordinate(31.21869167193043, 29.942667902383192)),
+					*must(model.NewCoordinate(31.20186826886348, 29.901443738997273)),
 				},
 				time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 			)),
@@ -337,13 +337,11 @@ func TestOSRM_StressTest_ComputeDistanceTimeMatrix(t *testing.T) {
 
 	numSources := 100
 	numTargets := 100
-	numRuns := 10000 // Number of times to repeat the test (now in parallel)
-	maxRetries := 5
+	numRuns := 100
 
-	// Generate sources and targets in NYC bounding box
 	genCoord := func() model.Coordinate {
-		lat := 40.6 + (0.3 * (rand.Float64()))
-		lon := -74.1 + (0.2 * (rand.Float64()))
+		lat := 31.18 + (0.07 * rand.Float64()) // 31.18 - 31.25
+		lon := 29.85 + (0.13 * rand.Float64()) // 29.85 - 29.98
 		c, _ := model.NewCoordinate(lat, lon)
 		return *c
 	}
@@ -367,37 +365,24 @@ func TestOSRM_StressTest_ComputeDistanceTimeMatrix(t *testing.T) {
 	var wg sync.WaitGroup
 	durations := make([]time.Duration, numRuns)
 	errs := make([]error, numRuns)
-	attempts := make([]int, numRuns)
 	mu := sync.Mutex{}
 
 	for i := 0; i < numRuns; i++ {
 		wg.Add(1)
 		go func(runIdx int) {
 			defer wg.Done()
-			var elapsed time.Duration
-			var err error
-			var result *model.DistanceTimeMatrix
-			for attempt := 1; attempt <= maxRetries+1; attempt++ {
-				start := time.Now()
-				result, err = o.ComputeDistanceTimeMatrix(context.Background(), params)
-				elapsed = time.Since(start)
-				if err == nil {
-					mu.Lock()
-					durations[runIdx] = elapsed
-					errs[runIdx] = nil
-					attempts[runIdx] = attempt
-					mu.Unlock()
-					fmt.Printf("Run %d: %v (matrix: %dx%d) [attempts: %d]\n", runIdx+1, elapsed, len(result.Times()), len(result.Times()[0]), attempt)
-					return
-				}
-			}
-			// If we reach here, all attempts failed
+			start := time.Now()
+			result, err := o.ComputeDistanceTimeMatrix(context.Background(), params)
+			elapsed := time.Since(start)
 			mu.Lock()
 			durations[runIdx] = elapsed
 			errs[runIdx] = err
-			attempts[runIdx] = maxRetries + 1
 			mu.Unlock()
-			fmt.Printf("Run %d: ERROR after %d attempts: %v\n", runIdx+1, maxRetries+1, err)
+			if err == nil {
+				fmt.Printf("Run %d: %v (matrix: %dx%d)\n", runIdx+1, elapsed, len(result.Times()), len(result.Times()[0]))
+			} else {
+				fmt.Printf("Run %d: ERROR: %v\n", runIdx+1, err)
+			}
 		}(i)
 	}
 	wg.Wait()
@@ -408,7 +393,7 @@ func TestOSRM_StressTest_ComputeDistanceTimeMatrix(t *testing.T) {
 	first := true
 	for i, d := range durations {
 		if errs[i] != nil {
-			t.Fatalf("matrix computation failed on run %d after %d attempts: %v", i+1, attempts[i], errs[i])
+			t.Fatalf("matrix computation failed on run %d: %v", i+1, errs[i])
 		}
 		if first || d < min {
 			min = d
@@ -420,7 +405,7 @@ func TestOSRM_StressTest_ComputeDistanceTimeMatrix(t *testing.T) {
 		first = false
 	}
 	avg := total / time.Duration(numRuns)
-	fmt.Printf("Average: %v, Min: %v, Max: %v (over %d runs, parallel, with retry)\n", avg, min, max, numRuns)
+	fmt.Printf("Average: %v, Min: %v, Max: %v (over %d runs, parallel)\n", avg, min, max, numRuns)
 }
 
 func TestOSRM_StressTest_PlanDrivingRoute(t *testing.T) {
@@ -429,12 +414,11 @@ func TestOSRM_StressTest_PlanDrivingRoute(t *testing.T) {
 		t.Fatalf("failed to create OSRM engine: %v", err)
 	}
 
-	numRuns := 100
-	maxRetries := 5
+	numRuns := 1000
 
 	genCoord := func() model.Coordinate {
-		lat := 40.6 + (0.3 * rand.Float64())
-		lon := -74.1 + (0.2 * rand.Float64())
+		lat := 22.0 + (9.5 * rand.Float64())  // 22.0 - 31.5
+		lon := 25.0 + (10.0 * rand.Float64()) // 25.0 - 35.0
 		c, _ := model.NewCoordinate(lat, lon)
 		return *c
 	}
@@ -442,42 +426,30 @@ func TestOSRM_StressTest_PlanDrivingRoute(t *testing.T) {
 	var wg sync.WaitGroup
 	durations := make([]time.Duration, numRuns)
 	errs := make([]error, numRuns)
-	attempts := make([]int, numRuns)
 	mu := sync.Mutex{}
 
 	for i := 0; i < numRuns; i++ {
 		wg.Add(1)
 		go func(runIdx int) {
 			defer wg.Done()
-			var elapsed time.Duration
-			var err error
-			var result *model.Route
-			for attempt := 1; attempt <= maxRetries+1; attempt++ {
-				startCoord := genCoord()
-				endCoord := genCoord()
-				params := must(model.NewRouteParams(
-					[]model.Coordinate{startCoord, endCoord},
-					time.Now().Add(time.Minute),
-				))
-				start := time.Now()
-				result, err = o.PlanDrivingRoute(context.Background(), params)
-				elapsed = time.Since(start)
-				if err == nil {
-					mu.Lock()
-					durations[runIdx] = elapsed
-					errs[runIdx] = nil
-					attempts[runIdx] = attempt
-					mu.Unlock()
-					fmt.Printf("Run %d: %v (distance: %.2f km) [attempts: %d]\n", runIdx+1, elapsed, result.Distance().Value()/1000, attempt)
-					return
-				}
-			}
+			startCoord := genCoord()
+			endCoord := genCoord()
+			params := must(model.NewRouteParams(
+				[]model.Coordinate{startCoord, endCoord},
+				time.Now().Add(time.Minute),
+			))
+			start := time.Now()
+			result, err := o.PlanDrivingRoute(context.Background(), params)
+			elapsed := time.Since(start)
 			mu.Lock()
 			durations[runIdx] = elapsed
 			errs[runIdx] = err
-			attempts[runIdx] = maxRetries + 1
 			mu.Unlock()
-			fmt.Printf("Run %d: ERROR after %d attempts: %v\n", runIdx+1, maxRetries+1, err)
+			if err == nil {
+				fmt.Printf("Run %d: %v (distance: %.2f km)\n", runIdx+1, elapsed, result.Distance().Value()/1000)
+			} else {
+				fmt.Printf("Run %d: ERROR: %v\n", runIdx+1, err)
+			}
 		}(i)
 	}
 	wg.Wait()
@@ -488,7 +460,7 @@ func TestOSRM_StressTest_PlanDrivingRoute(t *testing.T) {
 	first := true
 	for i, d := range durations {
 		if errs[i] != nil {
-			t.Fatalf("PlanDrivingRoute failed on run %d after %d attempts: %v", i+1, attempts[i], errs[i])
+			t.Fatalf("PlanDrivingRoute failed on run %d: %v", i+1, errs[i])
 		}
 		if first || d < min {
 			min = d
@@ -500,7 +472,7 @@ func TestOSRM_StressTest_PlanDrivingRoute(t *testing.T) {
 		first = false
 	}
 	avg := total / time.Duration(numRuns)
-	fmt.Printf("PlanDrivingRoute: Average: %v, Min: %v, Max: %v (over %d runs, parallel, with retry)\n", avg, min, max, numRuns)
+	fmt.Printf("PlanDrivingRoute: Average: %v, Min: %v, Max: %v (over %d runs, parallel)\n", avg, min, max, numRuns)
 }
 
 func TestOSRM_StressTest_SnapPointToRoad(t *testing.T) {
@@ -510,11 +482,10 @@ func TestOSRM_StressTest_SnapPointToRoad(t *testing.T) {
 	}
 
 	numRuns := 10000
-	maxRetries := 5
 
 	genCoord := func() model.Coordinate {
-		lat := 40.6 + (0.3 * rand.Float64())
-		lon := -74.1 + (0.2 * rand.Float64())
+		lat := 22.0 + (9.5 * rand.Float64())  // 22.0 - 31.5
+		lon := 25.0 + (10.0 * rand.Float64()) // 25.0 - 35.0
 		c, _ := model.NewCoordinate(lat, lon)
 		return *c
 	}
@@ -522,37 +493,25 @@ func TestOSRM_StressTest_SnapPointToRoad(t *testing.T) {
 	var wg sync.WaitGroup
 	durations := make([]time.Duration, numRuns)
 	errs := make([]error, numRuns)
-	attempts := make([]int, numRuns)
 	mu := sync.Mutex{}
 
 	for i := 0; i < numRuns; i++ {
 		wg.Add(1)
 		go func(runIdx int) {
 			defer wg.Done()
-			var elapsed time.Duration
-			var err error
-			var result *model.Coordinate
-			for attempt := 1; attempt <= maxRetries+1; attempt++ {
-				point := genCoord()
-				start := time.Now()
-				result, err = o.SnapPointToRoad(context.Background(), &point)
-				elapsed = time.Since(start)
-				if err == nil {
-					mu.Lock()
-					durations[runIdx] = elapsed
-					errs[runIdx] = nil
-					attempts[runIdx] = attempt
-					mu.Unlock()
-					fmt.Printf("Run %d: %v (snapped: %.6f, %.6f) [attempts: %d]\n", runIdx+1, elapsed, result.Lat(), result.Lng(), attempt)
-					return
-				}
-			}
+			point := genCoord()
+			start := time.Now()
+			result, err := o.SnapPointToRoad(context.Background(), &point)
+			elapsed := time.Since(start)
 			mu.Lock()
 			durations[runIdx] = elapsed
 			errs[runIdx] = err
-			attempts[runIdx] = maxRetries + 1
 			mu.Unlock()
-			fmt.Printf("Run %d: ERROR after %d attempts: %v\n", runIdx+1, maxRetries+1, err)
+			if err == nil {
+				fmt.Printf("Run %d: %v (snapped: %.6f, %.6f)\n", runIdx+1, elapsed, result.Lat(), result.Lng())
+			} else {
+				fmt.Printf("Run %d: ERROR: %v\n", runIdx+1, err)
+			}
 		}(i)
 	}
 	wg.Wait()
@@ -563,7 +522,7 @@ func TestOSRM_StressTest_SnapPointToRoad(t *testing.T) {
 	first := true
 	for i, d := range durations {
 		if errs[i] != nil {
-			t.Fatalf("SnapPointToRoad failed on run %d after %d attempts: %v", i+1, attempts[i], errs[i])
+			t.Fatalf("SnapPointToRoad failed on run %d: %v", i+1, errs[i])
 		}
 		if first || d < min {
 			min = d
@@ -575,5 +534,5 @@ func TestOSRM_StressTest_SnapPointToRoad(t *testing.T) {
 		first = false
 	}
 	avg := total / time.Duration(numRuns)
-	fmt.Printf("SnapPointToRoad: Average: %v, Min: %v, Max: %v (over %d runs, parallel, with retry)\n", avg, min, max, numRuns)
+	fmt.Printf("SnapPointToRoad: Average: %v, Min: %v, Max: %v (over %d runs, parallel)\n", avg, min, max, numRuns)
 }

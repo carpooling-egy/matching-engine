@@ -18,7 +18,7 @@ var defaultProfileConfig = map[model.OSRMProfile]struct {
 	host string
 	port int
 }{
-	model.OSRMProfileCar:  {"20.46.49.38", 5000},
+	model.OSRMProfileCar:  {"localhost", 5000},
 	model.OSRMProfileFoot: {"20.46.49.38", 5001},
 }
 
