@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	retryablehttp "github.com/hashicorp/go-retryablehttp"
 	"github.com/rs/zerolog/log"
 	"io"
 	"matching-engine/internal/adapter/routing"
@@ -17,7 +18,7 @@ import (
 
 type OSRMClient struct {
 	cfg        *Config
-	httpClient *http.Client
+	httpClient *retryablehttp.Client
 }
 
 func NewOSRMClient(profile string) (routing.Client[model.OSRMTransport, map[string]any], error) {
@@ -29,15 +30,13 @@ func NewOSRMClient(profile string) (routing.Client[model.OSRMTransport, map[stri
 		return nil, fmt.Errorf("failed to load config: %w", err)
 	}
 
-	httpClient := &http.Client{
-		Transport: &http.Transport{
-			MaxIdleConnsPerHost: 50,
-		},
-	}
+	retryClient := retryablehttp.NewClient()
+	retryClient.RetryMax = 5
+	retryClient.Logger = nil
 
 	client := &OSRMClient{
 		cfg:        cfg,
-		httpClient: httpClient,
+		httpClient: retryClient,
 	}
 
 	baseURL := client.cfg.OSRMURL()
@@ -119,7 +118,7 @@ func appendVar(path *string, segment string) {
 }
 
 func (c *OSRMClient) doGetRequest(fullURL string) (*http.Response, error) {
-	request, err := http.NewRequest("GET", fullURL, nil)
+	request, err := retryablehttp.NewRequest("GET", fullURL, nil)
 	if err != nil {
 		log.Error().Err(err).Str("fullURL", fullURL).Msg("Failed to create GET request")
 		return nil, fmt.Errorf("failed to create request: %w", err)

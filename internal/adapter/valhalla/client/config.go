@@ -13,8 +13,8 @@ type Config struct {
 
 func LoadConfig() (*Config, error) {
 	cfg := &Config{
-		host: "68.221.112.34",
-		port: 8004,
+		host: "localhost",
+		port: 8002,
 	}
 
 	if v, ok := os.LookupEnv("VALHALLA_HOST"); ok && v != "" {
