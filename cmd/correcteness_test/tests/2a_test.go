@@ -75,7 +75,7 @@ func getTest2aData(engine routing.Engine) ([]*model.Offer, []*model.Request, map
 	cumulativeTimesWithRider := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offerSource, *matchedRequestSource, *matchedRequestDestination, *pickup, *dropoff, *offerDestination}, offerDepartureTime, engine)
 
 	// overwrite offer detour, maxEstimated arrival time && matchedRequestLatestArrivalTime
-	offerDetourDuration = cumulativeTimesWithRider[5] - cumulativeTimesWithoutRider[1] + 5*time.Minute // adding 5 minutes to ensure the detour is valid
+	offerDetourDuration = cumulativeTimesWithRider[5] - cumulativeTimesWithoutRider[1] + 1*time.Second // adding 5 minutes to ensure the detour is valid
 	offer.SetDetour(offerDetourDuration)
 	offer.SetMaxEstimatedArrivalTime(offerDepartureTime.Add(cumulativeTimesWithoutRider[1]).Add(offerDetourDuration))
 	matchedRequest.SetLatestArrivalTime(offer.MaxEstimatedArrivalTime().Add(10 * time.Minute))
