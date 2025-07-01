@@ -28,11 +28,16 @@ func ToDomainDistanceUnit(pbUnit pb.Options_Units) (model.DistanceUnit, error) {
 	}
 }
 
-func MapProfileToCosting(profile model.Profile) (pb.Costing_Type, *pb.Costing, error) {
-	switch profile {
-	case model.ProfilePedestrian:
+func MapProfileToCosting(profile model.RoutingProfile) (pb.Costing_Type, *pb.Costing, error) {
+	valhallaProfile, err := model.ToValhallaProfile(profile)
+	if err != nil {
+		return 0, nil, fmt.Errorf("failed to convert profile to Valhalla profile: %w", err)
+	}
+
+	switch valhallaProfile {
+	case model.ValhallaProfilePedestrian:
 		return pb.Costing_pedestrian, DefaultPedestrianCosting, nil
-	case model.ProfileAuto:
+	case model.ValhallaProfileAuto:
 		return pb.Costing_auto_, DefaultAutoCosting, nil
 	}
 	return 0, nil, fmt.Errorf("unsupported profile: %s", profile)

@@ -6,6 +6,7 @@ import (
 	"matching-engine/internal/adapter/valhalla"
 	"matching-engine/internal/geo"
 	"matching-engine/internal/model"
+	"math/rand"
 	"os"
 	"testing"
 	"time"
@@ -59,9 +60,8 @@ func TestValhalla_PlanDrivingRoute(t *testing.T) {
 			name: "valid route",
 			routeParam: must(model.NewRouteParams(
 				[]model.Coordinate{
-					*must(model.NewCoordinate(29.977462461368575, 31.249469996140675)),
-					*must(model.NewCoordinate(29.9811224983645, 31.250405678626862)),
-					*must(model.NewCoordinate(29.97376, 31.254408)),
+					*must(model.NewCoordinate(31.261772319501347, 29.99262985474232)),
+					*must(model.NewCoordinate(31.20765210728787, 29.92392636464055)),
 				},
 				time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 			)),
@@ -91,6 +91,9 @@ func TestValhalla_PlanDrivingRoute(t *testing.T) {
 				tc.name+".json",
 				must(json.Build()),
 			))
+
+			fmt.Println(result.Distance())
+			fmt.Println(result.Time())
 		})
 	}
 }
@@ -190,8 +193,8 @@ func TestValhalla_ComputeIsochrone(t *testing.T) {
 		{
 			name: "valid isochrone",
 			req: must(model.NewIsochroneParams(
-				must(model.NewCoordinate(29.977462461368575, 31.249469996140675)),
-				must(model.NewContour(30, model.ContourMetricDistanceInKilometers)),
+				must(model.NewCoordinate(31.249469996140675, 29.977462461368575)),
+				must(model.NewContour(1, model.ContourMetricDistanceInKilometers)),
 				model.ProfilePedestrian,
 			)),
 			wantErr: false,
@@ -210,7 +213,16 @@ func TestValhalla_ComputeIsochrone(t *testing.T) {
 				t.Errorf("unexpected error status: got %v, wantErr %v", err, tc.wantErr)
 				return
 			}
-			fmt.Println(result)
+
+			json := geo.
+				NewGeoJSON().
+				AddIsochrone(result, "blue").
+				AddPoint(*tc.req.Origin(), "red")
+
+			emust(writeToFile(
+				tc.name+".json",
+				must(json.Build()),
+			))
 		})
 	}
 }
@@ -295,4 +307,66 @@ func TestValhalla_SnapPointToRoad(t *testing.T) {
 			fmt.Println(result)
 		})
 	}
+}
+
+func TestValhalla_StressTest_ComputeDistanceTimeMatrix(t *testing.T) {
+	v, err := valhalla.NewValhalla()
+	if err != nil {
+		t.Fatalf("failed to create Valhalla engine: %v", err)
+	}
+
+	numSources := 50
+	numTargets := 50
+	numRuns := 10 // Number of times to repeat the test
+
+	// Generate sources and targets in Alexandria, Egypt bounding box
+	// Approx: lat 31.18 - 31.25, lon 29.85 - 29.98
+	genCoord := func() model.Coordinate {
+		lat := 31.18 + (0.07 * rand.Float64()) // 31.18 - 31.25
+		lon := 29.85 + (0.13 * rand.Float64()) // 29.85 - 29.98
+		c, _ := model.NewCoordinate(lat, lon)
+		return *c
+	}
+
+	var sources []model.Coordinate
+	var targets []model.Coordinate
+	for i := 0; i < numSources; i++ {
+		sources = append(sources, genCoord())
+	}
+	for i := 0; i < numTargets; i++ {
+		targets = append(targets, genCoord())
+	}
+
+	params := must(model.NewDistanceTimeMatrixParams(
+		sources,
+		model.ProfileCar,
+		model.WithTargets(targets),
+		model.WithDepartureTime(time.Now().Add(time.Minute)),
+	))
+
+	var total time.Duration
+	var min, max time.Duration
+
+	for i := 0; i < numRuns; i++ {
+		start := time.Now()
+		result, err := v.ComputeDistanceTimeMatrix(context.Background(), params)
+		elapsed := time.Since(start)
+
+		if err != nil {
+			t.Fatalf("matrix computation failed on run %d: %v", i+1, err)
+		}
+
+		if i == 0 || elapsed < min {
+			min = elapsed
+		}
+		if i == 0 || elapsed > max {
+			max = elapsed
+		}
+		total += elapsed
+
+		fmt.Printf("Run %d: %v (matrix: %dx%d)\n", i+1, elapsed, len(result.Times()), len(result.Times()[0]))
+	}
+
+	avg := total / time.Duration(numRuns)
+	fmt.Printf("Average: %v, Min: %v, Max: %v (over %d runs)\n", avg, min, max, numRuns)
 }

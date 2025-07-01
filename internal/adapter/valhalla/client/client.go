@@ -18,17 +18,10 @@ type ValhallaClient struct {
 	httpClient *http.Client
 }
 
-type Option func(*ValhallaClient)
-
-func WithConfig(c *Config) Option {
-	return func(vc *ValhallaClient) {
-		if c != nil {
-			vc.cfg = c
-		}
-	}
-}
-
-func NewValhallaClient(opts ...Option) (*ValhallaClient, error) {
+func NewValhallaClient() (re.Client[
+	*pb.Api,
+	*pb.Api,
+], error) {
 	cfg, err := LoadConfig()
 	if err != nil {
 		log.Error().
@@ -44,10 +37,6 @@ func NewValhallaClient(opts ...Option) (*ValhallaClient, error) {
 	vc := &ValhallaClient{
 		cfg:        cfg,
 		httpClient: httpClient,
-	}
-
-	for _, opt := range opts {
-		opt(vc)
 	}
 
 	baseURL := vc.cfg.ValhallaURL()
@@ -66,11 +55,6 @@ func NewValhallaClient(opts ...Option) (*ValhallaClient, error) {
 
 	return vc, nil
 }
-
-var _ re.Client[
-	*pb.Api,
-	*pb.Api,
-] = (*ValhallaClient)(nil)
 
 func (vc *ValhallaClient) Post(endpoint string, request *pb.Api) (*pb.Api, error) {
 	data, err := vc.serializeRequest(request)
@@ -195,4 +179,11 @@ func (vc *ValhallaClient) deserializeResponse(body []byte) (*pb.Api, error) {
 	// log.Debug().
 	// 	Msg("Response successfully unmarshalled from protobuf format")
 	return response, nil
+}
+
+func (vc *ValhallaClient) Get(endpoint string, params *pb.Api) (*pb.Api, error) {
+	log.Error().
+		Str("endpoint", endpoint).
+		Msg("GET method is not supported by ValhallaClient")
+	panic("GET method is not supported by ValhallaClient")
 }

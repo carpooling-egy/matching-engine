@@ -181,3 +181,52 @@ func (b *GeoJSONBuilder) AddCircle(center model.Coordinate, radiusMeters float64
 	b.fc.AddFeature(feature)
 	return b
 }
+
+// AddIsochrone adds an isochrone polygon to the GeoJSON.
+// The isochrone should contain a valid polygon geometry.
+// Color (fill and stroke) is optional.
+func (b *GeoJSONBuilder) AddIsochrone(isochrone *model.Isochrone, color string) *GeoJSONBuilder {
+	if b.err != nil {
+		return b
+	}
+	if isochrone == nil {
+		b.err = errors.New("isochrone is nil")
+		return b
+	}
+
+	polygons := isochrone.Polygons()
+	if len(polygons) == 0 {
+		b.err = errors.New("isochrone has no polygons")
+		return b
+	}
+
+	// Process each polygon in the isochrone
+	for _, polygon := range polygons {
+		if len(polygon) == 0 {
+			continue
+		}
+
+		// Convert coordinates to GeoJSON format (lng, lat)
+		geoJsonPolygon := make([][][]float64, len(polygon))
+		for i, ring := range polygon {
+			geoJsonRing := make([][]float64, len(ring))
+			for j, coord := range ring {
+				geoJsonRing[j] = []float64{coord.Lng(), coord.Lat()}
+			}
+			geoJsonPolygon[i] = geoJsonRing
+		}
+
+		// Create a polygon feature
+		feature := geojson.NewPolygonFeature(geoJsonPolygon)
+
+		if color != "" {
+			feature.SetProperty("stroke", color)
+			feature.SetProperty("fill", color)
+			feature.SetProperty("fill-opacity", 0.2) // Semi-transparent fill
+		}
+
+		b.fc.AddFeature(feature)
+	}
+
+	return b
+}
