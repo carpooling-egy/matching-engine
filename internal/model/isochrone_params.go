@@ -8,13 +8,13 @@ import (
 type IsochroneParams struct {
 	origin  *Coordinate
 	contour *Contour
-	profile Profile
+	profile RoutingProfile
 }
 
 func NewIsochroneParams(
 	origin *Coordinate,
 	contour *Contour,
-	profile Profile,
+	profile RoutingProfile,
 ) (*IsochroneParams, error) {
 	if origin == nil {
 		return nil, errors.New("origin is nil")
@@ -43,7 +43,7 @@ func (ip *IsochroneParams) Contour() *Contour {
 	return ip.contour
 }
 
-func (ip *IsochroneParams) Profile() Profile {
+func (ip *IsochroneParams) Profile() RoutingProfile {
 	return ip.profile
 }
 

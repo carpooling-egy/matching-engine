@@ -1,8 +1,8 @@
 package tests
 
 import (
+	"matching-engine/internal/adapter/osrm"
 	"matching-engine/internal/adapter/routing"
-	"matching-engine/internal/adapter/valhalla"
 	"matching-engine/internal/app/config"
 	"matching-engine/internal/app/di"
 	"matching-engine/internal/app/di/utils"
@@ -24,7 +24,7 @@ func setupTestingEnvironment() (routing.Engine, error) {
 		return nil, err
 	}
 	// Create a mock routing engine
-	engine, err := valhalla.NewValhalla()
+	engine, err := osrm.NewOSRM()
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +189,8 @@ func runMatcher(offers []*model.Offer, requests []*model.Request) ([]*model.Matc
 	di.RegisterPathServices(c)
 	di.RegisterCheckers(c)
 	di.RegisterMatchingServices(c)
-	utils.Must(c.Provide(valhalla.NewValhalla))
+	//utils.Must(c.Provide(valhalla.NewValhalla))
+	utils.Must(c.Provide(osrm.NewOSRM))
 
 	var matches []*model.MatchingResult
 	var matchErr error

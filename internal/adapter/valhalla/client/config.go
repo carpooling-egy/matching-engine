@@ -12,28 +12,24 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	c := defaultConfig()
+	cfg := &Config{
+		host: "68.221.112.34",
+		port: 8004,
+	}
 
 	if v, ok := os.LookupEnv("VALHALLA_HOST"); ok && v != "" {
-		c.host = v
+		cfg.host = v
 	}
 
 	if v, ok := os.LookupEnv("VALHALLA_PORT"); ok && v != "" {
-		p, err := strconv.Atoi(v)
+		port, err := strconv.Atoi(v)
 		if err != nil {
 			return nil, fmt.Errorf("invalid VALHALLA_PORT %q: %w", v, err)
 		}
-		c.port = p
+		cfg.port = port
 	}
 
-	return c, nil
-}
-
-func defaultConfig() *Config {
-	return &Config{
-		host: "localhost",
-		port: 8002,
-	}
+	return cfg, nil
 }
 
 func (c *Config) ValhallaHost() string { return c.host }

@@ -62,7 +62,7 @@ func (ds *DefaultGenerator) Generate(offerNode *model.OfferNode, requestNodes []
 	// Call the routing engine to get the distance and time matrix
 	params, err := model.NewDistanceTimeMatrixParams(
 		matrixPoints,
-		model.ProfileAuto,
+		model.ProfileCar,
 		model.WithDepartureTime(offerNode.Offer().DepartureTime()),
 	)
 	if err != nil {

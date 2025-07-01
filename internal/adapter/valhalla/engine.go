@@ -6,17 +6,18 @@ import (
 	"github.com/rs/zerolog/log"
 	re "matching-engine/internal/adapter/routing"
 	"matching-engine/internal/adapter/valhalla/client"
+	"matching-engine/internal/adapter/valhalla/client/pb"
 	"matching-engine/internal/model"
 	"time"
 )
 
 type Valhalla struct {
-	client *client.ValhallaClient
+	client re.Client[*pb.Api, *pb.Api]
 	mapper *Mapper
 }
 
-func NewValhalla(clientOpts ...client.Option) (re.Engine, error) {
-	c, err := client.NewValhallaClient(clientOpts...)
+func NewValhalla() (re.Engine, error) {
+	c, err := client.NewValhallaClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create valhalla client: %w", err)
 	}
@@ -31,18 +32,10 @@ func (v *Valhalla) PlanDrivingRoute(
 	ctx context.Context,
 	routeParams *model.RouteParams,
 ) (*model.Route, error) {
-	route, err := re.RunOperation(
-		ctx,
-		v.client,
-		"/route",
-		routeParams,
-		v.mapper.RouteMapper,
-	)
-
+	route, err := runOperationWithPost(ctx, v.client, "/route", routeParams, v.mapper.RouteMapper)
 	if err != nil {
 		return nil, fmt.Errorf("failed to compute route: %w", err)
 	}
-
 	return route, nil
 }
 
@@ -84,7 +77,7 @@ func (v *Valhalla) getTimeMatrix(matrixPoints []model.Coordinate, departureTime 
 	// Call the routing engine to get the distance and time matrix
 	params, err := model.NewDistanceTimeMatrixParams(
 		matrixPoints,
-		model.ProfileAuto,
+		model.ProfileCar,
 		model.WithDepartureTime(departureTime),
 	)
 	if err != nil {
@@ -102,18 +95,10 @@ func (v *Valhalla) ComputeWalkingTime(
 	ctx context.Context,
 	walkParams *model.WalkParams,
 ) (time.Duration, error) {
-	duration, err := re.RunOperation(
-		ctx,
-		v.client,
-		"/route",
-		walkParams,
-		v.mapper.WalkingTimeMapper,
-	)
-
+	duration, err := runOperationWithPost(ctx, v.client, "/route", walkParams, v.mapper.WalkingTimeMapper)
 	if err != nil {
 		return 0, fmt.Errorf("failed to compute time: %w", err)
 	}
-
 	return duration, nil
 }
 
@@ -121,18 +106,10 @@ func (v *Valhalla) ComputeIsochrone(
 	ctx context.Context,
 	req *model.IsochroneParams,
 ) (*model.Isochrone, error) {
-	isochrone, err := re.RunOperation(
-		ctx,
-		v.client,
-		"/isochrone",
-		req,
-		v.mapper.IsochroneMapper,
-	)
-
+	isochrone, err := runOperationWithPost(ctx, v.client, "/isochrone", req, v.mapper.IsochroneMapper)
 	if err != nil {
 		return nil, fmt.Errorf("failed to compute isochrone: %w", err)
 	}
-
 	return isochrone, nil
 }
 
@@ -140,18 +117,10 @@ func (v *Valhalla) ComputeDistanceTimeMatrix(
 	ctx context.Context,
 	req *model.DistanceTimeMatrixParams,
 ) (*model.DistanceTimeMatrix, error) {
-	matrix, err := re.RunOperation(
-		ctx,
-		v.client,
-		"/matrix",
-		req,
-		v.mapper.MatrixMapper,
-	)
-
+	matrix, err := runOperationWithPost(ctx, v.client, "/matrix", req, v.mapper.MatrixMapper)
 	if err != nil {
 		return nil, fmt.Errorf("failed to compute distance time matrix: %w", err)
 	}
-
 	return matrix, nil
 }
 
@@ -159,19 +128,26 @@ func (v *Valhalla) SnapPointToRoad(
 	ctx context.Context,
 	point *model.Coordinate,
 ) (*model.Coordinate, error) {
-	snappedPoint, err := re.RunOperation(
-		ctx,
-		v.client,
-		"/trace_attributes",
-		point,
-		v.mapper.SnapToRoadMapper,
-	)
-
+	snappedPoint, err := runOperationWithPost(ctx, v.client, "/trace_attributes", point, v.mapper.SnapToRoadMapper)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to snap point to road")
 		log.Info().Msg("Returning original point as fallback")
 		return point, nil
 	}
-
 	return snappedPoint, nil
+}
+
+func runOperationWithPost[
+	DomainReq any,
+	DomainRes any,
+	TransReq any,
+	TransRes any,
+](
+	ctx context.Context,
+	client re.Client[TransReq, TransRes],
+	endpoint string,
+	params DomainReq,
+	mapper re.OperationMapper[DomainReq, DomainRes, TransReq, TransRes],
+) (DomainRes, error) {
+	return re.RunOperation(ctx, client, endpoint, params, mapper, re.MethodPost)
 }
