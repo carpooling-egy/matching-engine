@@ -130,9 +130,9 @@ func getTest4(engine routing.Engine) ([]*model.Offer, []*model.Request, map[stri
 	cumulativeTimesForDriver3Direct := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offer3.Source(), *offer3.Destination()}, offer3.DepartureTime(), engine)
 	cumulativeTimesForDriver2With4Only := correcteness_test.GetCumulativeTimes([]model.Coordinate{*offer2.Source(), request4Source, request4Destination, *offer2.Destination()}, offer2.DepartureTime(), engine)
 
-	offerDetourDuration1 := cumulativeTimesForDriver1With3[5] - cumulativeTimesForDriver1Direct[1] + 60*time.Second // adding 10 seconds to ensure the detour is valid
-	offerDetourDuration2 := cumulativeTimesForDriver2With3[5] - cumulativeTimesForDriver2Direct[1] + 60*time.Second // adding 10 seconds to ensure the detour is valid
-	offerDetourDuration3 := cumulativeTimesForDriver3Direct[1] + 10*time.Second                                     // adding 10 seconds to ensure the detour is valid
+	offerDetourDuration1 := cumulativeTimesForDriver1With3[5] - cumulativeTimesForDriver1Direct[1] + 1*time.Second // adding 1 seconds to ensure the detour is valid
+	offerDetourDuration2 := cumulativeTimesForDriver2With3[5] - cumulativeTimesForDriver2Direct[1] + 1*time.Second // adding 1 seconds to ensure the detour is valid
+	offerDetourDuration3 := cumulativeTimesForDriver3Direct[1] + 1*time.Second                                     // adding 1 seconds to ensure the detour is valid
 
 	offer1.SetDetour(offerDetourDuration1 + 10*time.Second) // adding 10 seconds to ensure the detour is valid
 	offer1.SetMaxEstimatedArrivalTime(GetMaxEstimatedArrivalTime(*offer1.Source(), *offer1.Destination(), offer1.DepartureTime(), offerDetourDuration1, engine))
