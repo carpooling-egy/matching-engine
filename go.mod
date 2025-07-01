@@ -23,7 +23,9 @@ require (
 
 require (
 	github.com/dhconnelly/rtreego v1.2.0
+	github.com/gojuno/go.osrm v0.1.0
 	github.com/golang/geo v0.0.0-20250509130527-0a13e5a5d53d
+	github.com/paulmach/go.geojson v1.5.0
 	github.com/stretchr/testify v1.8.4
 	github.com/umahmood/haversine v0.0.0-20151105152445-808ab04add26
 	go.uber.org/dig v1.19.0
@@ -38,6 +40,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/paulmach/go.geo v0.0.0-20180829195134-22b514266d33 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect

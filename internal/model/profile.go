@@ -1,20 +1,20 @@
 package model
 
+type RoutingProfile string
+
 const (
-	ProfileAuto       Profile = "auto"
-	ProfilePedestrian Profile = "pedestrian"
+	ProfileCar        RoutingProfile = "car"
+	ProfilePedestrian RoutingProfile = "pedestrian"
 )
 
-type Profile string
-
-func (p Profile) IsValid() bool {
+func (p RoutingProfile) IsValid() bool {
 	switch p {
-	case ProfileAuto, ProfilePedestrian:
+	case ProfileCar, ProfilePedestrian:
 		return true
 	}
 	return false
 }
 
-func (p Profile) String() string {
+func (p RoutingProfile) String() string {
 	return string(p)
 }

@@ -69,7 +69,7 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to create route parameters")
 	}
 
-	params, _ := model.NewDistanceTimeMatrixParams(coords, model.ProfileAuto,
+	params, _ := model.NewDistanceTimeMatrixParams(coords, model.ProfileCar,
 		model.WithDepartureTime(timestamp))
 
 	matrix, _ := engine.ComputeDistanceTimeMatrix(context.Background(), params)

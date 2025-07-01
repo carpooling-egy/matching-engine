@@ -34,6 +34,23 @@ func (i *Isochrone) Geometry() *LineString {
 	return i.ring
 }
 
+func (i *Isochrone) Polygons() [][][]Coordinate {
+	if i.ring == nil || len(*i.ring) < 4 {
+		return nil
+	}
+
+	// For now, we only have one polygon with one outer ring (no holes)
+	polygon := make([][][]Coordinate, 1)
+
+	// Clone the coordinates to avoid any potential issues with the original data
+	ring := make([]Coordinate, len(*i.ring))
+	copy(ring, *i.ring)
+
+	polygon[0] = [][]Coordinate{ring}
+
+	return polygon
+}
+
 func (i *Isochrone) String() string {
 	return fmt.Sprintf("Isochrone{contour: %s, ring: %s}",
 		i.contour.String(), i.ring.String())

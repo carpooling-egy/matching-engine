@@ -11,7 +11,7 @@ type DistanceTimeMatrixParams struct {
 	sources       []Coordinate
 	targets       []Coordinate
 	departureTime time.Time
-	profile       Profile
+	profile       RoutingProfile
 }
 
 type MatrixOption func(*DistanceTimeMatrixParams)
@@ -30,7 +30,7 @@ func WithDepartureTime(departureTime time.Time) MatrixOption {
 
 func NewDistanceTimeMatrixParams(
 	sources []Coordinate,
-	profile Profile,
+	profile RoutingProfile,
 	opts ...MatrixOption,
 ) (*DistanceTimeMatrixParams, error) {
 
@@ -78,7 +78,7 @@ func (dtm *DistanceTimeMatrixParams) DepartureTime() time.Time {
 	return dtm.departureTime
 }
 
-func (dtm *DistanceTimeMatrixParams) Profile() Profile {
+func (dtm *DistanceTimeMatrixParams) Profile() RoutingProfile {
 	return dtm.profile
 }
 
