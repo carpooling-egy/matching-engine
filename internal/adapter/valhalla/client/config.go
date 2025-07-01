@@ -39,5 +39,5 @@ func defaultConfig() *Config {
 func (c *Config) ValhallaHost() string { return c.host }
 func (c *Config) ValhallaPort() int    { return c.port }
 func (c *Config) ValhallaURL() string {
-	return fmt.Sprintf("http://%s:%d", c.host, c.port)
+	return fmt.Sprintf("%s:%d", c.host, c.port)
 }
