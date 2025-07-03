@@ -13,9 +13,9 @@ import (
 )
 
 var (
-	stage2WorkerCount = runtime.GOMAXPROCS(0) * 4
-	stage3WorkerCount = runtime.GOMAXPROCS(0) * 2
-	channelBufferSize = 2000
+	graphBuilderStage2WorkerCount = runtime.GOMAXPROCS(0) * 10
+	graphBuilderStage3WorkerCount = runtime.GOMAXPROCS(0) * 10
+	channelBufferSize             = 2000
 )
 
 func (matcher *Matcher) buildMatchingGraph(
@@ -36,8 +36,8 @@ func (matcher *Matcher) buildMatchingGraph(
 	})
 
 	filterWG := sync.WaitGroup{}
-	filterWG.Add(stage2WorkerCount)
-	for i := 0; i < stage2WorkerCount; i++ {
+	filterWG.Add(graphBuilderStage2WorkerCount)
+	for i := 0; i < graphBuilderStage2WorkerCount; i++ {
 		eg.Go(func() error {
 			defer filterWG.Done()
 			return matcher.flattenAndPopulate(ctx, offersChannel, offerRequestNodePairsChannel)
@@ -49,7 +49,7 @@ func (matcher *Matcher) buildMatchingGraph(
 		return nil
 	})
 
-	for i := 0; i < stage3WorkerCount; i++ {
+	for i := 0; i < graphBuilderStage3WorkerCount; i++ {
 		eg.Go(func() error {
 			return matcher.evaluateAndBuild(ctx, offerRequestNodePairsChannel, graph, &hasNewEdge)
 		})

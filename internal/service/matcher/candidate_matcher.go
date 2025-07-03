@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	workerCount = runtime.GOMAXPROCS(0) * 4
+	candidateGenStage3WorkerCount = runtime.GOMAXPROCS(0) * 10
 )
 
 // buildCandidateMatches is responsible for matching offers and requests.
@@ -41,7 +41,7 @@ func (matcher *Matcher) runCandidateProcessors(
 	g *errgroup.Group,
 	candidatesChannel <-chan *model.MatchCandidate,
 ) {
-	for i := 0; i < workerCount; i++ {
+	for i := 0; i < candidateGenStage3WorkerCount; i++ {
 		g.Go(func() error {
 			for {
 				select {

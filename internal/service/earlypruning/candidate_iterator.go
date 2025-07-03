@@ -27,9 +27,9 @@ func NewCandidateIterator(offers []*model.Offer, requests []*model.Request, chec
 }
 
 var (
-	stage1workerCount = runtime.GOMAXPROCS(0)
-	stage2workerCount = runtime.GOMAXPROCS(0) * 4
-	channelBufferSize = 2000
+	candidateGenStage1WorkerCount = runtime.GOMAXPROCS(0)
+	candidateGenStage2WorkerCount = runtime.GOMAXPROCS(0) * 10
+	channelBufferSize             = 2000
 )
 
 func (ci *CandidateIterator) Candidates(
@@ -42,8 +42,8 @@ func (ci *CandidateIterator) Candidates(
 	ci.produceOfferPairs(ctx, eg, offerPairChannel)
 
 	var consWG sync.WaitGroup
-	consWG.Add(stage2workerCount)
-	for i := 0; i < stage2workerCount; i++ {
+	consWG.Add(candidateGenStage2WorkerCount)
+	for i := 0; i < candidateGenStage2WorkerCount; i++ {
 		eg.Go(func() error {
 			defer consWG.Done()
 			return ci.processOfferPairs(ctx, offerPairChannel, candidatesChannel)
@@ -65,18 +65,18 @@ func (ci *CandidateIterator) produceOfferPairs(
 	offerPairChannel chan<- collections.Tuple2[*model.Offer, *model.Request],
 ) {
 	var prodWG sync.WaitGroup
-	prodWG.Add(stage1workerCount)
+	prodWG.Add(candidateGenStage1WorkerCount)
 
 	nOffers := len(ci.offers)
 	nReqs := len(ci.requests)
 
-	rows := min(stage1workerCount, nOffers)
-	cols := int(math.Ceil(float64(stage1workerCount) / float64(rows)))
+	rows := min(candidateGenStage1WorkerCount, nOffers)
+	cols := int(math.Ceil(float64(candidateGenStage1WorkerCount) / float64(rows)))
 
 	offersPerRow := int(math.Ceil(float64(nOffers) / float64(rows)))
 	reqsPerCol := int(math.Ceil(float64(nReqs) / float64(cols)))
 
-	for tile := 0; tile < stage1workerCount; tile++ {
+	for tile := 0; tile < candidateGenStage1WorkerCount; tile++ {
 		row := tile / cols
 		col := tile % cols
 
