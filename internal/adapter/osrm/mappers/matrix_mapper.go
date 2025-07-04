@@ -47,9 +47,11 @@ func (MatrixMapper) ToTransport(params *model.DistanceTimeMatrixParams) (model.O
 			"coordinates": strings.Join(coordStrs, ";"),
 		},
 		QueryParams: map[string]any{
-			"sources":      strings.Join(sourceIndices, ";"),
-			"destinations": strings.Join(targetIndices, ";"),
-			"annotations":  "duration,distance",
+			"sources":             strings.Join(sourceIndices, ";"),
+			"destinations":        strings.Join(targetIndices, ";"),
+			"annotations":         "duration,distance",
+			"fallback_speed":      5,
+			"fallback_coordinate": "snapped",
 		},
 	}, nil
 }
