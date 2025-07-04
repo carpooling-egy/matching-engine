@@ -30,8 +30,8 @@ func NewOSRMClient(profile string) (routing.Client[model.OSRMTransport, map[stri
 	}
 
 	transport := &http.Transport{
-		MaxIdleConns:        200,
-		MaxIdleConnsPerHost: 200,
+		MaxIdleConns:        300,
+		MaxIdleConnsPerHost: 300,
 		IdleConnTimeout:     30 * time.Second,
 	}
 
