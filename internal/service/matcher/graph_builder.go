@@ -3,13 +3,16 @@ package matcher
 import (
 	"context"
 	"fmt"
-	"github.com/rs/zerolog/log"
-	"golang.org/x/sync/errgroup"
+	"matching-engine/cmd/appmetrics"
 	"matching-engine/internal/collections"
 	"matching-engine/internal/model"
 	"runtime"
 	"sync"
 	"sync/atomic"
+	"time"
+
+	"github.com/rs/zerolog/log"
+	"golang.org/x/sync/errgroup"
 )
 
 var (
@@ -147,8 +150,12 @@ func (matcher *Matcher) evaluateAndBuild(
 
 		offerNode := offerRequestNodePair.First
 		requestNode := offerRequestNodePair.Second
-
+		start := time.Now()
 		path, valid, err := matcher.matchEvaluator.Evaluate(offerNode, requestNode)
+		elapsed := time.Since(start)
+		log.Info().Str("duration", elapsed.String())
+		appmetrics.TrackTime("one_edge",elapsed)
+		appmetrics.IncrementCount("one_edge", 1)
 		if err != nil {
 			return fmt.Errorf("error evaluating the match %v", err)
 		}

@@ -97,10 +97,15 @@ func processDataset(datasetID string, runs int, logger zerolog.Logger) {
 			Str("average_duration", averageDuration.String()).
 			Msg("Average duration for metric")
 	}
+	one_edge_duration := appmetrics.GetTime("one_edge") / time.Duration(appmetrics.GetCount("one_edge"))
+	logger.Info().
+		Str("metric", "one_edge").
+		Str("average_duration", one_edge_duration.String()).
+		Msg("Average duration for metric")
 }
 
 func main() {
-	datasetIDs := []string{"sf_100"}
+	datasetIDs := []string{"nyc_rt_100_v"}
 	runsPerDataset := 1
 
 	logsDir := "logs"
