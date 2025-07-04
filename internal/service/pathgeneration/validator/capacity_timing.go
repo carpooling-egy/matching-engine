@@ -13,6 +13,7 @@ func (validator *DefaultPathValidator) validateCapacityAndTiming(
 	path []model.PathPoint,
 	cumulativeDurations []time.Duration,
 	availableExtraDetour *time.Duration,
+
 ) (bool, error) {
 	currentCapacity := 0
 	extraAccumulatedDuration := time.Duration(0)
@@ -32,6 +33,8 @@ func (validator *DefaultPathValidator) validateCapacityAndTiming(
 				point, // point.expectedArrivalTime IS BEING MODIFIED BY THE HANDLER
 				cumulativeDurations[i],
 				&currentCapacity, // THIS VALUE IS BEING MODIFIED BY THE HANDLER
+				availableExtraDetour,
+				&extraAccumulatedDuration,
 			)
 			if !valid || err != nil {
 				return valid, err

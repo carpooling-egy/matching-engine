@@ -40,17 +40,7 @@ func (dtc *DetourTimeChecker) Check(offer *model.Offer, request *model.Request) 
 		return false, fmt.Errorf("failed to compute durations between points: %w", err)
 	}
 
-	pickupDuration := durations[1]
 	dropoffDuration := durations[2]
-
-	if offer.DepartureTime().Add(pickupDuration).Before(request.EarliestDepartureTime().Add(value.Pickup().WalkingDuration())) {
-		log.Debug().
-			Str("offer_id", offer.ID()).
-			Str("request_id", request.ID()).
-			Msg("offer arrival time at pickup" +
-				" is before request earliest departure time with pickup walking duration")
-		return false, nil
-	}
 
 	if offer.DepartureTime().Add(dropoffDuration).After(request.LatestArrivalTime().Add(-value.Dropoff().WalkingDuration())) {
 		log.Debug().
