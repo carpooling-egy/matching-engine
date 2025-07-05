@@ -3,10 +3,13 @@ package checker
 import (
 	"context"
 	"fmt"
-	"github.com/rs/zerolog/log"
+	"matching-engine/cmd/appmetrics"
 	"matching-engine/internal/adapter/routing"
 	"matching-engine/internal/model"
 	"matching-engine/internal/service/pickupdropoffservice"
+	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 type DetourTimeChecker struct {
@@ -23,7 +26,7 @@ func NewDetourTimeChecker(selector pickupdropoffservice.PickupDropoffSelectorInt
 
 // Check checks if the detour time is within the acceptable range and if the offer can accommodate the request
 func (dtc *DetourTimeChecker) Check(offer *model.Offer, request *model.Request) (bool, error) {
-
+	start := time.Now()
 	value, err := dtc.selector.GetPickupDropoffPointsAndDurations(request, offer)
 	if err != nil {
 		return false, fmt.Errorf("failed to get pickup and dropoff points: %w", err)
@@ -58,6 +61,8 @@ func (dtc *DetourTimeChecker) Check(offer *model.Offer, request *model.Request) 
 			Msg("total trip duration exceeds the maximum estimated arrival time")
 		return false, nil
 	}
-
+	timeTaken := time.Since(start)
+	appmetrics.TrackTime("detour_time_checker_duration", timeTaken)
+	appmetrics.IncrementCount("detour_time_checker_count", 1)
 	return true, nil
 }

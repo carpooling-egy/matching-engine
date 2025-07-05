@@ -1,32 +1,40 @@
 package appmetrics
 
 import (
-	"matching-engine/internal/collections"
-	"time"
+    "matching-engine/internal/collections"
+    "time"
 )
 
 var Timings = collections.NewSyncMap[string, time.Duration]()
 
 // TrackTime tracks the time taken for a specific operation identified by the key.
 func TrackTime(key string, duration time.Duration) {
-	if existingDuration, exists := Timings.Get(key); exists {
-		Timings.Set(key, existingDuration+duration)
-	} else {
-		Timings.Set(key, duration)
-	}
+    if existingDuration, exists := Timings.Get(key); exists {
+        Timings.Set(key, existingDuration+duration)
+    } else {
+        Timings.Set(key, duration)
+    }
+}
+
+// GetTime retrieves the total time tracked for a specific key.
+func GetTime(key string) time.Duration {
+    if duration, exists := Timings.Get(key); exists {
+        return duration
+    }
+    return 0
 }
 
 // ResetTimings clears all tracked timings.
 func ResetTimings() {
-	Timings.Clear()
+    Timings.Clear()
 }
 
 // GetAllTimings retrieves all tracked timings.
 func GetAllTimings() map[string]time.Duration {
-	allTimings := make(map[string]time.Duration)
-	Timings.ForEach(func(key string, duration time.Duration) error {
-		allTimings[key] = duration
-		return nil
-	})
-	return allTimings
+    allTimings := make(map[string]time.Duration)
+    Timings.ForEach(func(key string, duration time.Duration) error {
+        allTimings[key] = duration
+        return nil
+    })
+    return allTimings
 }

@@ -67,6 +67,10 @@ func (s *StarterService) Start(ctx context.Context) error {
 	max_matched_requests := 0
 	totalMatchedRequests := 0
 	totalNumberOfRiders := 0
+	original_passenger_number := 0
+	for _, request := range requests {
+		original_passenger_number += request.NumberOfRiders()
+	}
 	for _, match := range matchingResults {
 		totalMatchedRequests += match.CurrentNumberOfRequests()
 		max_matched_requests = max(max_matched_requests, match.CurrentNumberOfRequests())
@@ -91,15 +95,16 @@ func (s *StarterService) Start(ctx context.Context) error {
 		Str("duration", elapsed.String()).
 		Int("matched_requests", totalMatchedRequests).
 		Int("matched_drivers", matchedDrivers).
+		Int("total_number_of_passengers", totalNumberOfRiders).
 		Float64("overall_matching", overall_matching).
 		Int("max_matched_requests", max_matched_requests).
 		Msg("Matching process completed")
 
 	log.Info().
-		Float64("Requests Matching Percentage", float64(totalMatchedRequests)/float64(len(requests))*100).
-		Float64("Drivers Matching Percentage", float64(matchedDrivers)/float64(len(offers))*100).
-		Float64("Overall Matching Percentage", overall_matching/float64(len(requests)+len(offers))*100).
-		Int("Total Number of Riders", totalNumberOfRiders).
+		Float64("Requests Matching Percentage %", float64(totalMatchedRequests)/float64(len(requests))*100).
+		Float64("Drivers Matching Percentage %", float64(matchedDrivers)/float64(len(offers))*100).
+		Float64("Overall Matching Percentage %", overall_matching/float64(len(requests)+len(offers))*100).
+		Float64("Total Number of Passengers Percentage %", float64(totalNumberOfRiders)/float64(original_passenger_number)*100).
 		Msg("Matching statistics")
 
 	appmetrics.IncrementCount("Average matches count", float64(len(matchingResults)))
@@ -107,7 +112,7 @@ func (s *StarterService) Start(ctx context.Context) error {
 	appmetrics.IncrementCount("Average total matched requests", float64(totalMatchedRequests))
 	appmetrics.IncrementCount("Average total matched drivers", float64(matchedDrivers))
 	appmetrics.IncrementCount("Average max matched requests", float64(max_matched_requests))
-	appmetrics.IncrementCount("Average total number of riders", float64(totalNumberOfRiders))
+	appmetrics.IncrementCount("Average total number of passengers", float64(totalNumberOfRiders))
 	appmetrics.IncrementCount("Average overall matching", overall_matching)
 	appmetrics.IncrementCount("Average matching percentage requests", float64(totalMatchedRequests)/float64(len(requests))*100)
 	appmetrics.IncrementCount("Average matching percentage drivers", float64(matchedDrivers)/float64(len(offers))*100)
@@ -117,6 +122,11 @@ func (s *StarterService) Start(ctx context.Context) error {
 	// if err = s.publisher.Publish(matchingResults); err != nil {
 	//     return fmt.Errorf("failed to publish matching results: %w", err)
 	// }
+	one_edge_duration := appmetrics.GetTime("one_edge") / time.Duration(appmetrics.GetCount("one_edge"))
+	log.Info().
+		Str("metric", "one_edge").
+		Str("average_duration", one_edge_duration.String()).
+		Msg("Average duration for metric")
 
 	log.Info().
 		Int("offers", len(offers)).
@@ -124,5 +134,12 @@ func (s *StarterService) Start(ctx context.Context) error {
 		Int("matches", len(matchingResults)).
 		Msg("Matching process completed successfully")
 
+	detour_time_checker_duration := appmetrics.GetTime("detour_time_checker_duration") / time.Duration(appmetrics.GetCount("detour_time_checker_count"))
+	log.Info().
+		Str("metric", "detour_time_checker_duration").
+		Str("average_duration", detour_time_checker_duration.String()).
+		Msg("Average duration for metric")
 	return nil
+
+	
 }

@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"matching-engine/internal/collections"
 	"matching-engine/internal/model"
+	"time"
+	"matching-engine/cmd/appmetrics"
+	"github.com/rs/zerolog/log"
 )
 
 // buildMatchingGraph constructs the graph by finding feasible paths and connecting offers with requests.
@@ -37,9 +40,12 @@ func (matcher *Matcher) buildMatchingGraph(graph *model.MaximumMatchingGraph) (b
 		}
 
 		for _, requestNode := range requestNodes {
-
+			start := time.Now()
 			path, valid, err := matcher.matchEvaluator.Evaluate(offerNode, requestNode)
-
+			elapsed := time.Since(start)
+			log.Info().Str("duration", elapsed.String())
+			appmetrics.TrackTime("one_edge",elapsed)
+			appmetrics.IncrementCount("one_edge", 1)
 			if err != nil {
 				return fmt.Errorf("error evaluating the match %v", err)
 			}
