@@ -91,6 +91,9 @@ func processDataset(datasetID string, runs int, logger zerolog.Logger) {
 		Msg("================================= Average Time Metrics =================================")
 	times := appmetrics.GetAllTimings()
 	for name, duration := range times {
+		if(name == "one_edge" || name == "detour_time_checker_duration") {
+			continue // Skip these metrics as they are logged separately
+		}
 		averageDuration := duration / time.Duration(runs)
 		logger.Info().
 			Str("metric", name).
@@ -101,6 +104,12 @@ func processDataset(datasetID string, runs int, logger zerolog.Logger) {
 	logger.Info().
 		Str("metric", "one_edge").
 		Str("average_duration", one_edge_duration.String()).
+		Msg("Average duration for metric")
+
+	detour_time_checker_duration := appmetrics.GetTime("detour_time_checker_duration") / time.Duration(appmetrics.GetCount("detour_time_checker_count"))
+	log.Info().
+		Str("metric", "detour_time_checker_duration").
+		Str("average_duration", detour_time_checker_duration.String()).
 		Msg("Average duration for metric")
 }
 
